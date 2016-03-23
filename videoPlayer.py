@@ -1,7 +1,7 @@
 import sys, os
 from PyQt4 import QtCore, QtGui, uic
 from PyQt4.phonon import Phonon
-from moviepy.editor import *
+#from moviepy.editor import *
 
 class VideoPlayer(QtGui.QWidget):
     def __init__(self, parent = None):
@@ -61,11 +61,11 @@ class VideoPlayer(QtGui.QWidget):
         s = (time-3600*h-m*60)
         self.status.setText('%02d:%02d:%02d'%(h,m,s))
 
-    def cutVideoClip(self,startTime,endTime,fps = 25):
-        print os.path.split(self.fileName)[1]
-        video = VideoFileClip(os.path.split(self.fileName)[1]).subclip(startTime,endTime)
-        result = CompositeVideoClip([video])
-        result.write_videofile("temp.mp4",fps)
+    # def cutVideoClip(self,startTime,endTime,fps = 25):
+    #     print os.path.split(self.fileName)[1]
+    #     video = VideoFileClip(os.path.split(self.fileName)[1]).subclip(startTime,endTime)
+    #     result = CompositeVideoClip([video])
+    #     result.write_videofile("temp.mp4",fps)
 
     def gettingTime(self):
         startMinutes = int(self.minutes.text())
