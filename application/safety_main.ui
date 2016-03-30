@@ -1,0 +1,573 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TransportationSafety</class>
+ <widget class="QMainWindow" name="TransportationSafety">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1024</width>
+    <height>705</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Transportation Safety</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QTabWidget" name="main_tab_widget">
+      <property name="acceptDrops">
+       <bool>false</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="tabShape">
+       <enum>QTabWidget::Rounded</enum>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <property name="elideMode">
+       <enum>Qt::ElideNone</enum>
+      </property>
+      <property name="tabsClosable">
+       <bool>false</bool>
+      </property>
+      <widget class="QWidget" name="tab_homography">
+       <attribute name="title">
+        <string>Homography</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QFrame" name="control_box">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <layout class="QHBoxLayout" name="open_buttons">
+             <item>
+              <widget class="QPushButton" name="homography_button_open_camera_image">
+               <property name="text">
+                <string>Open Camera Image</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="homography_open_buttons_hspacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="homography_button_open_aerial_image">
+               <property name="text">
+                <string>Open Aerial Image</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="zoom_sliders">
+             <item>
+              <widget class="QLabel" name="homography_label_zoom_camera_image">
+               <property name="text">
+                <string>Zoom:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="homography_hslider_zoom_camera_image">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="homography_zoom_sliders_hspacer0">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Preferred</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="homography_label_zoom_computed_image">
+               <property name="text">
+                <string>Zoom:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="homography_hslider_zoom_computed_image">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="homography_zoom_sliders_hspacer1">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Minimum</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="homography_label_zoom_aerial_image">
+               <property name="text">
+                <string>Zoom:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="homography_hslider_zoom_aerial_image">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="homography_layout">
+          <item>
+           <widget class="QGraphicsView" name="homography_cameraview">
+            <property name="cursor" stdset="0">
+             <cursorShape>CrossCursor</cursorShape>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="homography_results">
+            <property name="cursor" stdset="0">
+             <cursorShape>CrossCursor</cursorShape>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGraphicsView" name="homography_aerialview">
+            <property name="cursor" stdset="0">
+             <cursorShape>CrossCursor</cursorShape>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QWidget" name="homography_flow_control" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>50</height>
+           </size>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <spacer name="homography_flow_hspacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="homography_continue_button">
+             <property name="focusPolicy">
+              <enum>Qt::ClickFocus</enum>
+             </property>
+             <property name="text">
+              <string> Continue &gt;</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_features">
+       <attribute name="title">
+        <string>Track Features</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="1">
+           <widget class="QScrollArea" name="feature_tracking_parameter_area">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="feature_tracking_parameter_widget">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>486</width>
+               <height>465</height>
+              </rect>
+             </property>
+            </widget>
+           </widget>
+          </item>
+          <item row="0" column="0" rowspan="2">
+           <widget class="QWidget" name="feature_tracking_video_widget" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QWidget" name="feature_tracking_run_panel" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <item>
+              <widget class="QProgressBar" name="feature_tracking_run_test_progress">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="value">
+                <number>0</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="invertedAppearance">
+                <bool>false</bool>
+               </property>
+               <property name="format">
+                <string>%p%</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="button_feature_tracking_test">
+               <property name="text">
+                <string>Test on Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="button_feature_tracking_run">
+               <property name="text">
+                <string>Run</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QFrame" name="feature_tracking_flow_control">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QPushButton" name="feature_tracking_back_button">
+             <property name="text">
+              <string>&lt; Homography</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="feature_tracking_flow_hspacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="feature_tracking_continue_button">
+             <property name="text">
+              <string> Continue &gt;</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_roadusers">
+       <property name="font">
+        <font>
+         <pointsize>17</pointsize>
+        </font>
+       </property>
+       <attribute name="title">
+        <string>Track Road Users</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <layout class="QVBoxLayout" name="object_tracking_placeholder">
+          <item>
+           <widget class="QLabel" name="label_object_tracking_msg">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="lineWidth">
+             <number>1</number>
+            </property>
+            <property name="text">
+             <string>This wIll look very similar to &quot;Track Features&quot;.</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::AutoText</enum>
+            </property>
+            <property name="scaledContents">
+             <bool>false</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_results">
+       <attribute name="title">
+        <string>Results</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <layout class="QGridLayout" name="results_grid">
+          <item row="0" column="0">
+           <widget class="QLabel" name="results_label0">
+            <property name="text">
+             <string>Data</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="results_label2">
+            <property name="text">
+             <string>Look at all the glorious data!</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="results_label1">
+            <property name="text">
+             <string>More data</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QWidget" name="results_plot_widget0" native="true"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_other_tools">
+       <attribute name="title">
+        <string>Other Tools</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1024</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuTraffic_Analysis">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen_Project"/>
+   </widget>
+   <widget class="QMenu" name="menuProject">
+    <property name="title">
+     <string>Project</string>
+    </property>
+    <widget class="QMenu" name="menuHomography_2">
+     <property name="title">
+      <string>Homography</string>
+     </property>
+     <addaction name="actionAdd_Replace_Aerial_Image"/>
+     <addaction name="actionAdd_Replace_Camera_Image"/>
+     <addaction name="separator"/>
+     <addaction name="actionCompute_Homography_Performance"/>
+     <addaction name="actionAcquire_Aerial_Image"/>
+    </widget>
+    <addaction name="actionAdd_Replace_Video"/>
+    <addaction name="menuHomography_2"/>
+    <addaction name="actionFeature_Tracking"/>
+    <addaction name="actionRoad_User_Tracking"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionUser_s_Guide"/>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuTraffic_Analysis"/>
+   <addaction name="menuProject"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionOpen_Project">
+   <property name="text">
+    <string>Open Project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionAdd_Replace_Video">
+   <property name="text">
+    <string>Video</string>
+   </property>
+  </action>
+  <action name="actionFeature_Tracking">
+   <property name="text">
+    <string>Feature Tracking</string>
+   </property>
+  </action>
+  <action name="actionRoad_User_Tracking">
+   <property name="text">
+    <string>Road-User Tracking</string>
+   </property>
+  </action>
+  <action name="actionLoad_Image">
+   <property name="text">
+    <string>Load Image</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionAdd_Replace_Aerial_Image">
+   <property name="text">
+    <string>Add/Replace Aerial Image</string>
+   </property>
+  </action>
+  <action name="actionAdd_Replace_Camera_Image">
+   <property name="text">
+    <string>Add/Replace Camera Image</string>
+   </property>
+  </action>
+  <action name="actionCompute_Homography_Performance">
+   <property name="text">
+    <string>Compute Homography Performance</string>
+   </property>
+  </action>
+  <action name="actionAcquire_Aerial_Image">
+   <property name="text">
+    <string>Acquire Aerial Image</string>
+   </property>
+  </action>
+  <action name="actionUser_s_Guide">
+   <property name="text">
+    <string>User's Guide</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
