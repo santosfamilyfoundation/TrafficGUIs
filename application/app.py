@@ -3,9 +3,9 @@ import sys
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 
+from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-import matplotlib.pyplot as plt
 import random
 
 class Organizer(object):
@@ -101,13 +101,14 @@ class MainGUI(QtGui.QMainWindow):
 
         # Results plotting
         # plt.ion()
-        self.figure1 = plt.figure()
+        self.figure1 = Figure()
         self.canvas1 = FigureCanvas(self.figure1)
         self.ui.results_plot_layout1.addWidget(self.canvas1)
         self.results_plot_plot1()
 
-        self.figure2 = plt.figure()
-        self.canvas2 = FigureCanvas(self.figure1)
+        self.figure2 = Figure()
+        ax1f2 = self.figure2.add_subplot(111)
+        self.canvas2 = FigureCanvas(self.figure2)
         self.ui.results_plot_layout2.addWidget(self.canvas2)
         self.results_plot_plot2()
         # self.ui.track_image.mousePressEvent = self.get_image_position
