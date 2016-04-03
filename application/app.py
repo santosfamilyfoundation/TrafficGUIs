@@ -82,6 +82,8 @@ class MainGUI(QtGui.QMainWindow):
         self.homography = Organizer()
         self.feature_tracking = Organizer()
         self.results = Organizer()
+        self.this = self.ui.centralWidget.layout().addWidget(QtGui.QScrollArea())
+        # self.this
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
@@ -90,7 +92,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_camera)
         self.ui.main_tab_widget.setCurrentIndex(0)  # Start on the first tab
 
-        # Connect button actionst
+        # Connect button actions
         self.ui.homography_button_open_aerial_image.clicked.connect(self.homography_open_image_aerial)  # TODO: New method. Check which tab is open. Move to homography tab if not already there. Then call open_image_aerial.
         self.ui.homography_button_open_camera_image.clicked.connect(self.homography_open_image_camera)
 
@@ -100,14 +102,12 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.feature_tracking_back_button.clicked.connect(self.show_prev_tab)
 
         # Results plotting
-        # plt.ion()
         self.figure1 = Figure()
         self.canvas1 = FigureCanvas(self.figure1)
         self.ui.results_plot_layout1.addWidget(self.canvas1)
         self.results_plot_plot1()
 
         self.figure2 = Figure()
-        ax1f2 = self.figure2.add_subplot(111)
         self.canvas2 = FigureCanvas(self.figure2)
         self.ui.results_plot_layout2.addWidget(self.canvas2)
         self.results_plot_plot2()
@@ -138,7 +138,7 @@ class MainGUI(QtGui.QMainWindow):
         # create an axis
         ax = self.figure2.add_subplot(111)
         # discards the old graph
-        ax.hold(True)
+        ax.hold(False)
         # plot data
         ax.plot(data1, '*-')
         # refresh canvas
