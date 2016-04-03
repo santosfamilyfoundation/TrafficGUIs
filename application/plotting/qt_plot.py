@@ -6,7 +6,7 @@ class QTPLT(object):
     """Matplotlib"""
     def __init__(self):
         super(QTPLT, self).__init__()
-        self.fig = Figure()
+        self.fig = Figure()#figsize=(5, 4))
         self._canvas = FigureCanvas(self.fig)
     
     def add_to_widget(self, widget):
@@ -25,8 +25,8 @@ class QTPLT(object):
 
 def example():
     a_plot = QTPLT()
-    a_plot.add_to_widget(some.)
-    ax = a_plot.figure.add_subplot(111)
+    a_plot.add_to_widget(somewidget)
+    ax = a_plot.fig.add_subplot(111)
     data = [random.random() for i in range(10)]
     # discards the old graph
     ax.hold(False)

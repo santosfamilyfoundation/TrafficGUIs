@@ -21,6 +21,8 @@ import matplotlib.cbook as cbook
 
 import matplotlib.patches as mpatches
 
+from plotting.qt_plot import QTPLT
+
 
 
 
@@ -56,10 +58,10 @@ def road_user_traj(filename, fps, homographyFile, roadImageFile):
     obj_traj_x = []
     obj_traj_y = []
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    im = plt.imread(roadImageFile)
-    implot = plt.imshow(im)
+    aplot = QTPLT()
+    ax = aplot.fig.add_subplot(111)
+    im = imread(roadImageFile)
+    implot = ax.imshow(im)
 
     # colors = [(0,0,0), (0,0,1), (0,1,0), (1,0,1), (0,1,1), (1,1,0), (1,0,1)]
     userlist = ['unknown', 'car', 'pedestrian', 'motorcycle', 'bicycle', 'bus', 'truck']
@@ -103,22 +105,33 @@ def road_user_traj(filename, fps, homographyFile, roadImageFile):
     for i in range(0,len(userlist)):
         colorlist.append(colors[userlist[i]])
         recs.append(mpatches.Rectangle((0,0),1,1,fc=colorlist[i]))
-    ax.legend(recs,userlist, loc='center left', bbox_to_anchor=(1, 0.5))    
+    ax.set_position([0.1, 0.1, 0.85, 0.85])
+    # ax.legend(recs,userlist, loc='center left', bbox_to_anchor=(1, 0.5))    
+    ax.legend(recs,userlist, loc=8, mode="expand", bbox_to_anchor=(-.5, -.5, .1, .1))    
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+
+    # Put a legend below current axis
+    ax.legend(recs, userlist, loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=4)
+    # ax.legend(recs, userlist, bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=2, mode="expand", borderaxespad=0.)
 
     # legend = plt.legend(loc='upper right', shadow=True)
 
-    plt.xlim([0,1280])
-    plt.ylim([0,720])
+    ax.set_xlim([0,1280])
+    ax.set_ylim([0,720])
     ax.set_ylim(ax.get_ylim()[::-1])
 
-    plt.xlabel('X-Coordinate')
-    plt.ylabel('Y-Coordinate')
-    plt.title('Road User Trajectories')
+    # ax.set_xlabel('X-Coordinate')
+    # ax.set_ylabel('Y-Coordinate')
+    ax.set_title('Road User Trajectories')
 
-    plt.show() 
+    # plt.show() 
 
     connection.commit()
     connection.close()
+
+    return aplot
 
 def road_user_vels(filename, fps):
     """

@@ -8,6 +8,8 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 import random
 
+from plotting import visualization
+
 class Organizer(object):
     def __init__(self):
         super(Organizer, self).__init__()
@@ -82,7 +84,6 @@ class MainGUI(QtGui.QMainWindow):
         self.homography = Organizer()
         self.feature_tracking = Organizer()
         self.results = Organizer()
-        self.this = self.ui.centralWidget.layout().addWidget(QtGui.QScrollArea())
         # self.this
 
         # Connect Menu actions
@@ -102,15 +103,21 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.feature_tracking_back_button.clicked.connect(self.show_prev_tab)
 
         # Results plotting
-        self.figure1 = Figure()
-        self.canvas1 = FigureCanvas(self.figure1)
-        self.ui.results_plot_layout1.addWidget(self.canvas1)
-        self.results_plot_plot1()
+        # self.figure1 = Figure()
+        # self.canvas1 = FigureCanvas(self.figure1)
+        # self.ui.results_plot_layout1.addWidget(self.canvas1)
+        # self.results_plot_plot1()
+        print("Adding road user graph")
+        aplot = visualization.road_user_traj('stmarc.sqlite', 30, 'homography.txt', 'stmarc_image.png')
+        print("ADD TO WIDGET WHAT")
+        aplot.add_to_widget(self.ui.results_plot_layout1)
+        print("SHOW IT SHOW IT SHOWIT")
+        aplot.show()
 
-        self.figure2 = Figure()
-        self.canvas2 = FigureCanvas(self.figure2)
-        self.ui.results_plot_layout2.addWidget(self.canvas2)
-        self.results_plot_plot2()
+        # self.figure2 = Figure()
+        # self.canvas2 = FigureCanvas(self.figure2)
+        # self.ui.results_plot_layout2.addWidget(self.canvas2)
+        # self.results_plot_plot2()
         # self.ui.track_image.mousePressEvent = self.get_image_position
         self.show()
 
