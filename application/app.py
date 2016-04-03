@@ -3,6 +3,10 @@ import sys
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+import matplotlib.pyplot as plt
+import random
 
 class Organizer(object):
     def __init__(self):
@@ -77,6 +81,7 @@ class MainGUI(QtGui.QMainWindow):
         # Experimenting with organizational objects
         self.homography = Organizer()
         self.feature_tracking = Organizer()
+        self.results = Organizer()
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
@@ -94,6 +99,17 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.feature_tracking_continue_button.clicked.connect(self.show_next_tab)
         self.ui.feature_tracking_back_button.clicked.connect(self.show_prev_tab)
 
+        # Results plotting
+        # plt.ion()
+        self.figure1 = plt.figure()
+        self.canvas1 = FigureCanvas(self.figure1)
+        self.ui.results_plot_layout1.addWidget(self.canvas1)
+        self.results_plot_plot1()
+
+        self.figure2 = plt.figure()
+        self.canvas2 = FigureCanvas(self.figure1)
+        self.ui.results_plot_layout2.addWidget(self.canvas2)
+        self.results_plot_plot2()
         # self.ui.track_image.mousePressEvent = self.get_image_position
         self.show()
 
@@ -104,6 +120,28 @@ class MainGUI(QtGui.QMainWindow):
     def show_prev_tab(self):
         curr_i = self.ui.main_tab_widget.currentIndex()
         self.ui.main_tab_widget.setCurrentIndex(curr_i - 1)
+
+    def results_plot_plot1(self):
+        data = [random.random() for i in range(10)]
+        # create an axis
+        ax = self.figure1.add_subplot(111)
+        # discards the old graph
+        ax.hold(False)
+        # plot data
+        ax.plot(data, '*-')
+        # refresh canvas
+        self.canvas1.draw()
+
+    def results_plot_plot2(self):
+        data1 = [random.random() for i in range(50)]
+        # create an axis
+        ax = self.figure2.add_subplot(111)
+        # discards the old graph
+        ax.hold(True)
+        # plot data
+        ax.plot(data1, '*-')
+        # refresh canvas
+        self.canvas2.draw()
 
     def open_project(self):
         fname = QtGui.QFileDialog.getOpenFileName(

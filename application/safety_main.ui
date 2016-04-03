@@ -27,7 +27,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -405,18 +405,8 @@
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <layout class="QGridLayout" name="results_grid">
-          <item row="0" column="0">
-           <widget class="QLabel" name="results_label0">
-            <property name="text">
-             <string>Data</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="1">
-           <widget class="QLabel" name="results_label2">
+           <widget class="QLabel" name="results_label3">
             <property name="text">
              <string>Look at all the glorious data!</string>
             </property>
@@ -426,7 +416,7 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="results_label1">
+           <widget class="QLabel" name="results_label4">
             <property name="text">
              <string>More data</string>
             </property>
@@ -436,7 +426,16 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QWidget" name="results_plot_widget0" native="true"/>
+           <widget class="QWidget" name="results_plot_widget1" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_8">
+             <item>
+              <layout class="QVBoxLayout" name="results_plot_layout1"/>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <layout class="QVBoxLayout" name="results_plot_layout2"/>
           </item>
          </layout>
         </item>
