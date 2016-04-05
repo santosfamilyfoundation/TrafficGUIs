@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Mon Apr  4 18:56:35 2016
+# Created: Mon Apr  4 19:34:13 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -71,6 +71,8 @@ class Ui_TransportationSafety(object):
         self.homography_hslider_zoom_camera_image.setPageStep(25)
         self.homography_hslider_zoom_camera_image.setProperty("value", 100)
         self.homography_hslider_zoom_camera_image.setOrientation(QtCore.Qt.Horizontal)
+        self.homography_hslider_zoom_camera_image.setTickPosition(QtGui.QSlider.NoTicks)
+        self.homography_hslider_zoom_camera_image.setTickInterval(0)
         self.homography_hslider_zoom_camera_image.setObjectName(_fromUtf8("homography_hslider_zoom_camera_image"))
         self.zoom_sliders.addWidget(self.homography_hslider_zoom_camera_image)
         spacerItem1 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Minimum)
@@ -99,7 +101,7 @@ class Ui_TransportationSafety(object):
         self.verticalLayout.addWidget(self.control_box)
         self.homography_layout = QtGui.QHBoxLayout()
         self.homography_layout.setObjectName(_fromUtf8("homography_layout"))
-        self.homography_cameraview = QtGui.QGraphicsView(self.tab_homography)
+        self.homography_cameraview = HomographyView(self.tab_homography)
         self.homography_cameraview.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.CrossCursor))
         self.homography_cameraview.setObjectName(_fromUtf8("homography_cameraview"))
         self.homography_layout.addWidget(self.homography_cameraview)
@@ -349,4 +351,5 @@ class Ui_TransportationSafety(object):
         self.actionUser_s_Guide.setText(_translate("TransportationSafety", "User\'s Guide", None))
         self.actionAbout.setText(_translate("TransportationSafety", "About", None))
 
+from custom.homography import HomographyView
 from custom.zoomslider import ZoomSlider

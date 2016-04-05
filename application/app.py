@@ -118,31 +118,14 @@ class MainGUI(QtGui.QMainWindow):
         # self.ui.results_plot_layout2.addWidget(self.canvas2)
         # self.results_plot_plot2()
         # self.ui.track_image.mousePressEvent = self.get_image_position
-        # aerial_label = QtGui.QLabel()
-        # aerial_label.setBackgroundRole(QtGui.QPalette.ColorRole(9))
-        # aerial_label.setSizePolicy(QtGui.QSizePolicy().Ignored, QtGui.QSizePolicy().Ignored)
-        # aerial_label.setScaledContents = False
-        # self.homography.aerial_image_label = aerial_label
-        # self.homography.aerial_scale_factor = .5
-        # self.ui.homography_aerialview_scroll.setBackgroundRole(QtGui.QPalette.ColorRole(4))
-        # self.ui.homography_aerialview_scroll.setWidget(self.homography.aerial_image_label)
-
+        
+        ## CONFIGURE HOMOGRAPHY ##
         self.ui.homography_hslider_zoom_camera_image.zoom_target = self.ui.homography_cameraview
-        self.init_gv()
 
         self.show()
 
     def homography_load_aerial_image(self):
         pass
-
-    def init_gv(self):
-        im = QtGui.QImage("stmarc_image.png")
-        this = QtGui.QGraphicsScene()
-        pixmap = this.addPixmap(QtGui.QPixmap().fromImage(im))
-        pixmap.setZValue(-1)
-        # this.drawBackground = draw_image
-        self.ui.homography_cameraview.setScene(this)
-        self.ui.homography_cameraview.show()
 
     def show_next_tab(self):
         curr_i = self.ui.main_tab_widget.currentIndex()
@@ -186,8 +169,7 @@ class MainGUI(QtGui.QMainWindow):
         selected by the user in a popup file dialog menu.
         """
         qi = self.open_image_fd(dialog_text="Select camera image...")
-        self.homography.image_aerial = qi
-        self.homography.pixmap_aerial = QtGui.QPixmap.fromImage(qi)
+        self.ui.homography_cameraview.load_image(qi)
         # Do other stuff
         # self.homography_show_image('aerial'), etc. ?
 
@@ -203,18 +185,6 @@ class MainGUI(QtGui.QMainWindow):
         self.homography.aerial_image_label.setPixmap(self.homography.pixmap_aerial)
         # Do other stuff
         # self.homography_show_image('aerial'), etc. ?
-        self.homography_scale_aerial_image(.8)
-
-    def homography_adjust_scrollbar(self, scrollbar, factor):
-        scrollbar.setValue(int(factor * scrollbar.value() + ((factor - 1) * scrollbar.pageStep()/2)))
-
-    def homography_scale_aerial_image(self, factor):
-        self.homography.aerial_scale_factor *= factor
-        self.homography.aerial_image_label.resize(self.homography.aerial_scale_factor * self.homography.aerial_image_label.pixmap().size())
-
-        self.homography_adjust_scrollbar(self.ui.homography_aerialview_scroll.horizontalScrollBar(), factor)
-        self.homography_adjust_scrollbar(self.ui.homography_aerialview_scroll.verticalScrollBar(), factor)
-        # QtGui.QLabel.resize()
 
     def open_image_fd(self, dialog_text="Open Image", default_dir=""):
         """Opens a file dialog, allowing user to select an image file.

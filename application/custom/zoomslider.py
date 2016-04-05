@@ -15,6 +15,7 @@ class ZoomSlider(QtGui.QSlider):
 
     def valueChanged_handler(self):
         if self.zoom_target is None:
+            self.setValue(100)  # If no target set, do not manipulate slider.
             return
         slider_val = self.value()
         desired_percentage = slider_val / 100.
