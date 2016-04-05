@@ -65,6 +65,7 @@ class HomographyScene(QtGui.QGraphicsScene):
                 offset = 0
                 for point in need_update:
                     point.homography_index = cp_index + offset
+                    point.childItems()[0].setText("{}".format(point.homography_index + 1))
                     offset += 1
             else:
                 self.point_selected = True
@@ -72,9 +73,18 @@ class HomographyScene(QtGui.QGraphicsScene):
                 self.selected_point.setCursor(self.parent().cursor_drag)
         else:
             new_point = self.addEllipse(loc[0] - self.point_rad, loc[1] - self.point_rad, self.point_rad * 2, self.point_rad * 2, self.point_pen, self.point_brush)
-            new_point.setCursor(self.parent().cursor_hover)
-            new_point.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
             new_point.homography_index = len(self.points)
+            # new_text = self.addText(loc[0] - self.point_rad, loc[1] - self.point_rad, "Bob", QtGui.QFont())
+            new_text = QtGui.QGraphicsSimpleTextItem()
+            new_text.setPos(loc[0]-10, loc[1]-10)
+            new_text.setText("{}".format(new_point.homography_index + 1))  # Display number is 1-indexed, not 0-indexed
+            self.addItem(new_text)
+            new_text.setParentItem(new_point)
+            # new_point_group = self.createItemGroup([new_point, new_text])
+            new_point.setCursor(self.parent().cursor_hover)
+            # new_point_group.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+            new_point.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+
             self.points.append(new_point)
 
     def mouseMoveEvent(self, event):
