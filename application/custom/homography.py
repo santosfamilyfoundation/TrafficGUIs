@@ -14,6 +14,8 @@ class HomographyView(QtGui.QGraphicsView):
 
         self.image_loaded = False
 
+        self.status_label = None
+
     def load_image(self, image):
         """
         Call this to load a new image from the provide QImage into
@@ -29,6 +31,23 @@ class HomographyView(QtGui.QGraphicsView):
         self.show()
         self.image_loaded = True
 
+    def list_points(self):
+        """
+        Returns a list of all points (x, y) selected within this view's scene.
+        """
+        out_points = []
+        raw_points = self.scene().points  # List of point objects
+        for pt in raw_points:
+            qptf = pt.scenePos()
+            print qptf
+            point = qptf.x(), qptf.y()
+            out_points.append(point)
+        return out_points
+
+    def update_point_count_status(self, point_list):
+        if self.status_label is None:
+            return
+        self.status_label.setText("{} points selected.".format(len(point_list)))
 
 class HomographyScene(QtGui.QGraphicsScene):
     """QGraphicsScene derivative displayed in HomographyViews.
@@ -65,11 +84,12 @@ class HomographyScene(QtGui.QGraphicsScene):
         self.points. The numerical index displayed in the text label corresponds to 1 + this point's index in
         self.points. This point and it's label are styled using attributes configured in this object's __init__().
         """
-        new_point = self.addEllipse(loc[0] - self.point_rad, loc[1] - self.point_rad, self.point_rad * 2, self.point_rad * 2, self.point_pen, self.point_brush)
+        new_point = self.addEllipse(0, 0, self.point_rad * 2, self.point_rad * 2, self.point_pen, self.point_brush)
+        new_point.setPos(loc[0] - self.point_rad, loc[1] - self.point_rad)
         new_point.homography_index = len(self.points)
 
         new_text = QtGui.QGraphicsSimpleTextItem()
-        new_text.setPos(loc[0]-30, loc[1]-30)
+        new_text.setPos(-20, -20)
         new_text.setFont(self.label_font)
         new_text.setBrush(self.label_brush)
         new_text.setPen(self.label_pen)
@@ -81,6 +101,7 @@ class HomographyScene(QtGui.QGraphicsScene):
         new_point.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
 
         self.points.append(new_point)
+        self.update_point_list_status()
 
     def delete_point(self, point, index):
         """
@@ -100,6 +121,7 @@ class HomographyScene(QtGui.QGraphicsScene):
             pt.childItems()[0].setText("{}".format(pt.homography_index + 1))
             self.update(redraw_box)  # Get rid of text artifacts. These can occur when changing from 10 to 9, for example.
             offset += 1
+        self.update_point_list_status()
 
     def mouseReleaseEvent(self, event):
         super(HomographyScene, self).mouseReleaseEvent(event)
@@ -137,6 +159,13 @@ class HomographyScene(QtGui.QGraphicsScene):
                 return point, i
         return False, None
 
+    def update_point_list_status(self):
+        """
+        Updates the status bar above the image.
+        """
+        point_list = self.parent().list_points()
+        self.parent().update_point_count_status(point_list)
+
     def register_pixmap(self, pixmap):
         self.main_pixmap_item = pixmap
 
@@ -156,4 +185,3 @@ class HomographyScene(QtGui.QGraphicsScene):
                 return False
         else:
             return False
-

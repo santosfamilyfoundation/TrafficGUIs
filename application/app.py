@@ -91,12 +91,12 @@ class MainGUI(QtGui.QMainWindow):
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
         # self.ui.actionLoad_Image.triggered.connect(self.open_image)
-        self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_aerial)
+        self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_aerial)  # TODO: New method. Check which tab is open. Move to homography tab if not already there. Then call open_image_aerial.
         self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_camera)
         self.ui.main_tab_widget.setCurrentIndex(0)  # Start on the first tab
 
         # Connect button actions
-        self.ui.homography_button_open_aerial_image.clicked.connect(self.homography_open_image_aerial)  # TODO: New method. Check which tab is open. Move to homography tab if not already there. Then call open_image_aerial.
+        self.ui.homography_button_open_aerial_image.clicked.connect(self.homography_open_image_aerial)
         self.ui.homography_button_open_camera_image.clicked.connect(self.homography_open_image_camera)
 
         # Connect back + continue buttons
@@ -121,7 +121,9 @@ class MainGUI(QtGui.QMainWindow):
 
         ## CONFIGURE HOMOGRAPHY ##
         self.ui.homography_hslider_zoom_camera_image.zoom_target = self.ui.homography_cameraview
-
+        self.ui.homography_hslider_zoom_aerial_image.zoom_target = self.ui.homography_aerialview
+        self.ui.homography_cameraview.status_label = self.ui.homography_camera_status_label
+        self.ui.homography_aerialview.status_label = self.ui.homography_aerial_status_label
         self.show()
 
     def homography_load_aerial_image(self):
@@ -165,7 +167,7 @@ class MainGUI(QtGui.QMainWindow):
     def homography_open_image_camera(self):
         """Opens a file dialog, allowing user to select an camera image file.
 
-        Creates a QImage object and QPixmap from the filename of an camera image
+        Creates a QImage object from the filename of an camera image
         selected by the user in a popup file dialog menu.
         """
         qi = self.open_image_fd(dialog_text="Select camera image...")
@@ -175,15 +177,12 @@ class MainGUI(QtGui.QMainWindow):
     def homography_open_image_aerial(self):
         """Opens a file dialog, allowing user to select an aerial image file.
 
-        Creates a QImage object and QPixmap from the filename of an aerial image
+        Creates a QImage object from the filename of an aerial image
         selected by the user in a popup file dialog menu.
         """
         qi = self.open_image_fd(dialog_text="Select aerial image...")
-        self.homography.image_aerial = qi
-        self.homography.pixmap_aerial = QtGui.QPixmap.fromImage(qi)
-        self.homography.aerial_image_label.setPixmap(self.homography.pixmap_aerial)
-        # Do other stuff
-        # self.homography_show_image('aerial'), etc. ?
+        if qi:
+            self.ui.homography_aerialview.load_image(qi)
 
     def open_image_fd(self, dialog_text="Open Image", default_dir=""):
         """Opens a file dialog, allowing user to select an image file.
