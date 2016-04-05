@@ -118,7 +118,7 @@ class MainGUI(QtGui.QMainWindow):
         # self.ui.results_plot_layout2.addWidget(self.canvas2)
         # self.results_plot_plot2()
         # self.ui.track_image.mousePressEvent = self.get_image_position
-        
+
         ## CONFIGURE HOMOGRAPHY ##
         self.ui.homography_hslider_zoom_camera_image.zoom_target = self.ui.homography_cameraview
 
@@ -169,9 +169,8 @@ class MainGUI(QtGui.QMainWindow):
         selected by the user in a popup file dialog menu.
         """
         qi = self.open_image_fd(dialog_text="Select camera image...")
-        self.ui.homography_cameraview.load_image(qi)
-        # Do other stuff
-        # self.homography_show_image('aerial'), etc. ?
+        if qi:
+            self.ui.homography_cameraview.load_image(qi)
 
     def homography_open_image_aerial(self):
         """Opens a file dialog, allowing user to select an aerial image file.
@@ -200,9 +199,13 @@ class MainGUI(QtGui.QMainWindow):
 
         Returns:
             QImage: Image object created from selected image file.
+            None: Returns None if no file was selected in the dialog box.
         """
         fname = QtGui.QFileDialog.getOpenFileName(self, dialog_text, default_dir)  # TODO: Filter to show only image files
-        image = QtGui.QImage(fname)
+        if fname:
+            image = QtGui.QImage(fname)
+        else:
+            image = None
         return image
 
     # def open_image(self):

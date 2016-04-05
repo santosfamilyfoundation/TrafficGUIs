@@ -12,6 +12,8 @@ class HomographyView(QtGui.QGraphicsView):
         self.cursor_hover = QtGui.QCursor(Qt.OpenHandCursor)
         self.cursor_drag = QtGui.QCursor(Qt.ClosedHandCursor)
 
+        self.image_loaded = False
+
     def load_image(self, image):
         """
         Call this to load a new image from the provide QImage into
@@ -22,6 +24,7 @@ class HomographyView(QtGui.QGraphicsView):
         new_scene.addPixmap(QtGui.QPixmap().fromImage(image))
         self.setScene(new_scene)
         self.show()
+        self.image_loaded = True
 
 
 class HomographyScene(QtGui.QGraphicsScene):
@@ -42,9 +45,17 @@ class HomographyScene(QtGui.QGraphicsScene):
         self.point_selected = False
         self.selected_point = None
 
+        font = QtGui.QFont()
+        font.setPixelSize(24)
+        font.setBold(False)
+        self.label_font = font
+        self.label_pen_color = QtGui.QColor(0, 0, 0)  # R, G, B
+        self.label_pen = QtGui.QPen(self.label_pen_color, .1)
+        self.label_brush_color = QtGui.QColor(255, 255, 255)  # R, G, B
+        self.label_brush = QtGui.QBrush(self.label_brush_color)
+
     def mouseReleaseEvent(self, event):
         super(HomographyScene, self).mouseReleaseEvent(event)
-        loc = (event.scenePos().x(), event.scenePos().y())
         if self.point_selected:
             # Re-placing moved point
             self.selected_point.setCursor(self.parent().cursor_hover)
@@ -65,7 +76,10 @@ class HomographyScene(QtGui.QGraphicsScene):
                 offset = 0
                 for point in need_update:
                     point.homography_index = cp_index + offset
+                    text_box = point.childItems()[0]
+                    redraw_box = text_box.boundingRect()
                     point.childItems()[0].setText("{}".format(point.homography_index + 1))
+                    self.update(redraw_box)  # Get rid of text artifacts. These can occur when changing from 10 to 9, for example.
                     offset += 1
             else:
                 self.point_selected = True
@@ -74,15 +88,17 @@ class HomographyScene(QtGui.QGraphicsScene):
         else:
             new_point = self.addEllipse(loc[0] - self.point_rad, loc[1] - self.point_rad, self.point_rad * 2, self.point_rad * 2, self.point_pen, self.point_brush)
             new_point.homography_index = len(self.points)
-            # new_text = self.addText(loc[0] - self.point_rad, loc[1] - self.point_rad, "Bob", QtGui.QFont())
+
             new_text = QtGui.QGraphicsSimpleTextItem()
-            new_text.setPos(loc[0]-10, loc[1]-10)
+            new_text.setPos(loc[0]-30, loc[1]-30)
+            new_text.setFont(self.label_font)
+            new_text.setBrush(self.label_brush)
+            new_text.setPen(self.label_pen)
             new_text.setText("{}".format(new_point.homography_index + 1))  # Display number is 1-indexed, not 0-indexed
+
             self.addItem(new_text)
             new_text.setParentItem(new_point)
-            # new_point_group = self.createItemGroup([new_point, new_text])
             new_point.setCursor(self.parent().cursor_hover)
-            # new_point_group.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
             new_point.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
 
             self.points.append(new_point)
