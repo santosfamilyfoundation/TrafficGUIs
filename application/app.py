@@ -8,71 +8,12 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 import random
 
-
-
 from plotting import visualization
 
-class Organizer(object):
+
+class Organizer(object):  # TODO: Phase out.
     def __init__(self):
         super(Organizer, self).__init__()
-
-
-class DisplayImage(object):
-    def __init__(self, image, pixmap):
-        self._image = None
-        self.image = image
-        self.pixmap = pixmap
-        self.scale_factor = 0  # If 512x512 img and 256x256 pixmap, this is 0.5
-        self.compute_scale_factor()
-
-    # @property
-    # def image(self):
-    #     return self._image
-
-    # @image.setter
-    # def image(self, new_image):
-    #     try:
-    #         self.image_size = (new_image.height(), new_image.width())
-    #     except TypeError, e:
-    #         print("ERR: Invalid image passed to DisplayImage. Must be QImage.")
-    #     else:
-    #         self._image = image
-
-    # @image.deleter
-    # def image(self):
-    #     self._image = None
-    #     self.image_size = (None, None)
-
-    def compute_scale_factor(self):
-        pix_width = float(self.pixmap.width())
-        pix_height = float(self.pixmap.height())
-        img_width = float(self.image.width())
-        img_height = float(self.image.height())
-        print(img_width / pix_width)
-        print(img_height / pix_height)
-        self.scale_factor = img_width / pix_width
-
-    def tf_pixmap_to_image(self, x_coord, y_coord):
-        """
-        MapsTransforms pixmap coordinates to unscaled image coordinates. Rounds
-        to nearest integer value using Python's built-in round() function.
-
-        EX: If scale_factor = 0.5 and input (44, 21), returns (88, 42)
-        """
-        sf = float(self.scale_factor)
-        x_scaled = round(x_coord / sf)
-        y_scaled = round(y_coord / sf)
-        return x_scaled, y_scaled
-
-    def tf_image_to_pixmap(self, x_coord, y_coord):
-        """
-        Transforms image coordinates to scaled pixmap coordinates.
-
-        EX: If scale_factor = 0.5 and input (44, 21), returns (22, 11)
-        """
-        x_scaled = round(x_coord * self.scale_factor)
-        y_scaled = round(y_coord * self.scale_factor)
-        return x_scaled, y_scaled
 
 
 class MainGUI(QtGui.QMainWindow):
@@ -228,5 +169,4 @@ def main():
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     ex = MainGUI()
-    # print(dir(ex.ui))  # Uncomment to show structure of ui object
     sys.exit(main())
