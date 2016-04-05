@@ -20,8 +20,11 @@ class HomographyView(QtGui.QGraphicsView):
         this HomographyView's scene. The image's top left corner will
         be placed at (0,0) in the scene.
         """
+        self.scene_image = image
         new_scene = HomographyScene(self)
-        new_scene.addPixmap(QtGui.QPixmap().fromImage(image))
+        pmap = new_scene.addPixmap(QtGui.QPixmap().fromImage(image))
+        new_scene.register_pixmap(pmap)
+        new_scene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
         self.setScene(new_scene)
         self.show()
         self.image_loaded = True
@@ -35,6 +38,7 @@ class HomographyScene(QtGui.QGraphicsScene):
     def __init__(self, parent):
         super(HomographyScene, self).__init__(parent)
         self.points = []
+        self.main_pixmap_item = None  # Either None or a QGraphicsPixmapItem representing the loaded image
 
         # Point configuration
         self.point_rad = 12  # Radius, in pixels
@@ -54,10 +58,53 @@ class HomographyScene(QtGui.QGraphicsScene):
         self.label_brush_color = QtGui.QColor(255, 255, 255)  # R, G, B
         self.label_brush = QtGui.QBrush(self.label_brush_color)
 
+    def add_point(self, loc):
+        """
+        Adds a point (QEllipseItem) with a child QSimpleTextItem displaying a numerical index to the
+        scene at the location specified by the (x, y) tuple loc. The new_point (QEllipseItem) is appended to
+        self.points. The numerical index displayed in the text label corresponds to 1 + this point's index in
+        self.points. This point and it's label are styled using attributes configured in this object's __init__().
+        """
+        new_point = self.addEllipse(loc[0] - self.point_rad, loc[1] - self.point_rad, self.point_rad * 2, self.point_rad * 2, self.point_pen, self.point_brush)
+        new_point.homography_index = len(self.points)
+
+        new_text = QtGui.QGraphicsSimpleTextItem()
+        new_text.setPos(loc[0]-30, loc[1]-30)
+        new_text.setFont(self.label_font)
+        new_text.setBrush(self.label_brush)
+        new_text.setPen(self.label_pen)
+        new_text.setText("{}".format(new_point.homography_index + 1))  # Display number is 1-indexed, not 0-indexed
+
+        self.addItem(new_text)
+        new_text.setParentItem(new_point)
+        new_point.setCursor(self.parent().cursor_hover)
+        new_point.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+
+        self.points.append(new_point)
+
+    def delete_point(self, point, index):
+        """
+        Given a point (QEllipseItem) with a child QSimpleTextItem and it's index in
+        self.points, removes it from the screen, re-indexes following points, and redraws
+        following points with new labels.
+        """
+        self.removeItem(point)
+        del self.points[index]
+        # Amend following points' indices
+        need_update = self.points[index:]
+        offset = 0
+        for pt in need_update:
+            pt.homography_index = index + offset
+            text_box = pt.childItems()[0]
+            redraw_box = text_box.boundingRect()
+            pt.childItems()[0].setText("{}".format(pt.homography_index + 1))
+            self.update(redraw_box)  # Get rid of text artifacts. These can occur when changing from 10 to 9, for example.
+            offset += 1
+
     def mouseReleaseEvent(self, event):
         super(HomographyScene, self).mouseReleaseEvent(event)
         if self.point_selected:
-            # Re-placing moved point
+            # Note that we are no longer moving a point.
             self.selected_point.setCursor(self.parent().cursor_hover)
             self.point_selected = False
             self.selected_point = None
@@ -67,41 +114,15 @@ class HomographyScene(QtGui.QGraphicsScene):
         loc = (event.scenePos().x(), event.scenePos().y())
         clicked_point, cp_index = self.find_clicked_point(loc)
         if clicked_point:
-            if event.button() == Qt.RightButton:
-                # Delete point
-                self.removeItem(clicked_point)
-                del self.points[cp_index]
-                # Amend following points' indices
-                need_update = self.points[cp_index:]
-                offset = 0
-                for point in need_update:
-                    point.homography_index = cp_index + offset
-                    text_box = point.childItems()[0]
-                    redraw_box = text_box.boundingRect()
-                    point.childItems()[0].setText("{}".format(point.homography_index + 1))
-                    self.update(redraw_box)  # Get rid of text artifacts. These can occur when changing from 10 to 9, for example.
-                    offset += 1
-            else:
+            if event.button() == Qt.RightButton:  # Right click to delete points
+                self.delete_point(clicked_point, cp_index)
+            else:  # Note that we are currently moving a point
                 self.point_selected = True
                 self.selected_point = clicked_point
                 self.selected_point.setCursor(self.parent().cursor_drag)
-        else:
-            new_point = self.addEllipse(loc[0] - self.point_rad, loc[1] - self.point_rad, self.point_rad * 2, self.point_rad * 2, self.point_pen, self.point_brush)
-            new_point.homography_index = len(self.points)
-
-            new_text = QtGui.QGraphicsSimpleTextItem()
-            new_text.setPos(loc[0]-30, loc[1]-30)
-            new_text.setFont(self.label_font)
-            new_text.setBrush(self.label_brush)
-            new_text.setPen(self.label_pen)
-            new_text.setText("{}".format(new_point.homography_index + 1))  # Display number is 1-indexed, not 0-indexed
-
-            self.addItem(new_text)
-            new_text.setParentItem(new_point)
-            new_point.setCursor(self.parent().cursor_hover)
-            new_point.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-
-            self.points.append(new_point)
+        else:  # Otherwise add a new point
+            if self.main_pixmap_item.isUnderMouse():  # Check to make sure we're in the image.
+                self.add_point(loc)
 
     def mouseMoveEvent(self, event):
         super(HomographyScene, self).mousePressEvent(event)
@@ -112,17 +133,20 @@ class HomographyScene(QtGui.QGraphicsScene):
         Else returns False.
         """
         for i, point in enumerate(self.points):
-            # if self.click_is_within(point.rect(), click_loc):
-            # if point.rect().contains(click_loc[0], click_loc[1]):
             if point.isUnderMouse():
                 return point, i
         return False, None
+
+    def register_pixmap(self, pixmap):
+        self.main_pixmap_item = pixmap
 
     @staticmethod
     def click_is_within(ellipse_rect, click):
         """
         Returns True if click (x, y) is within the rectange of a drawn ellipse.
         Else returns False. Use this if we need to manually specify a selection radius.
+        Before using this, check QT docs to evaluate configuring larger bounding boxes around
+        objects and letting QT handle item selection.
         """
         min_x, min_y, max_x, max_y = ellipse_rect.getCoords()  # Coordinates of bounding rectangle.
         if click[0] > min_x and click[0] < max_x:  # If click within x-bounds
@@ -132,3 +156,4 @@ class HomographyScene(QtGui.QGraphicsScene):
                 return False
         else:
             return False
+
