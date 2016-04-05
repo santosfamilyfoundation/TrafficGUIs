@@ -1,5 +1,6 @@
 # homography.py
 from PyQt4 import QtGui
+from PyQt4.QtCore import Qt
 
 
 class HomographyView(QtGui.QGraphicsView):
@@ -7,6 +8,8 @@ class HomographyView(QtGui.QGraphicsView):
     """
     def __init__(self, parent):
         super(HomographyView, self).__init__(parent)
+        self.cursor_default = QtGui.QCursor(Qt.CrossCursor)
+        self.cursor_hover = QtGui.QCursor(Qt.PointingHandCursor)
 
     def load_image(self, image):
         """
@@ -34,19 +37,38 @@ class HomographyScene(QtGui.QGraphicsScene):
         self.point_pen = QtGui.QPen()
         self.point_brush_color = QtGui.QColor(255, 25, 23)  # R, G, B
         self.point_brush = QtGui.QBrush(self.point_brush_color)
+        self.point_selected = False
+        self.selected_point = None
 
     def mouseReleaseEvent(self, event):
         super(HomographyScene, self).mouseReleaseEvent(event)
         loc = (event.scenePos().x(), event.scenePos().y())
         print(event.scenePos().x(), event.scenePos().y())
-        new_point = self.addEllipse(loc[0] - self.point_rad, loc[1] - self.point_rad, self.point_rad * 2, self.point_rad * 2, self.point_pen, self.point_brush)
-        self.points.append(new_point)
+        if self.point_selected:
+            print self.selected_point
+            self.point_selected = False
+            self.selected_point = None
+        else:
+            new_point = self.addEllipse(loc[0] - self.point_rad, loc[1] - self.point_rad, self.point_rad * 2, self.point_rad * 2, self.point_pen, self.point_brush)
+            self.points.append(new_point)
 
     def mousePressEvent(self, event):
         super(HomographyScene, self).mousePressEvent(event)
         loc = (event.scenePos().x(), event.scenePos().y())
-        clicked = self.find_clicked_point(loc)
-        print clicked
+        clicked_point = self.find_clicked_point(loc)
+        if clicked_point:
+            self.point_selected = True
+            self.selected_point = clicked_point
+
+    def mouseMoveEvent(self, event):
+        super(HomographyScene, self).mousePressEvent(event)
+        loc = (event.scenePos().x(), event.scenePos().y())
+        clicked_point = self.find_clicked_point(loc)
+        if clicked_point:
+            self.parent().viewport().setCursor(self.parent().cursor_hover)
+        else:
+            self.parent().viewport().setCursor(self.parent().cursor_default)
+
 
     def find_clicked_point(self, click_loc):
         """
