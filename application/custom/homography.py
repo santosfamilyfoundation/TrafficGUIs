@@ -34,7 +34,7 @@ class HomographyScene(QtGui.QGraphicsScene):
         self.points = []
 
         # Point configuration
-        self.point_rad = 5  # Radius, in pixels
+        self.point_rad = 15  # Radius, in pixels
         self.point_pen = QtGui.QPen()
         self.point_brush_color = QtGui.QColor(255, 25, 23)  # R, G, B
         self.point_brush = QtGui.QBrush(self.point_brush_color)
@@ -54,15 +54,30 @@ class HomographyScene(QtGui.QGraphicsScene):
     def mousePressEvent(self, event):
         super(HomographyScene, self).mousePressEvent(event)
         loc = (event.scenePos().x(), event.scenePos().y())
-        clicked_point = self.find_clicked_point(loc)
+        clicked_point, cp_index = self.find_clicked_point(loc)
         if clicked_point:
-            self.point_selected = True
-            self.selected_point = clicked_point
-            self.selected_point.setCursor(self.parent().cursor_drag)
+            print("Clicked point")
+            print(event.button())
+            if event.button() == Qt.RightButton:
+                print("Delete point")
+                # Delete point
+                self.removeItem(clicked_point)
+                del self.points[cp_index]
+                # Amend following points' indices
+                need_update = self.points[cp_index:]
+                offset = 0
+                for point in need_update:
+                    point.homography_index = cp_index + offset
+                    offset += 1
+            else:
+                self.point_selected = True
+                self.selected_point = clicked_point
+                self.selected_point.setCursor(self.parent().cursor_drag)
         else:
             new_point = self.addEllipse(loc[0] - self.point_rad, loc[1] - self.point_rad, self.point_rad * 2, self.point_rad * 2, self.point_pen, self.point_brush)
             new_point.setCursor(self.parent().cursor_hover)
             new_point.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+            new_point.homography_index = len(self.points)
             self.points.append(new_point)
 
     def mouseMoveEvent(self, event):
@@ -73,12 +88,12 @@ class HomographyScene(QtGui.QGraphicsScene):
         Searches placed points and returns a point if the user has clicked it.
         Else returns False.
         """
-        for point in self.points:
+        for i, point in enumerate(self.points):
             # if self.click_is_within(point.rect(), click_loc):
             # if point.rect().contains(click_loc[0], click_loc[1]):
             if point.isUnderMouse():
-                return point
-        return False
+                return point, i
+        return False, None
 
     @staticmethod
     def click_is_within(ellipse_rect, click):
