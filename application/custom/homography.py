@@ -34,9 +34,10 @@ class HomographyScene(QtGui.QGraphicsScene):
         self.points = []
 
         # Point configuration
-        self.point_rad = 15  # Radius, in pixels
-        self.point_pen = QtGui.QPen()
-        self.point_brush_color = QtGui.QColor(255, 25, 23)  # R, G, B
+        self.point_rad = 12  # Radius, in pixels
+        self.point_pen_color = QtGui.QColor(255, 74, 13, 230)  # R, G, B, A
+        self.point_pen = QtGui.QPen(self.point_pen_color, 10)
+        self.point_brush_color = QtGui.QColor(195, 13, 255, 20)  # R, G, B, A
         self.point_brush = QtGui.QBrush(self.point_brush_color)
         self.point_selected = False
         self.selected_point = None
@@ -46,20 +47,16 @@ class HomographyScene(QtGui.QGraphicsScene):
         loc = (event.scenePos().x(), event.scenePos().y())
         if self.point_selected:
             # Re-placing moved point
-            print self.selected_point
             self.selected_point.setCursor(self.parent().cursor_hover)
             self.point_selected = False
-            self.selected_point = None  
+            self.selected_point = None
 
     def mousePressEvent(self, event):
         super(HomographyScene, self).mousePressEvent(event)
         loc = (event.scenePos().x(), event.scenePos().y())
         clicked_point, cp_index = self.find_clicked_point(loc)
         if clicked_point:
-            print("Clicked point")
-            print(event.button())
             if event.button() == Qt.RightButton:
-                print("Delete point")
                 # Delete point
                 self.removeItem(clicked_point)
                 del self.points[cp_index]
