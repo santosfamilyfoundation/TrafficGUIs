@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Wed Mar 30 09:59:11 2016
+# Created: Mon Apr  4 18:56:35 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -65,7 +65,11 @@ class Ui_TransportationSafety(object):
         self.homography_label_zoom_camera_image = QtGui.QLabel(self.control_box)
         self.homography_label_zoom_camera_image.setObjectName(_fromUtf8("homography_label_zoom_camera_image"))
         self.zoom_sliders.addWidget(self.homography_label_zoom_camera_image)
-        self.homography_hslider_zoom_camera_image = QtGui.QSlider(self.control_box)
+        self.homography_hslider_zoom_camera_image = ZoomSlider(self.control_box)
+        self.homography_hslider_zoom_camera_image.setMinimum(10)
+        self.homography_hslider_zoom_camera_image.setMaximum(400)
+        self.homography_hslider_zoom_camera_image.setPageStep(25)
+        self.homography_hslider_zoom_camera_image.setProperty("value", 100)
         self.homography_hslider_zoom_camera_image.setOrientation(QtCore.Qt.Horizontal)
         self.homography_hslider_zoom_camera_image.setObjectName(_fromUtf8("homography_hslider_zoom_camera_image"))
         self.zoom_sliders.addWidget(self.homography_hslider_zoom_camera_image)
@@ -74,7 +78,7 @@ class Ui_TransportationSafety(object):
         self.homography_label_zoom_computed_image = QtGui.QLabel(self.control_box)
         self.homography_label_zoom_computed_image.setObjectName(_fromUtf8("homography_label_zoom_computed_image"))
         self.zoom_sliders.addWidget(self.homography_label_zoom_computed_image)
-        self.homography_hslider_zoom_computed_image = QtGui.QSlider(self.control_box)
+        self.homography_hslider_zoom_computed_image = ZoomSlider(self.control_box)
         self.homography_hslider_zoom_computed_image.setOrientation(QtCore.Qt.Horizontal)
         self.homography_hslider_zoom_computed_image.setObjectName(_fromUtf8("homography_hslider_zoom_computed_image"))
         self.zoom_sliders.addWidget(self.homography_hslider_zoom_computed_image)
@@ -83,8 +87,12 @@ class Ui_TransportationSafety(object):
         self.homography_label_zoom_aerial_image = QtGui.QLabel(self.control_box)
         self.homography_label_zoom_aerial_image.setObjectName(_fromUtf8("homography_label_zoom_aerial_image"))
         self.zoom_sliders.addWidget(self.homography_label_zoom_aerial_image)
-        self.homography_hslider_zoom_aerial_image = QtGui.QSlider(self.control_box)
+        self.homography_hslider_zoom_aerial_image = ZoomSlider(self.control_box)
+        self.homography_hslider_zoom_aerial_image.setMaximum(1000)
+        self.homography_hslider_zoom_aerial_image.setPageStep(25)
+        self.homography_hslider_zoom_aerial_image.setProperty("value", 500)
         self.homography_hslider_zoom_aerial_image.setOrientation(QtCore.Qt.Horizontal)
+        self.homography_hslider_zoom_aerial_image.setTickPosition(QtGui.QSlider.NoTicks)
         self.homography_hslider_zoom_aerial_image.setObjectName(_fromUtf8("homography_hslider_zoom_aerial_image"))
         self.zoom_sliders.addWidget(self.homography_hslider_zoom_aerial_image)
         self.verticalLayout_4.addLayout(self.zoom_sliders)
@@ -99,10 +107,14 @@ class Ui_TransportationSafety(object):
         self.homography_results.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.CrossCursor))
         self.homography_results.setObjectName(_fromUtf8("homography_results"))
         self.homography_layout.addWidget(self.homography_results)
-        self.homography_aerialview = QtGui.QGraphicsView(self.tab_homography)
-        self.homography_aerialview.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.CrossCursor))
-        self.homography_aerialview.setObjectName(_fromUtf8("homography_aerialview"))
-        self.homography_layout.addWidget(self.homography_aerialview)
+        self.homography_aerialview_scroll = QtGui.QScrollArea(self.tab_homography)
+        self.homography_aerialview_scroll.setWidgetResizable(True)
+        self.homography_aerialview_scroll.setObjectName(_fromUtf8("homography_aerialview_scroll"))
+        self.scrollAreaWidgetContents = QtGui.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 321, 424))
+        self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
+        self.homography_aerialview_scroll.setWidget(self.scrollAreaWidgetContents)
+        self.homography_layout.addWidget(self.homography_aerialview_scroll)
         self.verticalLayout.addLayout(self.homography_layout)
         self.homography_flow_control = QtGui.QWidget(self.tab_homography)
         self.homography_flow_control.setMinimumSize(QtCore.QSize(0, 50))
@@ -295,7 +307,7 @@ class Ui_TransportationSafety(object):
         self.menuBar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(TransportationSafety)
-        self.main_tab_widget.setCurrentIndex(3)
+        self.main_tab_widget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(TransportationSafety)
 
     def retranslateUi(self, TransportationSafety):
@@ -337,3 +349,4 @@ class Ui_TransportationSafety(object):
         self.actionUser_s_Guide.setText(_translate("TransportationSafety", "User\'s Guide", None))
         self.actionAbout.setText(_translate("TransportationSafety", "About", None))
 
+from custom.zoomslider import ZoomSlider

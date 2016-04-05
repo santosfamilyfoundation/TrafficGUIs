@@ -27,7 +27,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -96,9 +96,27 @@
               </widget>
              </item>
              <item>
-              <widget class="QSlider" name="homography_hslider_zoom_camera_image">
+              <widget class="ZoomSlider" name="homography_hslider_zoom_camera_image">
+               <property name="minimum">
+                <number>10</number>
+               </property>
+               <property name="maximum">
+                <number>400</number>
+               </property>
+               <property name="pageStep">
+                <number>25</number>
+               </property>
+               <property name="value">
+                <number>100</number>
+               </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="tickPosition">
+                <enum>QSlider::NoTicks</enum>
+               </property>
+               <property name="tickInterval">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -126,7 +144,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QSlider" name="homography_hslider_zoom_computed_image">
+              <widget class="ZoomSlider" name="homography_hslider_zoom_computed_image">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -156,9 +174,21 @@
               </widget>
              </item>
              <item>
-              <widget class="QSlider" name="homography_hslider_zoom_aerial_image">
+              <widget class="ZoomSlider" name="homography_hslider_zoom_aerial_image">
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+               <property name="pageStep">
+                <number>25</number>
+               </property>
+               <property name="value">
+                <number>500</number>
+               </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="tickPosition">
+                <enum>QSlider::NoTicks</enum>
                </property>
               </widget>
              </item>
@@ -184,10 +214,20 @@
            </widget>
           </item>
           <item>
-           <widget class="QGraphicsView" name="homography_aerialview">
-            <property name="cursor" stdset="0">
-             <cursorShape>CrossCursor</cursorShape>
+           <widget class="QScrollArea" name="homography_aerialview_scroll">
+            <property name="widgetResizable">
+             <bool>true</bool>
             </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>321</width>
+               <height>424</height>
+              </rect>
+             </property>
+            </widget>
            </widget>
           </item>
          </layout>
@@ -567,6 +607,13 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>ZoomSlider</class>
+   <extends>QSlider</extends>
+   <header>custom/zoomslider.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
