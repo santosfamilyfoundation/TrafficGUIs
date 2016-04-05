@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Tue Apr  5 12:40:48 2016
+# Created: Tue Apr  5 13:02:19 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -125,7 +125,7 @@ class Ui_TransportationSafety(object):
         self.homography_cameraview.setMouseTracking(True)
         self.homography_cameraview.setObjectName(_fromUtf8("homography_cameraview"))
         self.homography_layout.addWidget(self.homography_cameraview)
-        self.homography_results = QtGui.QGraphicsView(self.tab_homography)
+        self.homography_results = HomographyResultView(self.tab_homography)
         self.homography_results.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.CrossCursor))
         self.homography_results.setObjectName(_fromUtf8("homography_results"))
         self.homography_layout.addWidget(self.homography_results)
@@ -378,5 +378,5 @@ class Ui_TransportationSafety(object):
         self.actionUser_s_Guide.setText(_translate("TransportationSafety", "User\'s Guide", None))
         self.actionAbout.setText(_translate("TransportationSafety", "About", None))
 
-from custom.homography import HomographyView
+from custom.homography import HomographyResultView, HomographyView
 from custom.zoomslider import ZoomSlider

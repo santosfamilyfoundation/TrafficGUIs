@@ -259,7 +259,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QGraphicsView" name="homography_results">
+           <widget class="HomographyResultView" name="homography_results">
             <property name="cursor" stdset="0">
              <cursorShape>CrossCursor</cursorShape>
             </property>
@@ -287,7 +287,7 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
-            <spacer name="homography_flow_hspacer">
+            <spacer name="homography_flow_hspacer0">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -313,7 +313,7 @@
             </widget>
            </item>
            <item>
-            <spacer name="horizontalSpacer">
+            <spacer name="homography_flow_hspacer1">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -686,6 +686,11 @@
   </customwidget>
   <customwidget>
    <class>HomographyView</class>
+   <extends>QGraphicsView</extends>
+   <header>custom/homography.h</header>
+  </customwidget>
+  <customwidget>
+   <class>HomographyResultView</class>
    <extends>QGraphicsView</extends>
    <header>custom/homography.h</header>
   </customwidget>

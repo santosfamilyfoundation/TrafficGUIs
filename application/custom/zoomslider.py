@@ -3,7 +3,7 @@ from PyQt4 import QtGui
 
 
 class ZoomSlider(QtGui.QSlider):
-    """Slider used for zooming a HomographyView.
+    """Slider used for zooming a HomographyView or a HomographyResultView.
     """
     def __init__(self, parent):
         super(ZoomSlider, self).__init__(parent)

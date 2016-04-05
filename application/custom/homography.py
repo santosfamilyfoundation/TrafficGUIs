@@ -49,6 +49,37 @@ class HomographyView(QtGui.QGraphicsView):
             return
         self.status_label.setText("{} points selected.".format(len(point_list)))
 
+class HomographyResultView(QtGui.QGraphicsView):
+    """QGraphicsView used for viewing the result of image-based homographies.
+    """
+    def __init__(self, parent):
+        super(HomographyResultView, self).__init__(parent)
+        self.cursor_default = QtGui.QCursor(Qt.CrossCursor)
+        self.image_loaded = False
+
+        new_scene = QtGui.QGraphicsScene(self)
+        new_scene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(124, 124, 124)))
+        txt = QtGui.QGraphicsSimpleTextItem("Compute homography to see results here.")
+        new_scene.addItem(txt)
+        self.setScene(new_scene)
+        self.show()
+
+    def load_image(self, image):
+        """
+        Call this to load a new image from the provide QImage into
+        this HomographyView's scene. The image's top left corner will
+        be placed at (0,0) in the scene.
+        """
+        self.scene_image = image
+        new_scene = QtGui.QGraphicsScene(self)
+        pmap = new_scene.addPixmap(QtGui.QPixmap().fromImage(image))
+        new_scene.register_pixmap(pmap)
+        new_scene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
+        self.setScene(new_scene)
+        self.show()
+        self.image_loaded = True
+
+
 class HomographyScene(QtGui.QGraphicsScene):
     """QGraphicsScene derivative displayed in HomographyViews.
 
