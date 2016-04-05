@@ -122,6 +122,7 @@ class MainGUI(QtGui.QMainWindow):
         ## CONFIGURE HOMOGRAPHY ##
         self.ui.homography_hslider_zoom_camera_image.zoom_target = self.ui.homography_cameraview
         self.ui.homography_hslider_zoom_aerial_image.zoom_target = self.ui.homography_aerialview
+        self.ui.homography_hslider_zoom_computed_image.zoom_target = self.ui.homography_results
         self.ui.homography_cameraview.status_label = self.ui.homography_camera_status_label
         self.ui.homography_aerialview.status_label = self.ui.homography_aerial_status_label
         self.show()

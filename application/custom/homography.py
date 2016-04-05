@@ -39,7 +39,6 @@ class HomographyView(QtGui.QGraphicsView):
         raw_points = self.scene().points  # List of point objects
         for pt in raw_points:
             qptf = pt.scenePos()
-            print qptf
             point = qptf.x(), qptf.y()
             out_points.append(point)
         return out_points
