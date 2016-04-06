@@ -96,9 +96,27 @@
               </widget>
              </item>
              <item>
-              <widget class="QSlider" name="homography_hslider_zoom_camera_image">
+              <widget class="ZoomSlider" name="homography_hslider_zoom_camera_image">
+               <property name="minimum">
+                <number>10</number>
+               </property>
+               <property name="maximum">
+                <number>400</number>
+               </property>
+               <property name="pageStep">
+                <number>25</number>
+               </property>
+               <property name="value">
+                <number>100</number>
+               </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="tickPosition">
+                <enum>QSlider::NoTicks</enum>
+               </property>
+               <property name="tickInterval">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -126,7 +144,19 @@
               </widget>
              </item>
              <item>
-              <widget class="QSlider" name="homography_hslider_zoom_computed_image">
+              <widget class="ZoomSlider" name="homography_hslider_zoom_computed_image">
+               <property name="minimum">
+                <number>10</number>
+               </property>
+               <property name="maximum">
+                <number>400</number>
+               </property>
+               <property name="pageStep">
+                <number>25</number>
+               </property>
+               <property name="value">
+                <number>100</number>
+               </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -156,9 +186,58 @@
               </widget>
              </item>
              <item>
-              <widget class="QSlider" name="homography_hslider_zoom_aerial_image">
+              <widget class="ZoomSlider" name="homography_hslider_zoom_aerial_image">
+               <property name="minimum">
+                <number>10</number>
+               </property>
+               <property name="maximum">
+                <number>400</number>
+               </property>
+               <property name="pageStep">
+                <number>25</number>
+               </property>
+               <property name="value">
+                <number>100</number>
+               </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="tickPosition">
+                <enum>QSlider::NoTicks</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="homography_status_layout">
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="homography_camera_status_label">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="homography_status_hspacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="homography_aerial_status_label">
+               <property name="text">
+                <string/>
                </property>
               </widget>
              </item>
@@ -170,23 +249,29 @@
         <item>
          <layout class="QHBoxLayout" name="homography_layout">
           <item>
-           <widget class="QGraphicsView" name="homography_cameraview">
+           <widget class="HomographyView" name="homography_cameraview">
+            <property name="cursor" stdset="0">
+             <cursorShape>CrossCursor</cursorShape>
+            </property>
+            <property name="mouseTracking">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="HomographyResultView" name="homography_results">
             <property name="cursor" stdset="0">
              <cursorShape>CrossCursor</cursorShape>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QGraphicsView" name="homography_results">
+           <widget class="HomographyView" name="homography_aerialview">
             <property name="cursor" stdset="0">
              <cursorShape>CrossCursor</cursorShape>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGraphicsView" name="homography_aerialview">
-            <property name="cursor" stdset="0">
-             <cursorShape>CrossCursor</cursorShape>
+            <property name="mouseTracking">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -202,7 +287,33 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
-            <spacer name="homography_flow_hspacer">
+            <spacer name="homography_flow_hspacer0">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="homography_label_notification">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="homography_flow_hspacer1">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -405,18 +516,8 @@
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <layout class="QGridLayout" name="results_grid">
-          <item row="0" column="0">
-           <widget class="QLabel" name="results_label0">
-            <property name="text">
-             <string>Data</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="1">
-           <widget class="QLabel" name="results_label2">
+           <widget class="QLabel" name="results_label3">
             <property name="text">
              <string>Look at all the glorious data!</string>
             </property>
@@ -426,7 +527,7 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="results_label1">
+           <widget class="QLabel" name="results_label4">
             <property name="text">
              <string>More data</string>
             </property>
@@ -436,7 +537,16 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QWidget" name="results_plot_widget0" native="true"/>
+           <widget class="QWidget" name="results_plot_widget1" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_8">
+             <item>
+              <layout class="QVBoxLayout" name="results_plot_layout1"/>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <layout class="QVBoxLayout" name="results_plot_layout2"/>
           </item>
          </layout>
         </item>
@@ -568,6 +678,23 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>ZoomSlider</class>
+   <extends>QSlider</extends>
+   <header>custom/zoomslider.h</header>
+  </customwidget>
+  <customwidget>
+   <class>HomographyView</class>
+   <extends>QGraphicsView</extends>
+   <header>custom/homography.h</header>
+  </customwidget>
+  <customwidget>
+   <class>HomographyResultView</class>
+   <extends>QGraphicsView</extends>
+   <header>custom/homography.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
