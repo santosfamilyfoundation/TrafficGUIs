@@ -6,16 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
-    <height>705</height>
+    <width>1129</width>
+    <height>808</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Transportation Safety</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
-    <item>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
      <widget class="QTabWidget" name="main_tab_widget">
       <property name="acceptDrops">
        <bool>false</bool>
@@ -27,7 +27,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -344,42 +344,9 @@
        <attribute name="title">
         <string>Track Features</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="1">
-           <widget class="QScrollArea" name="feature_tracking_parameter_area">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="widgetResizable">
-             <bool>true</bool>
-            </property>
-            <widget class="QWidget" name="feature_tracking_parameter_widget">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>486</width>
-               <height>465</height>
-              </rect>
-             </property>
-            </widget>
-           </widget>
-          </item>
-          <item row="0" column="0" rowspan="2">
-           <widget class="QWidget" name="feature_tracking_video_widget" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="1">
            <widget class="QWidget" name="feature_tracking_run_panel" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -422,9 +389,59 @@
             </layout>
            </widget>
           </item>
+          <item row="0" column="0" rowspan="2">
+           <layout class="QVBoxLayout" name="feature_tracking_video_layout">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetNoConstraint</enum>
+            </property>
+           </layout>
+          </item>
+          <item row="0" column="1">
+           <widget class="QScrollArea" name="feature_tracking_parameter_area">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>400</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="feature_tracking_parameter_widget">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>538</width>
+               <height>568</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <layout class="QFormLayout" name="formLayout_2">
+              <property name="fieldGrowthPolicy">
+               <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+              </property>
+              <item row="0" column="0">
+               <layout class="QHBoxLayout" name="feature_tracking_parameter_layout"/>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
          </layout>
         </item>
-        <item>
+        <item row="1" column="0">
          <widget class="QFrame" name="feature_tracking_flow_control">
           <property name="minimumSize">
            <size>
@@ -471,41 +488,151 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_roadusers">
-       <property name="font">
-        <font>
-         <pointsize>17</pointsize>
-        </font>
-       </property>
+      <widget class="QWidget" name="roadusers_tab">
        <attribute name="title">
         <string>Track Road Users</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_6">
-        <item>
-         <layout class="QVBoxLayout" name="object_tracking_placeholder">
-          <item>
-           <widget class="QLabel" name="label_object_tracking_msg">
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_14">
+          <item row="1" column="1">
+           <widget class="QWidget" name="roadusers_tracking_run_panel" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_15">
+             <item>
+              <widget class="QProgressBar" name="roadusers_tracking_run_test_progress">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="value">
+                <number>0</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="invertedAppearance">
+                <bool>false</bool>
+               </property>
+               <property name="format">
+                <string>%p%</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="button_roadusers_tracking_test">
+               <property name="text">
+                <string>Test on Sample</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="button_roadusers_tracking_run">
+               <property name="text">
+                <string>Run</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="0" rowspan="2">
+           <layout class="QVBoxLayout" name="roadusers_tracking_video_layout">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetNoConstraint</enum>
             </property>
-            <property name="lineWidth">
-             <number>1</number>
+           </layout>
+          </item>
+          <item row="0" column="1">
+           <widget class="QScrollArea" name="roadusers_tracking_parameter_area">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="text">
-             <string>This wIll look very similar to &quot;Track Features&quot;.</string>
+            <property name="minimumSize">
+             <size>
+              <width>400</width>
+              <height>0</height>
+             </size>
             </property>
-            <property name="textFormat">
-             <enum>Qt::AutoText</enum>
+            <property name="widgetResizable">
+             <bool>true</bool>
             </property>
-            <property name="scaledContents">
-             <bool>false</bool>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
+            <widget class="QWidget" name="roadusers_tracking_parameter_widget">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>538</width>
+               <height>568</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <layout class="QFormLayout" name="formLayout_9">
+              <property name="fieldGrowthPolicy">
+               <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+              </property>
+              <item row="0" column="0">
+               <layout class="QHBoxLayout" name="roadusers_tracking_parameter_layout"/>
+              </item>
+             </layout>
+            </widget>
            </widget>
           </item>
          </layout>
+        </item>
+        <item row="1" column="0">
+         <widget class="QFrame" name="roadusers_tracking_flow_control">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_16">
+           <item>
+            <widget class="QPushButton" name="roadusers_tracking_back_button">
+             <property name="text">
+              <string>&lt;Track Features</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="roadusers_tracking_flow_hspacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="roadusers_tracking_continue_button">
+             <property name="text">
+              <string> Continue &gt;</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -552,11 +679,6 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_other_tools">
-       <attribute name="title">
-        <string>Other Tools</string>
-       </attribute>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -566,7 +688,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1024</width>
+     <width>1129</width>
      <height>25</height>
     </rect>
    </property>
@@ -575,6 +697,8 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen_Project"/>
+    <addaction name="actionOpen_Video"/>
+    <addaction name="actionOpen_Config"/>
    </widget>
    <widget class="QMenu" name="menuProject">
     <property name="title">
@@ -674,6 +798,16 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionOpen_Video">
+   <property name="text">
+    <string>Open Video</string>
+   </property>
+  </action>
+  <action name="actionOpen_Config">
+   <property name="text">
+    <string>Open Config </string>
    </property>
   </action>
  </widget>

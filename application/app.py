@@ -3,10 +3,11 @@ import sys
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-import random
+##############################################3
+import os 
+from PyQt4.phonon import Phonon
+import ConfigParser
+from PyQt4.QtGui import *
 
 from plotting import visualization
 
@@ -45,19 +46,45 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.feature_tracking_continue_button.clicked.connect(self.show_next_tab)
         self.ui.feature_tracking_back_button.clicked.connect(self.show_prev_tab)
 
-        # Results plotting
-        # self.figure1 = Figure()
-        # self.canvas1 = FigureCanvas(self.figure1)
-        # self.ui.results_plot_layout1.addWidget(self.canvas1)
-        # self.results_plot_plot1()
-        aplot = visualization.road_user_traj('stmarc.sqlite', 30, 'homography.txt', 'stmarc_image.png')
-        aplot.add_to_widget(self.ui.results_plot_layout1)
-        aplot.show()
+##############################################################################################################################################     
 
-        # self.figure2 = Figure()
-        # self.canvas2 = FigureCanvas(self.figure2)
-        # self.ui.results_plot_layout2.addWidget(self.canvas2)
-        # self.results_plot_plot2()
+        # back button for track roadusers 
+        self.ui.roadusers_tracking_back_button.clicked.connect(self.show_prev_tab) 
+        self.ui.roadusers_tracking_continue_button.clicked.connect(self.show_next_tab) 
+
+##########################################################################################################################################
+
+        # Track features page 
+
+        # video play 
+        self.videoplayer = VideoPlayer()
+        self.ui.actionOpen_Video.triggered.connect(self.videoplayer.openVideo)
+        self.ui.feature_tracking_video_layout.addWidget(self.videoplayer)
+
+
+        # config 
+        self.configGui = configGui()
+        self.ui.actionOpen_Config.triggered.connect(self.configGui.openConfig)
+        self.ui.feature_tracking_parameter_layout.addWidget(self.configGui)
+
+
+##########################################################################################################################################
+
+        # roadusers page 
+
+        # video play 
+        self.videoplayer3 = VideoPlayer() 
+        self.ui.actionOpen_Video.triggered.connect(self.videoplayer3.openVideo)
+        self.ui.roadusers_tracking_video_layout.addWidget(self.videoplayer3)
+
+
+        # config 
+        self.configGui3 = configGui2()
+        self.ui.actionOpen_Config.triggered.connect(self.configGui3.openConfig)
+        self.ui.roadusers_tracking_parameter_layout.addWidget(self.configGui3)
+
+
+###########################################################################################################################################
         # self.ui.track_image.mousePressEvent = self.get_image_position
 
         ## CONFIGURE HOMOGRAPHY ##
@@ -162,6 +189,353 @@ class MainGUI(QtGui.QMainWindow):
         print(event.pos())
         print(self._tracking_image.image.pixel(event.x(), event.y()))
 
+###############################################################################################################################
+
+class VideoPlayer(QtGui.QWidget):
+
+    def __init__(self, parent = None):
+
+
+        QtGui.QWidget.__init__(self, parent)
+        self.setSizePolicy(QtGui.QSizePolicy.Expanding,
+            QtGui.QSizePolicy.Preferred)
+        # filename = 1
+        # self.filename = filename
+        # print filename
+        self.player = Phonon.VideoPlayer(Phonon.VideoCategory,self)
+
+        self.play_pause = QtGui.QPushButton('Load Video',self)
+        self.play_pause.clicked.connect(self.playClicked)
+
+        self.pause = QtGui.QPushButton('Play/Pause',self)
+        self.pause.clicked.connect(self.playPause)
+
+
+        self.slider = Phonon.SeekSlider(self.player.mediaObject() , self)
+        # self.minutes = QtGui.QLineEdit('min',self)
+        # self.seconds = QtGui.QLineEdit('sec',self)
+        # self.endMinutes = QtGui.QLineEdit('End Min',self)
+        # self.endSeconds = QtGui.QLineEdit('End Sec',self)
+        # self.getTime = QtGui.QPushButton('set time period', self)
+        # self.getTime.clicked.connect(self.gettingTime)
+
+
+        self.status = QtGui.QLabel(self)
+        self.status.setAlignment(QtCore.Qt.AlignRight |
+            QtCore.Qt.AlignVCenter)
+
+        
+        topLayout = QtGui.QVBoxLayout(self)
+        topLayout.addWidget(self.player)
+        layout = QtGui.QHBoxLayout(self)
+        layout.addWidget(self.play_pause)
+        layout.addWidget(self.pause)
+        layout.addWidget(self.slider)
+        # layout.addWidget(self.minutes)
+        # layout.addWidget(self.seconds)
+        # layout.addWidget(self.endMinutes)
+        # layout.addWidget(self.endSeconds)
+        # layout.addWidget(self.getTime)
+        topLayout.addLayout(layout)
+        self.setLayout(topLayout)
+
+    def playClicked(self):
+        # allows the video to load through whenever a new file is chosen 
+
+        # try is needed incase no file is chosen by the user 
+
+        try:
+            filename
+        except NameError:
+            self.player.load(Phonon.MediaSource(""))
+
+        else:
+            self.player.load(Phonon.MediaSource(filename))
+            self.player.mediaObject().setTickInterval(100)
+            self.player.mediaObject().tick.connect(self.tock)
+            self.player.play()
+
+
+
+    def playPause(self):
+    # allows the video to load through whenever a new file is chosen 
+        if self.player.mediaObject().state() == Phonon.PlayingState:
+            self.player.pause()
+        else:
+            self.player.play()
+
+    def tock(self, time):
+        time = time/1000
+        h = time/3600
+        m = (time-3600*h) / 60
+        s = (time-3600*h-m*60)
+        self.status.setText('%02d:%02d:%02d'%(h,m,s))
+
+    # def cutVideoClip(self,startTime,endTime,fps = 25):
+    #     print os.path.split(self.fileName)[1]
+    #     video = VideoFileClip(os.path.split(self.fileName)[1]).subclip(startTime,endTime)
+    #     result = CompositeVideoClip([video])
+    #     result.write_videofile("temp.mp4",fps)
+
+    def gettingTime(self):
+        startMinutes = int(self.minutes.text())
+        startSeconds = int(self.seconds.text())
+        endMinutes = int(self.endMinutes.text())
+        endSeconds = int(self.endSeconds.text())
+        startTime = (startMinutes*60+startSeconds)
+        endTime = (endMinutes*60+endSeconds)
+        self.player.seek(startTime*1000)
+        #self.cutVideoClip(startTime,endTime)
+
+        # opens a video file 
+    def openVideo(self):        
+        # filevideo = 
+        global filename 
+        filename = str(QtGui.QFileDialog.getOpenFileName(self,'Open File', os.getenv('HOME')))
+        # print filename
+
+
+##########################################################################################################################
+
+class configGui(QtGui.QWidget):
+
+    
+    def __init__(self):
+        super(configGui, self).__init__()
+        
+        self.initUI()
+        
+
+    def initUI(self): 
+
+     
+        # lbl1.move(15, 10)
+
+        self.btn = QtGui.QPushButton('Set Config', self)
+        # self.btn.move(20, 20)
+        self.btn.clicked.connect(self.createConfig)
+
+      
+        self.label1 = QtGui.QLabel("first frame to process")
+        # input box 
+        self.input1 = QtGui.QLineEdit()
+        # self.input1.setMaximumWidth(10)
+
+        self.label2 = QtGui.QLabel("number of frames to process")
+        # self.label1.move(130, 22)
+        self.input2 = QtGui.QLineEdit()
+        # self.le.move(150, 22)
+
+        self.label3 = QtGui.QLabel("maximum connection-distance")
+        self.input3 = QtGui.QLineEdit()
+
+        self.label4 = QtGui.QLabel("maximum segmentation-distance")
+        self.input4 = QtGui.QLineEdit()
+
+
+        grid = QtGui.QGridLayout()
+        grid.setSpacing(10)
+        
+
+        grid.addWidget(self.label1, 2, 0)
+        grid.addWidget(self.input1, 2, 1)
+
+        grid.addWidget(self.label2, 3, 0)
+        grid.addWidget(self.input2, 3, 1)
+
+        grid.addWidget(self.label3, 4, 0)
+        grid.addWidget(self.input3, 4, 1)
+
+        grid.addWidget(self.label4, 5, 0)
+        grid.addWidget(self.input4, 5, 1)
+
+        grid.addWidget(self.btn, 6, 0)
+
+        # path1 = "3"
+
+        self.setLayout(grid) 
+
+        # size gets fixed
+        # self.setFixedSize(450,350)
+        
+        # window box location and size 
+        # self.setGeometry(500, 100, 150, 20)
+
+        self.setWindowTitle('Input config')
+        # self.show()
+
+        # opens a cofig file 
+    def openConfig(self):
+        path = QFileDialog.getOpenFileName(self, 'Open File', '/') 
+        global path1
+        path1= str(path)
+        
+       
+    def createConfig(self,path):
+        """
+        Create a config file
+        """
+        config = ConfigParser.ConfigParser()
+
+        # add new content to config file 
+        config.add_section("added")
+        config.set("added", "frame1", self.input1.text())
+        config.set("added", "nframes", self.input2.text())
+        config.set("added", "mm-connection-distance", self.input3.text())
+        config.set("added", "mm-segmentation-distance", self.input4.text())
+
+        try:
+            path1
+        except NameError:
+          # self.player.load(Phonon.MediaSource(""))
+            error = QtGui.QErrorMessage()
+            error.showMessage('''\
+            no config files chosen''')
+            error.exec_()
+            print "no config chosen"
+        else:
+            with open(path1,"a") as config_file:
+                config.write(config_file)
+
+            # to remove the section header from config file  
+
+            #opens the file to read      
+            f = open(path1,"r")
+            lines = f.readlines()
+            f.close()
+            #opens the file to write 
+            f = open(path1,"w")
+            for line in lines:
+                #removes the section header 
+                if line!="[added]"+"\n":
+                    f.write(line)
+            f.close()
+
+        # self.path1 = "dash"     
+        # grid = QtGui.QGridLayout()
+        # self.lbl1 = QtGui.QLabel(self.path1)
+        # grid.addWidget(lbl1, 1, 0)
+        # self.setLayout(grid) 
+
+
+##########################################################################################################################
+
+class configGui2(QtGui.QWidget):
+
+    
+    def __init__(self):
+        super(configGui2, self).__init__()
+        
+        self.initUI()
+        
+
+    def initUI(self): 
+
+     
+        # lbl1.move(15, 10)
+
+        self.btn = QtGui.QPushButton('Set Config', self)
+        # self.btn.move(20, 20)
+        self.btn.clicked.connect(self.createConfig)
+
+      
+        self.label1 = QtGui.QLabel("first frame to process2")
+        # input box 
+        self.input1 = QtGui.QLineEdit()
+        # self.input1.setMaximumWidth(10)
+
+        self.label2 = QtGui.QLabel("number of frames to process2")
+        # self.label1.move(130, 22)
+        self.input2 = QtGui.QLineEdit()
+        # self.le.move(150, 22)
+
+        self.label3 = QtGui.QLabel("maximum connection-distance")
+        self.input3 = QtGui.QLineEdit()
+
+        self.label4 = QtGui.QLabel("maximum segmentation-distance")
+        self.input4 = QtGui.QLineEdit()
+
+
+        grid = QtGui.QGridLayout()
+        grid.setSpacing(10)
+        
+
+        grid.addWidget(self.label1, 2, 0)
+        grid.addWidget(self.input1, 2, 1)
+
+        grid.addWidget(self.label2, 3, 0)
+        grid.addWidget(self.input2, 3, 1)
+
+        grid.addWidget(self.label3, 4, 0)
+        grid.addWidget(self.input3, 4, 1)
+
+        grid.addWidget(self.label4, 5, 0)
+        grid.addWidget(self.input4, 5, 1)
+
+        grid.addWidget(self.btn, 6, 0)
+
+        # path1 = "3"
+
+        self.setLayout(grid) 
+
+        self.setWindowTitle('Input config')
+        # self.show()
+
+        # opens a cofig file 
+    def openConfig(self):
+        path = QFileDialog.getOpenFileName(self, 'Open File', '/') 
+        global path1
+        path1= str(path)
+        
+       
+    def createConfig(self,path):
+        """
+        Create a config file
+        """
+        config = ConfigParser.ConfigParser()
+
+        # add new content to config file 
+        config.add_section("added")
+        config.set("added", "frame1", self.input1.text())
+        config.set("added", "nframes", self.input2.text())
+        config.set("added", "mm-connection-distance", self.input3.text())
+        config.set("added", "mm-segmentation-distance", self.input4.text())
+
+        try:
+            path1
+        except NameError:
+          # self.player.load(Phonon.MediaSource(""))
+            error = QtGui.QErrorMessage()
+            error.showMessage('''\
+            no config files chosen''')
+            error.exec_()
+            print "no config chosen"
+        else:
+            with open(path1,"a") as config_file:
+                config.write(config_file)
+
+            # to remove the section header from config file  
+
+            #opens the file to read      
+            f = open(path1,"r")
+            lines = f.readlines()
+            f.close()
+            #opens the file to write 
+            f = open(path1,"w")
+            for line in lines:
+                #removes the section header 
+                if line!="[added]"+"\n":
+                    f.write(line)
+            f.close()
+
+        # self.path1 = "dash"     
+        # grid = QtGui.QGridLayout()
+        # self.lbl1 = QtGui.QLabel(self.path1)
+        # grid.addWidget(lbl1, 1, 0)
+        # self.setLayout(grid) 
+
+
+##########################################################################################################################
 
 def main():
     app.exec_()
