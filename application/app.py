@@ -2,6 +2,7 @@
 import sys
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
+import pm
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -22,6 +23,7 @@ class MainGUI(QtGui.QMainWindow):
         super(MainGUI, self).__init__()
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
+        self.newp = pm.ProjectWizard(self)
 
         # Experimenting with organizational objects
         self.homography = Organizer()
@@ -102,9 +104,10 @@ class MainGUI(QtGui.QMainWindow):
         self.canvas2.draw()
 
     def open_project(self):
-        fname = QtGui.QFileDialog.getOpenFileName(
-            self, 'Open Project', '/home')
-        print(fname)
+        # fname = QtGui.QFileDialog.getOpenFileName(
+        #     self, 'Open Project', '/home')
+        # print(fname)
+        self.newp.show()
 
     def homography_open_image_camera(self):
         """Opens a file dialog, allowing user to select an camera image file.

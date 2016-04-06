@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>create_new_project</class>
+ <widget class="QWizard" name="create_new_project">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>604</width>
+    <height>406</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Create New Project</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <property name="wizardStyle">
+   <enum>QWizard::ClassicStyle</enum>
+  </property>
+  <widget class="QWizardPage" name="newp_p1">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="newp_p1_title">
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>New Safety Project</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QFormLayout" name="newp_p1_layout">
+      <property name="topMargin">
+       <number>8</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="newp_projectname_label">
+        <property name="text">
+         <string>Project Name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="newp_projectname_input"/>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWizardPage" name="newp_p2">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QLabel" name="newp_p2_add_video_title">
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Add project video</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="newp_p2_add_vido_description">
+      <property name="text">
+       <string>Browse and select a video file to analyze. Please also input the date and time when the video recording began as well as the framerate of the video in frames per second.</string>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QFormLayout" name="newp_p2_video_layout">
+      <property name="topMargin">
+       <number>8</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="newp_video_label">
+        <property name="text">
+         <string>Selected video</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <layout class="QHBoxLayout" name="newp_p2_video_browse_layout">
+        <item>
+         <widget class="QLineEdit" name="newp_video_input"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="newp_video_browse">
+          <property name="text">
+           <string>Browse...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="newp_video_start_time_label">
+        <property name="text">
+         <string>Recording start time</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDateTimeEdit" name="newp_video_start_time_input"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="newp_video_fps_label">
+        <property name="text">
+         <string>Video framerate</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="newp_video_fps_input"/>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QLabel" name="newp_add_aerial_image_title">
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Add aerial image</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="newp_p2_add_aerial_image_description">
+      <property name="text">
+       <string>Browse and select an aerial image of the video's target. </string>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QFormLayout" name="newp_p2_aerial_layout">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
+      <property name="topMargin">
+       <number>8</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="newp_aerial_image_label">
+        <property name="text">
+         <string>Aerial image</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <layout class="QHBoxLayout" name="newp_p2_image_browse_layout">
+        <item>
+         <widget class="QLineEdit" name="newp_aerial_image_input"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="newp_aerial_image_browse">
+          <property name="text">
+           <string>Browse...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
