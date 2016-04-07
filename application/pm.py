@@ -110,7 +110,7 @@ class ProjectWizard(QtGui.QWizard):
             success, image = vidcap.read()
             progress_bar.setValue(85)
             if success:
-                cv2.imwrite(os.path.join(pr_path, "homography", camera.png), image)
+                cv2.imwrite(os.path.join(pr_path, "homography", "camera.png"), image)
             else:
                 print("ERR: No camera image extracted.")
             progress_bar.setValue(90)
@@ -127,13 +127,16 @@ class ProjectWizard(QtGui.QWizard):
 
     def _write_to_project_config(self):
         ts = time.time()
+        vid_ts = self.ui.newp_video_start_time_input.dateTime().toPyDateTime()
         timestamp = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y %H:%M:%S %Z')
+        video_timestamp = vid_ts.strftime('%d-%m-%Y %H:%M:%S %Z')
         self.config_parser.add_section("info")
         self.config_parser.set("info", "project_name", self.project_name)
         self.config_parser.set("info", "creation_date", timestamp)
         self.config_parser.add_section("video")
         self.config_parser.set("video", "path", self.videopath)
         self.config_parser.set("video", "framerate", str(self.ui.newp_video_fps_input.text()))
+        self.config_parser.set("video", "start", video_timestamp)
 
         with open(os.path.join(self.PROJECT_PATH, "{}.cfg".format(self.project_name)), 'wb') as configfile:
             self.config_parser.write(configfile)

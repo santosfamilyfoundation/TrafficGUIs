@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'new_project.ui'
 #
-# Created: Thu Apr  7 05:19:25 2016
+# Created: Thu Apr  7 06:04:09 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -54,6 +54,15 @@ class Ui_create_new_project(object):
         self.newp_projectname_input.setObjectName(_fromUtf8("newp_projectname_input"))
         self.newp_p1_layout.setWidget(0, QtGui.QFormLayout.FieldRole, self.newp_projectname_input)
         self.verticalLayout.addLayout(self.newp_p1_layout)
+        self.newp_ldir_label = QtGui.QLabel(self.newp_p1)
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setItalic(True)
+        font.setWeight(75)
+        self.newp_ldir_label.setFont(font)
+        self.newp_ldir_label.setText(_fromUtf8(""))
+        self.newp_ldir_label.setObjectName(_fromUtf8("newp_ldir_label"))
+        self.verticalLayout.addWidget(self.newp_ldir_label)
         create_new_project.addPage(self.newp_p1)
         self.newp_p2 = QtGui.QWizardPage()
         self.newp_p2.setObjectName(_fromUtf8("newp_p2"))
