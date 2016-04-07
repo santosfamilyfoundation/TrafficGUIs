@@ -28,6 +28,20 @@ class ProjectWizard(QtGui.QWizard):
         self.ui.newp_start_creation.clicked.connect(self.start_create_project)
         self.config_parser = SafeConfigParser()
 
+        self.creating_project = False
+
+        self.ui.newp_p1.registerField("project_name*", self.ui.newp_projectname_input)
+
+        self.ui.newp_p2.registerField("video_path*", self.ui.newp_video_input)
+        self.ui.newp_p2.registerField("video_start_datetime", self.ui.newp_video_start_time_input)
+        self.ui.newp_p2.registerField("video_fps*", self.ui.newp_video_fps_input)
+
+        self.ui.newp_p2.registerField("aerial_image*", self.ui.newp_aerial_image_input)
+
+        self.ui.newp_p3.registerField("create_project", self.ui.newp_start_creation)
+
+
+
     def open_aerial_image(self):
         filt = "Images (*.png *.jpg *.jpeg *.bmp *.tif *.gif)"  # Select only images
         # default_dir = 
@@ -72,8 +86,9 @@ class ProjectWizard(QtGui.QWizard):
         return str(fname)
 
     def start_create_project(self):
-        self.ui.newp_start_creation.hide()
-        self.create_project_dir()
+        if not self.creating_project:
+            self.creating_project = True
+            self.create_project_dir()
 
     def create_project_dir(self):
         self.project_name = str(self.ui.newp_projectname_input.text())
