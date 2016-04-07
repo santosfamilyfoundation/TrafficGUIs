@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'new_project.ui'
 #
-# Created: Wed Apr  6 10:04:21 2016
+# Created: Thu Apr  7 05:19:25 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,9 +26,12 @@ except AttributeError:
 class Ui_create_new_project(object):
     def setupUi(self, create_new_project):
         create_new_project.setObjectName(_fromUtf8("create_new_project"))
-        create_new_project.resize(604, 406)
+        create_new_project.setWindowModality(QtCore.Qt.ApplicationModal)
+        create_new_project.resize(568, 406)
+        create_new_project.setAutoFillBackground(False)
         create_new_project.setModal(True)
         create_new_project.setWizardStyle(QtGui.QWizard.ClassicStyle)
+        create_new_project.setOptions(QtGui.QWizard.NoBackButtonOnLastPage|QtGui.QWizard.NoBackButtonOnStartPage)
         self.newp_p1 = QtGui.QWizardPage()
         self.newp_p1.setObjectName(_fromUtf8("newp_p1"))
         self.verticalLayout = QtGui.QVBoxLayout(self.newp_p1)
@@ -126,6 +129,34 @@ class Ui_create_new_project(object):
         self.newp_p2_aerial_layout.setLayout(0, QtGui.QFormLayout.FieldRole, self.newp_p2_image_browse_layout)
         self.verticalLayout_2.addLayout(self.newp_p2_aerial_layout)
         create_new_project.addPage(self.newp_p2)
+        self.newp_p3 = QtGui.QWizardPage()
+        self.newp_p3.setObjectName(_fromUtf8("newp_p3"))
+        self.verticalLayout_3 = QtGui.QVBoxLayout(self.newp_p3)
+        self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
+        self.newp_p2_add_video_title_2 = QtGui.QLabel(self.newp_p3)
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setWeight(75)
+        self.newp_p2_add_video_title_2.setFont(font)
+        self.newp_p2_add_video_title_2.setObjectName(_fromUtf8("newp_p2_add_video_title_2"))
+        self.verticalLayout_3.addWidget(self.newp_p2_add_video_title_2)
+        self.line = QtGui.QFrame(self.newp_p3)
+        self.line.setFrameShape(QtGui.QFrame.HLine)
+        self.line.setFrameShadow(QtGui.QFrame.Sunken)
+        self.line.setObjectName(_fromUtf8("line"))
+        self.verticalLayout_3.addWidget(self.line)
+        self.newp_start_creation = QtGui.QPushButton(self.newp_p3)
+        self.newp_start_creation.setObjectName(_fromUtf8("newp_start_creation"))
+        self.verticalLayout_3.addWidget(self.newp_start_creation)
+        self.newp_creation_progress = QtGui.QProgressBar(self.newp_p3)
+        self.newp_creation_progress.setProperty("value", 0)
+        self.newp_creation_progress.setObjectName(_fromUtf8("newp_creation_progress"))
+        self.verticalLayout_3.addWidget(self.newp_creation_progress)
+        self.newp_creation_status = QtGui.QLabel(self.newp_p3)
+        self.newp_creation_status.setObjectName(_fromUtf8("newp_creation_status"))
+        self.verticalLayout_3.addWidget(self.newp_creation_status)
+        create_new_project.addPage(self.newp_p3)
 
         self.retranslateUi(create_new_project)
         QtCore.QMetaObject.connectSlotsByName(create_new_project)
@@ -144,4 +175,7 @@ class Ui_create_new_project(object):
         self.newp_p2_add_aerial_image_description.setText(_translate("create_new_project", "Browse and select an aerial image of the video\'s target. ", None))
         self.newp_aerial_image_label.setText(_translate("create_new_project", "Aerial image", None))
         self.newp_aerial_image_browse.setText(_translate("create_new_project", "Browse...", None))
+        self.newp_p2_add_video_title_2.setText(_translate("create_new_project", "Creating new project", None))
+        self.newp_start_creation.setText(_translate("create_new_project", "Click to create project.", None))
+        self.newp_creation_status.setText(_translate("create_new_project", "Beginning project creation...", None))
 

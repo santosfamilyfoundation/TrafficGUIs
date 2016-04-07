@@ -2,22 +2,31 @@
 <ui version="4.0">
  <class>create_new_project</class>
  <widget class="QWizard" name="create_new_project">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>604</width>
+    <width>568</width>
     <height>406</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Create New Project</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
   <property name="modal">
    <bool>true</bool>
   </property>
   <property name="wizardStyle">
    <enum>QWizard::ClassicStyle</enum>
+  </property>
+  <property name="options">
+   <set>QWizard::NoBackButtonOnLastPage|QWizard::NoBackButtonOnStartPage</set>
   </property>
   <widget class="QWizardPage" name="newp_p1">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -182,6 +191,52 @@
        </layout>
       </item>
      </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWizardPage" name="newp_p3">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <item>
+     <widget class="QLabel" name="newp_p2_add_video_title_2">
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Creating new project</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="newp_start_creation">
+      <property name="text">
+       <string>Click to create project.</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QProgressBar" name="newp_creation_progress">
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="newp_creation_status">
+      <property name="text">
+       <string>Beginning project creation...</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
