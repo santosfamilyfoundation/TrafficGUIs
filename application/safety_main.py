@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Tue Apr  5 13:06:39 2016
+# Created: Wed Apr  6 15:27:58 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -151,8 +151,27 @@ class Ui_TransportationSafety(object):
         self.homography_label_notification.setText(_fromUtf8(""))
         self.homography_label_notification.setObjectName(_fromUtf8("homography_label_notification"))
         self.horizontalLayout_2.addWidget(self.homography_label_notification)
+        self.unit_px_label = QtGui.QLabel(self.homography_flow_control)
+        self.unit_px_label.setObjectName(_fromUtf8("unit_px_label"))
+        self.horizontalLayout_2.addWidget(self.unit_px_label)
+        self.unit_px_input = QtGui.QLineEdit(self.homography_flow_control)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.unit_px_input.sizePolicy().hasHeightForWidth())
+        self.unit_px_input.setSizePolicy(sizePolicy)
+        self.unit_px_input.setObjectName(_fromUtf8("unit_px_input"))
+        self.horizontalLayout_2.addWidget(self.unit_px_input)
+        self.unit_px_label2 = QtGui.QLabel(self.homography_flow_control)
+        self.unit_px_label2.setObjectName(_fromUtf8("unit_px_label2"))
+        self.horizontalLayout_2.addWidget(self.unit_px_label2)
         spacerItem5 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem5)
+        self.homography_compute_button = QtGui.QPushButton(self.homography_flow_control)
+        self.homography_compute_button.setObjectName(_fromUtf8("homography_compute_button"))
+        self.horizontalLayout_2.addWidget(self.homography_compute_button)
+        spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem6)
         self.homography_continue_button = QtGui.QPushButton(self.homography_flow_control)
         self.homography_continue_button.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.homography_continue_button.setObjectName(_fromUtf8("homography_continue_button"))
@@ -220,8 +239,8 @@ class Ui_TransportationSafety(object):
         self.feature_tracking_back_button = QtGui.QPushButton(self.feature_tracking_flow_control)
         self.feature_tracking_back_button.setObjectName(_fromUtf8("feature_tracking_back_button"))
         self.horizontalLayout_3.addWidget(self.feature_tracking_back_button)
-        spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_3.addItem(spacerItem6)
+        spacerItem7 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem7)
         self.feature_tracking_continue_button = QtGui.QPushButton(self.feature_tracking_flow_control)
         self.feature_tracking_continue_button.setObjectName(_fromUtf8("feature_tracking_continue_button"))
         self.horizontalLayout_3.addWidget(self.feature_tracking_continue_button)
@@ -346,6 +365,9 @@ class Ui_TransportationSafety(object):
         self.homography_label_zoom_camera_image.setText(_translate("TransportationSafety", "Zoom:", None))
         self.homography_label_zoom_computed_image.setText(_translate("TransportationSafety", "Zoom:", None))
         self.homography_label_zoom_aerial_image.setText(_translate("TransportationSafety", "Zoom:", None))
+        self.unit_px_label.setText(_translate("TransportationSafety", "Unit Pixel Ratio:", None))
+        self.unit_px_label2.setText(_translate("TransportationSafety", "m/px", None))
+        self.homography_compute_button.setText(_translate("TransportationSafety", "Compute Homography", None))
         self.homography_continue_button.setText(_translate("TransportationSafety", " Continue >", None))
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_homography), _translate("TransportationSafety", "Homography", None))
         self.feature_tracking_run_test_progress.setFormat(_translate("TransportationSafety", "%p%", None))

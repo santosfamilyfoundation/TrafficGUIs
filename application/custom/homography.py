@@ -3,6 +3,7 @@ from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
 
 
+
 class HomographyView(QtGui.QGraphicsView):
     """QGraphicsView used for manipulating and computing image-based homographies.
     """
@@ -72,7 +73,6 @@ class HomographyResultView(QtGui.QGraphicsView):
         self.scene_image = image
         new_scene = QtGui.QGraphicsScene(self)
         pmap = new_scene.addPixmap(QtGui.QPixmap().fromImage(image))
-        new_scene.register_pixmap(pmap)
         new_scene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
         self.setScene(new_scene)
         self.show()
@@ -215,3 +215,8 @@ class HomographyScene(QtGui.QGraphicsScene):
                 return False
         else:
             return False
+
+
+
+
+
