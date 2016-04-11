@@ -173,12 +173,22 @@ class MainGUI(QtGui.QMainWindow):
         self.worldPts = self.unitPixRatio * (np.array(self.ui.homography_aerialview.list_points()))
         self.videoPts = np.array(self.ui.homography_cameraview.list_points())
 
+        print self.worldPts
+        print self.videoPts
+
+
         if len(self.worldPts) >= 4:
             if len(self.worldPts) == len(self.videoPts):
                 self.homography, self.mask = cv2.findHomography(self.videoPts, self.worldPts)
 
         if self.homography is None:
             return
+
+        # self.homography = np.loadtxt("laurier-homography.txt")
+        # f = open('point-correspondences.txt', 'a')
+        # np.savetxt(f, self.worldPts.T)
+        # np.savetxt(f, self.videoPts.T)
+        # f.close()
 
         if self.homography.size>0:
             np.savetxt("homography.txt",self.homography)
