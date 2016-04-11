@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Wed Apr  6 12:46:45 2016
+# Created: Sun Apr 10 12:17:34 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -184,21 +184,15 @@ class Ui_TransportationSafety(object):
         self.button_feature_tracking_test = QtGui.QPushButton(self.feature_tracking_run_panel)
         self.button_feature_tracking_test.setObjectName(_fromUtf8("button_feature_tracking_test"))
         self.horizontalLayout_6.addWidget(self.button_feature_tracking_test)
-        self.button_feature_tracking_run = QtGui.QPushButton(self.feature_tracking_run_panel)
-        self.button_feature_tracking_run.setObjectName(_fromUtf8("button_feature_tracking_run"))
-        self.horizontalLayout_6.addWidget(self.button_feature_tracking_run)
         self.gridLayout.addWidget(self.feature_tracking_run_panel, 1, 1, 1, 1)
-        self.feature_tracking_video_layout = QtGui.QVBoxLayout()
-        self.feature_tracking_video_layout.setSizeConstraint(QtGui.QLayout.SetNoConstraint)
-        self.feature_tracking_video_layout.setObjectName(_fromUtf8("feature_tracking_video_layout"))
-        self.gridLayout.addLayout(self.feature_tracking_video_layout, 0, 0, 2, 1)
         self.feature_tracking_parameter_area = QtGui.QScrollArea(self.tab_features)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.feature_tracking_parameter_area.sizePolicy().hasHeightForWidth())
         self.feature_tracking_parameter_area.setSizePolicy(sizePolicy)
-        self.feature_tracking_parameter_area.setMinimumSize(QtCore.QSize(400, 0))
+        self.feature_tracking_parameter_area.setMinimumSize(QtCore.QSize(470, 0))
+        self.feature_tracking_parameter_area.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.feature_tracking_parameter_area.setWidgetResizable(True)
         self.feature_tracking_parameter_area.setObjectName(_fromUtf8("feature_tracking_parameter_area"))
         self.feature_tracking_parameter_widget = QtGui.QWidget()
@@ -217,6 +211,10 @@ class Ui_TransportationSafety(object):
         self.formLayout_2.setLayout(0, QtGui.QFormLayout.LabelRole, self.feature_tracking_parameter_layout)
         self.feature_tracking_parameter_area.setWidget(self.feature_tracking_parameter_widget)
         self.gridLayout.addWidget(self.feature_tracking_parameter_area, 0, 1, 1, 1)
+        self.feature_tracking_video_layout = QtGui.QVBoxLayout()
+        self.feature_tracking_video_layout.setSizeConstraint(QtGui.QLayout.SetNoConstraint)
+        self.feature_tracking_video_layout.setObjectName(_fromUtf8("feature_tracking_video_layout"))
+        self.gridLayout.addLayout(self.feature_tracking_video_layout, 0, 0, 2, 1)
         self.gridLayout_3.addLayout(self.gridLayout, 0, 0, 1, 1)
         self.feature_tracking_flow_control = QtGui.QFrame(self.tab_features)
         self.feature_tracking_flow_control.setMinimumSize(QtCore.QSize(0, 50))
@@ -274,7 +272,7 @@ class Ui_TransportationSafety(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.roadusers_tracking_parameter_area.sizePolicy().hasHeightForWidth())
         self.roadusers_tracking_parameter_area.setSizePolicy(sizePolicy)
-        self.roadusers_tracking_parameter_area.setMinimumSize(QtCore.QSize(400, 0))
+        self.roadusers_tracking_parameter_area.setMinimumSize(QtCore.QSize(410, 0))
         self.roadusers_tracking_parameter_area.setWidgetResizable(True)
         self.roadusers_tracking_parameter_area.setObjectName(_fromUtf8("roadusers_tracking_parameter_area"))
         self.roadusers_tracking_parameter_widget = QtGui.QWidget()
@@ -418,7 +416,6 @@ class Ui_TransportationSafety(object):
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_homography), _translate("TransportationSafety", "Homography", None))
         self.feature_tracking_run_test_progress.setFormat(_translate("TransportationSafety", "%p%", None))
         self.button_feature_tracking_test.setText(_translate("TransportationSafety", "Test on Sample", None))
-        self.button_feature_tracking_run.setText(_translate("TransportationSafety", "Run", None))
         self.feature_tracking_back_button.setText(_translate("TransportationSafety", "< Homography", None))
         self.feature_tracking_continue_button.setText(_translate("TransportationSafety", " Continue >", None))
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_features), _translate("TransportationSafety", "Track Features", None))
