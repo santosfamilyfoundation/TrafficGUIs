@@ -695,6 +695,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionNew_Project"/>
     <addaction name="actionOpen_Project"/>
     <addaction name="actionOpen_Video"/>
     <addaction name="actionOpen_Config"/>
@@ -799,6 +800,7 @@
     <string>About</string>
    </property>
   </action>
+
   <action name="actionOpen_Video">
    <property name="text">
     <string>Open Video</string>
@@ -809,6 +811,17 @@
     <string>Open Config </string>
    </property>
   </action>
+
+    <action name="actionNew_Project">
+   <property name="text">
+    <string>New Project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+      </property>
+  </action>
+
+
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

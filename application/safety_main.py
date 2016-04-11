@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Sun Apr 10 12:17:34 2016
+# Created: Sun Apr 10 20:51:15 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -383,6 +383,9 @@ class Ui_TransportationSafety(object):
         self.actionOpen_Video.setObjectName(_fromUtf8("actionOpen_Video"))
         self.actionOpen_Config = QtGui.QAction(TransportationSafety)
         self.actionOpen_Config.setObjectName(_fromUtf8("actionOpen_Config"))
+        self.actionNew_Project = QtGui.QAction(TransportationSafety)
+        self.actionNew_Project.setObjectName(_fromUtf8("actionNew_Project"))
+        self.menuTraffic_Analysis.addAction(self.actionNew_Project)
         self.menuTraffic_Analysis.addAction(self.actionOpen_Project)
         self.menuTraffic_Analysis.addAction(self.actionOpen_Video)
         self.menuTraffic_Analysis.addAction(self.actionOpen_Config)
@@ -447,6 +450,8 @@ class Ui_TransportationSafety(object):
         self.actionAbout.setText(_translate("TransportationSafety", "About", None))
         self.actionOpen_Video.setText(_translate("TransportationSafety", "Open Video", None))
         self.actionOpen_Config.setText(_translate("TransportationSafety", "Open Config ", None))
+        self.actionNew_Project.setText(_translate("TransportationSafety", "New Project", None))
+        self.actionNew_Project.setShortcut(_translate("TransportationSafety", "Ctrl+N", None))
 
 from custom.homography import HomographyResultView, HomographyView
 from custom.zoomslider import ZoomSlider

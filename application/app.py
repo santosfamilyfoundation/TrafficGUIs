@@ -16,6 +16,14 @@ from PyQt4.phonon import Phonon
 import ConfigParser
 from PyQt4.QtGui import *
 
+import random
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+
+from app_config import AppConfig as ac
+import pm
+
 from plotting import visualization
 
 
@@ -30,15 +38,16 @@ class MainGUI(QtGui.QMainWindow):
         super(MainGUI, self).__init__()
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
-
+        self.newp = pm.ProjectWizard(self)
+        
         # Experimenting with organizational objects
         self.homography = Organizer()
         self.feature_tracking = Organizer()
         self.results = Organizer()
-        # self.this
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
+        self.ui.actionNew_Project.triggered.connect(self.create_new_project)
         # self.ui.actionLoad_Image.triggered.connect(self.open_image)
         self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_aerial)  # TODO: New method. Check which tab is open. Move to homography tab if not already there. Then call open_image_aerial.
         self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_camera)
@@ -159,9 +168,14 @@ class MainGUI(QtGui.QMainWindow):
         self.canvas2.draw()
 
     def open_project(self):
-        fname = QtGui.QFileDialog.getOpenFileName(
-            self, 'Open Project', '/home')
-        print(fname)
+        fname = QtGui.QFileDialog.getExistingDirectory()
+        #     self, 'Open Project', '/home')
+        # print(fname)
+        pass
+
+    def create_new_project(self):
+        self.newp.restart()
+        self.newp.show()
 
     def homography_open_image_camera(self):
         """Opens a file dialog, allowing user to select an camera image file.
@@ -621,6 +635,7 @@ def main():
     app.exec_()
 
 if __name__ == '__main__':
+    ac.load_application_config()
     app = QtGui.QApplication(sys.argv)
     ex = MainGUI()
     sys.exit(main())
