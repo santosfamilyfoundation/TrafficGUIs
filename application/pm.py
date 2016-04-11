@@ -12,6 +12,9 @@ from shutil import copy
 import cv2
 import Image
 
+from app_config import AppConfig as ac
+
+
 class ProjectWizard(QtGui.QWizard):
 
     def __init__(self, parent):
@@ -23,7 +26,8 @@ class ProjectWizard(QtGui.QWizard):
         self.aerial_image_selected = False
         self.video_selected = False
 
-        self.DEFAULT_PROJECT_DIR = os.path.join(os.getcwd(), os.pardir, "project_dir")
+        # self.DEFAULT_PROJECT_DIR = os.path.join(os.getcwd(), os.pardir, "project_dir")
+        self.DEFAULT_PROJECT_DIR = ac.PROJECT_DIR
 
         self.ui.newp_start_creation.clicked.connect(self.start_create_project)
         self.config_parser = SafeConfigParser()
@@ -39,8 +43,6 @@ class ProjectWizard(QtGui.QWizard):
         self.ui.newp_p2.registerField("aerial_image*", self.ui.newp_aerial_image_input)
 
         self.ui.newp_p3.registerField("create_project", self.ui.newp_start_creation)
-
-
 
     def open_aerial_image(self):
         filt = "Images (*.png *.jpg *.jpeg *.bmp *.tif *.gif)"  # Select only images

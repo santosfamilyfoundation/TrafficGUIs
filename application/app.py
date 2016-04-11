@@ -2,12 +2,13 @@
 import sys
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
-import pm
-
+import random
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-import random
+
+from app_config import AppConfig as ac
+import pm
 
 from plotting import visualization
 
@@ -24,12 +25,11 @@ class MainGUI(QtGui.QMainWindow):
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
         self.newp = pm.ProjectWizard(self)
-
+        
         # Experimenting with organizational objects
         self.homography = Organizer()
         self.feature_tracking = Organizer()
         self.results = Organizer()
-        # self.this
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
@@ -175,6 +175,7 @@ def main():
     app.exec_()
 
 if __name__ == '__main__':
+    ac.load_application_config()
     app = QtGui.QApplication(sys.argv)
     ex = MainGUI()
     sys.exit(main())
