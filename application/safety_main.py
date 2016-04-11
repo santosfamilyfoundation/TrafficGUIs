@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Tue Apr  5 13:06:39 2016
+# Created: Thu Apr  7 07:04:45 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -319,6 +319,9 @@ class Ui_TransportationSafety(object):
         self.actionUser_s_Guide.setObjectName(_fromUtf8("actionUser_s_Guide"))
         self.actionAbout = QtGui.QAction(TransportationSafety)
         self.actionAbout.setObjectName(_fromUtf8("actionAbout"))
+        self.actionNew_Project = QtGui.QAction(TransportationSafety)
+        self.actionNew_Project.setObjectName(_fromUtf8("actionNew_Project"))
+        self.menuTraffic_Analysis.addAction(self.actionNew_Project)
         self.menuTraffic_Analysis.addAction(self.actionOpen_Project)
         self.menuHomography_2.addAction(self.actionAdd_Replace_Aerial_Image)
         self.menuHomography_2.addAction(self.actionAdd_Replace_Camera_Image)
@@ -377,6 +380,8 @@ class Ui_TransportationSafety(object):
         self.actionAcquire_Aerial_Image.setText(_translate("TransportationSafety", "Acquire Aerial Image", None))
         self.actionUser_s_Guide.setText(_translate("TransportationSafety", "User\'s Guide", None))
         self.actionAbout.setText(_translate("TransportationSafety", "About", None))
+        self.actionNew_Project.setText(_translate("TransportationSafety", "New Project", None))
+        self.actionNew_Project.setShortcut(_translate("TransportationSafety", "Ctrl+N", None))
 
 from custom.homography import HomographyResultView, HomographyView
 from custom.zoomslider import ZoomSlider
