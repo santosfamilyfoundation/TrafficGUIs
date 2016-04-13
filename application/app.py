@@ -251,6 +251,7 @@ class MainGUI(QtGui.QMainWindow):
         if self.homography is None:
             return
 
+        pm.update_project_cfg("homography", "unitpixelratio", str(self.unitPixRatio))
         homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
         # self.homography = np.loadtxt("homography.txt")
 

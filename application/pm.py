@@ -46,7 +46,7 @@ class ProjectWizard(QtGui.QWizard):
 
     def open_aerial_image(self):
         filt = "Images (*.png *.jpg *.jpeg *.bmp *.tif *.gif)"  # Select only images
-        # default_dir = 
+        # default_dir =
         fname = self.open_fd(dialog_text="Select aerial image", file_filter=filt)
         if fname:
             self.ui.newp_aerial_image_input.setText(fname)
@@ -57,7 +57,7 @@ class ProjectWizard(QtGui.QWizard):
 
     def open_video(self):
         filt = "Videos (*.mp4 *.avi *.mpg *mpeg)"  # Select only videos
-        # default_dir = 
+        # default_dir =
         fname = self.open_fd(dialog_text="Select video for analysis", file_filter=filt)
         if fname:
             self.ui.newp_video_input.setText(fname)
@@ -257,3 +257,19 @@ def check_project_cfg_option(section, option):
         return (False, None)
     else:
         return (True, value)
+
+
+def check_project_cfg_section(section):
+    """
+    Checks the currently open project's configuration file for the section. If it exists,
+    this returns True. If it does not exist, this returns False.
+
+    Args:
+        section (str): Name of the section to check existance of.
+    """
+    cfp = SafeConfigParser()
+    cfp.read(ac.CURRENT_PROJECT_CONFIG)
+    if section in cfp.sections():  # If the given section exists,
+        return True                # then return True.
+    else:                          # Otherwise,
+        return False               # then return False
