@@ -30,6 +30,10 @@ class HomographyView(QtGui.QGraphicsView):
         self.show()
         self.image_loaded = True
 
+    def load_image_from_path(self, path):
+        im = QtGui.QImage(path)
+        self.load_image(im)
+
     def list_points(self):
         """
         Returns a list of all points (x, y) selected within this view's scene.
