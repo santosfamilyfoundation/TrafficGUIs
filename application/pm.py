@@ -5,7 +5,7 @@ Project management classes and functions
 from PyQt4 import QtGui, QtCore
 from new_project import Ui_create_new_project
 import os
-from ConfigParser import SafeConfigParser
+from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
 import time
 import datetime
 from shutil import copy
@@ -157,3 +157,73 @@ class ProjectWizard(QtGui.QWizard):
 
         with open(os.path.join(self.PROJECT_PATH, "{}.cfg".format(self.project_name)), 'wb') as configfile:
             self.config_parser.write(configfile)
+
+
+def load_project(folder_path, main_window):
+    path = os.path.normpath(folder_path)  # Clean path. May not be necessary.
+    project_name = os.path.basename(path)
+    project_cfg = os.path.join(path, "{}.cfg".format(project_name))
+    ac.CURRENT_PROJECT_PATH = path  # Set application-level variables indicating the currently open project
+    ac.CURRENT_PROJECT_NAME = project_name
+    ac.CURRENT_PROJECT_CONFIG = project_cfg
+
+    config_parser = SafeConfigParser()
+    config_parser.read(project_cfg)  # Read project config file.
+
+    load_homography(main_window)
+    
+
+def load_homography(main_window):
+    """
+    Loads homography information into the specified main window.
+    """
+    path = ac.CURRENT_PROJECT_PATH
+    aerial_path = os.path.join(path, "homography", "aerial.png")
+    camera_path = os.path.join(path, "homography", "camera.png")
+    # TODO: Handle if above two paths do not exist
+
+    gui = main_window.ui
+    # Load images
+    gui.homography_aerialview.load_image_from_path(aerial_path)
+    gui.homography_cameraview.load_image_from_path(camera_path)
+
+
+def update_project_cfg(section, option, value):
+    """
+    Updates a single value in the current open project's configuration file.
+    Writes nothing and returns -1 if no project currently open.
+
+    Args:
+        section (str): Name of the section to write new option-value pair to write.
+        option (str): Name of the option to write/update.
+        value (str): Value to write/update assocaited with the specified option.
+    """
+    cfp = SafeConfigParser()
+    cfp.read(ac.CURRENT_PROJECT_CONFIG)
+    cfp.set(section, option, value)
+    with open(ac.CURRENT_PROJECT_CONFIG, "wb") as cfg_file:
+        cfp.write(cfg_file)
+
+
+def check_project_cfg_option(section, option):
+    """
+    Checks the currently open project's configuration file for the specified option
+    in the specified section. If it exists, this returns (True, <value>). If it does not
+    exist, this returns (False, None).
+
+    Args:
+        section (str): Name of the section to check for option.
+        option (str): Name of the option check/return.
+    """
+    cfp = SafeConfigParser()
+    cfp.read(ac.CURRENT_PROJECT_CONFIG)
+    try:
+        value = cfp.get(section, option)
+    except NoSectionError:
+        print("ERR [check_project_cfg_option()]: Section {} is not available in {}.".format(section, ac.CURRENT_PROJECT_CONFIG))
+        return (False, None)
+    except NoOptionError:
+        print("Option {} is not available in {}.".format(option, ac.CURRENT_PROJECT_CONFIG))
+        return (False, None)
+    else:
+        return (True, value)

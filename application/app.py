@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import sys
 import shutil
+import cv2
+from custom.videoplayer import VideoPlayer
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 from subprocess import call 
@@ -17,10 +19,12 @@ import ConfigParser
 from PyQt4.QtGui import *
 
 import random
+import os
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-
+import numpy as np
+import cvutils
 from app_config import AppConfig as ac
 import pm
 
@@ -39,16 +43,14 @@ class MainGUI(QtGui.QMainWindow):
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
         self.newp = pm.ProjectWizard(self)
-        
+
         # Experimenting with organizational objects
-        self.homography = Organizer()
         self.feature_tracking = Organizer()
         self.results = Organizer()
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
         self.ui.actionNew_Project.triggered.connect(self.create_new_project)
-        # self.ui.actionLoad_Image.triggered.connect(self.open_image)
         self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_aerial)  # TODO: New method. Check which tab is open. Move to homography tab if not already there. Then call open_image_aerial.
         self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_camera)
         self.ui.main_tab_widget.setCurrentIndex(0)  # Start on the first tab
@@ -62,46 +64,60 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.feature_tracking_continue_button.clicked.connect(self.show_next_tab)
         self.ui.feature_tracking_back_button.clicked.connect(self.show_prev_tab)
 
-##############################################################################################################################################     
+###########################################################################################################################################
 
-        # back button for track roadusers 
-        self.ui.roadusers_tracking_back_button.clicked.connect(self.show_prev_tab) 
-        self.ui.roadusers_tracking_continue_button.clicked.connect(self.show_next_tab) 
+        # Results plotting
+        # self.figure1 = Figure()
+        # self.canvas1 = FigureCanvas(self.figure1)
+        # self.ui.results_plot_layout1.addWidget(self.canvas1)
+        # self.results_plot_plot1()
+
+        #### Graphs for Sam
+        # aplot = visualization.road_user_traj('stmarc.sqlite', 30, 'homography.txt', 'stmarc_image.png')
+        # aplot.add_to_widget(self.ui.results_plot_layout1)
+        # aplot.show()
+
+        # self.figure2 = Figure()
+        # self.canvas2 = FigureCanvas(self.figure2)
+        # self.ui.results_plot_layout2.addWidget(self.canvas2)
+        # self.results_plot_plot2()
+        # back button for track roadusers
+        self.ui.roadusers_tracking_back_button.clicked.connect(self.show_prev_tab)
+        self.ui.roadusers_tracking_continue_button.clicked.connect(self.show_next_tab)
 
 ##########################################################################################################################################
 
-        # Track features page 
+        # Track features page
 
-        # video play 
         self.videoplayer = VideoPlayer()
-        self.ui.actionOpen_Video.triggered.connect(self.videoplayer.openVideo)
+        # self.ui.actionOpen_Video.triggered.connect(self.videoplayer.openVideo)
         self.ui.feature_tracking_video_layout.addWidget(self.videoplayer)
+        self.videoplayer.loadVideo("/home/reggert/Documents/easthall/3.mp4")
 
-
-        # config 
+        # config
         self.configGui_features = configGui_features()
         self.ui.actionOpen_Config.triggered.connect(self.configGui_features.openConfig)
         self.ui.feature_tracking_parameter_layout.addWidget(self.configGui_features)
 
-        # test button 
+        # test button
         self.ui.button_feature_tracking_test.clicked.connect(self.test_feature)
 
 ##########################################################################################################################################
 
-        # roadusers page 
+        # roadusers page
 
-        # video play 
-        self.videoplayer3 = VideoPlayer() 
-        self.ui.actionOpen_Video.triggered.connect(self.videoplayer3.openVideo)
+        # video play
+        self.videoplayer3 = VideoPlayer()
+        # self.ui.actionOpen_Video.triggered.connect(self.videoplayer3.openVideo)
         self.ui.roadusers_tracking_video_layout.addWidget(self.videoplayer3)
+        self.videoplayer3.loadVideo("/home/reggert/Documents/easthall/3.mp4")
 
-
-        # config 
+        # config
         self.configGui_object = configGui_object()
         self.ui.actionOpen_Config.triggered.connect(self.configGui_object.openConfig)
         self.ui.roadusers_tracking_parameter_layout.addWidget(self.configGui_object)
 
-        # test button 
+        # test button
         self.ui.button_roadusers_tracking_test.clicked.connect(self.test_object)
 
 
@@ -114,6 +130,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.homography_hslider_zoom_computed_image.zoom_target = self.ui.homography_results
         self.ui.homography_cameraview.status_label = self.ui.homography_camera_status_label
         self.ui.homography_aerialview.status_label = self.ui.homography_aerial_status_label
+        self.ui.homography_compute_button.clicked.connect(self.homography_compute)
         self.show()
 
 ######################################################################################################
@@ -122,17 +139,17 @@ class MainGUI(QtGui.QMainWindow):
         # self.features = configGui_features() 
          # self.btn.clicked.connect(self.createConfig_features)
 
+        ac.CURRENT_PROJECT_PATH
         # self.features.createConfig_features  
-        call(["feature-based-tracking","../project_dir/test1/test_feature/feature_tracking.cfg","--tf","--database-filename","../project_dir/test1/test_feature/test1.sqlite"])
-        call(["display-trajectories.py","-i","7.mp4","-d","../project_dir/test1/test_feature/test1.sqlite","-o","homography.txt","-t","feature"])
-
+        call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/test_feature/feature_tracking.cfg","--tf","--database-filename",ac.CURRENT_PROJECT_PATH + "/test_feature/test1.sqlite"])
+        call(["display-trajectories.py","-i","7.mp4","-d",ac.CURRENT_PROJECT_PATH + "/test_feature/test1.sqlite","-o","homography.txt","-t","feature"])
 
     def test_object(self):
-        call(["feature-based-tracking","tracking.cfg","--tf","--database-filename","test1.sqlite"])
-        call(["feature-based-tracking","tracking.cfg","--gf","--database-filename","test1.sqlite"])
-        call(["display-trajectories.py","-i","7.mp4","-d","test1.sqlite","-o","homography.txt","-t","object"])
-                   
-################################################################################################33
+        call(["feature-based-tracking", "tracking.cfg", "--tf", "--database-filename", "test1.sqlite"])
+        call(["feature-based-tracking", "tracking.cfg", "--gf", "--database-filename", "test1.sqlite"])
+        call(["display-trajectories.py", "-i", "7.mp4", "-d", "test1.sqlite", "-o", "homography.txt", "-t", "object"])
+
+################################################################################################
     def homography_load_aerial_image(self):
         pass
 
@@ -167,10 +184,12 @@ class MainGUI(QtGui.QMainWindow):
         self.canvas2.draw()
 
     def open_project(self):
-        fname = QtGui.QFileDialog.getExistingDirectory()
-        #     self, 'Open Project', '/home')
-        # print(fname)
-        pass
+        fname = str(QtGui.QFileDialog.getExistingDirectory(self, "Open Existing Project Folder...", ac.PROJECT_DIR))
+        # TODO: Instead of select folder, perhaps select config file?
+        if fname:
+            pm.load_project(fname, self)
+        else:
+            pass  # If no folder selected, don't load anything.
 
     def create_new_project(self):
         self.newp.restart()
@@ -219,148 +238,74 @@ class MainGUI(QtGui.QMainWindow):
             image = None
         return image
 
-    # def open_image(self):
-    #     fname = QtGui.QFileDialog.getOpenFileName(self, 'Open Project', '')
-    #     print(fname)
-    #     tracking_image = QtGui.QImage(fname)
-    #     pixmap = QtGui.QPixmap.fromImage(tracking_image)
-    #     pixmap = pixmap.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
-    #     self._tracking_image = DisplayImage(tracking_image, pixmap)
-    #     self.ui.track_image.setPixmap(pixmap)
+    def homography_compute(self):
+        px_text = self.ui.unit_px_input.text()
+        self.unitPixRatio = float(unicode(px_text))
+        self.worldPts = self.unitPixRatio * (np.array(self.ui.homography_aerialview.list_points()))
+        self.videoPts = np.array(self.ui.homography_cameraview.list_points())
 
-    def get_image_position(self, event):
-        print(event.pos())
-        print(self._tracking_image.image.pixel(event.x(), event.y()))
+        if len(self.worldPts) >= 4:
+            if len(self.worldPts) == len(self.videoPts):
+                self.homography, self.mask = cv2.findHomography(self.videoPts, self.worldPts)
 
-###############################################################################################################################
+        if self.homography is None:
+            return
 
-class VideoPlayer(QtGui.QWidget):
+        homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
+        # self.homography = np.loadtxt("homography.txt")
 
-    def __init__(self, parent = None):
+        if self.homography.size > 0:
+            txt_path = os.path.join(homography_path, "homography.txt")
+            np.savetxt(txt_path, self.homography)  # Save computed homography.
 
+        self.homography_display_results()
 
-        QtGui.QWidget.__init__(self, parent)
-        self.setSizePolicy(QtGui.QSizePolicy.Expanding,
-            QtGui.QSizePolicy.Preferred)
-        # filename = 1
-        # self.filename = filename
-        # print filename
-        self.player = Phonon.VideoPlayer(Phonon.VideoCategory,self)
+    def homography_display_results(self):
+        homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
+        worldImg = cv2.imread(os.path.join(homography_path, "aerial.png"))
+        videoImg = cv2.imread(os.path.join(homography_path, "camera.png"))
 
-        self.play_pause = QtGui.QPushButton('Load Video',self)
-        self.play_pause.clicked.connect(self.playClicked)
+        invHomography = np.linalg.inv(self.homography)
 
-        self.pause = QtGui.QPushButton('Play/Pause',self)
-        self.pause.clicked.connect(self.playPause)
+        projectedWorldPts = cvutils.projectArray(invHomography, self.worldPts.T).T
+        projectedVideoPts = cvutils.projectArray(self.homography, self.videoPts.T).T
 
+        # TODO: Nicer formatting for computed goodness images
+        for i in range(self.worldPts.shape[0]):
+            # world image
+            cv2.circle(worldImg, tuple(np.int32(np.round(self.worldPts[i] / self.unitPixRatio))), 2, cvutils.cvBlue)
+            cv2.circle(worldImg, tuple(np.int32(np.round(projectedVideoPts[i] / self.unitPixRatio))), 2, cvutils.cvRed)
+            cv2.putText(worldImg, str(i+1), tuple(np.int32(np.round(self.worldPts[i]/self.unitPixRatio)) + 5), cv2.FONT_HERSHEY_PLAIN, 2., cvutils.cvBlue, 2)
+            # video image
+            cv2.circle(videoImg, tuple(np.int32(np.round(self.videoPts[i]))), 2, cvutils.cvBlue)
+            cv2.circle(videoImg, tuple(np.int32(np.round(projectedWorldPts[i]))), 2, cvutils.cvRed)
+            cv2.putText(videoImg, str(i+1), tuple(np.int32(np.round(self.videoPts[i]) + 5)), cv2.FONT_HERSHEY_PLAIN, 2., cvutils.cvBlue, 2)
+        aerial_goodness_path = os.path.join(homography_path, "homography_goodness_aerial.png")
+        camera_goodness_path = os.path.join(homography_path, "homography_goodness_camera.png")
 
-        self.slider = Phonon.SeekSlider(self.player.mediaObject() , self)
-        # self.minutes = QtGui.QLineEdit('min',self)
-        # self.seconds = QtGui.QLineEdit('sec',self)
-        # self.endMinutes = QtGui.QLineEdit('End Min',self)
-        # self.endSeconds = QtGui.QLineEdit('End Sec',self)
-        # self.getTime = QtGui.QPushButton('set time period', self)
-        # self.getTime.clicked.connect(self.gettingTime)
+        cv2.imwrite(aerial_goodness_path, worldImg)  # Save aerial goodness image
+        cv2.imwrite(camera_goodness_path, videoImg)  # Save camera goodness image
 
-
-        self.status = QtGui.QLabel(self)
-        self.status.setAlignment(QtCore.Qt.AlignRight |
-            QtCore.Qt.AlignVCenter)
-
-        
-        topLayout = QtGui.QVBoxLayout(self)
-        topLayout.addWidget(self.player)
-        layout = QtGui.QHBoxLayout(self)
-        layout.addWidget(self.play_pause)
-        layout.addWidget(self.pause)
-        layout.addWidget(self.slider)
-        # layout.addWidget(self.minutes)
-        # layout.addWidget(self.seconds)
-        # layout.addWidget(self.endMinutes)
-        # layout.addWidget(self.endSeconds)
-        # layout.addWidget(self.getTime)
-        topLayout.addLayout(layout)
-        self.setLayout(topLayout)
-
-    def playClicked(self):
-        # allows the video to load through whenever a new file is chosen 
-
-        # try is needed incase no file is chosen by the user 
-
-        try:
-            filename
-        except NameError:
-            self.player.load(Phonon.MediaSource(""))
-
-        else:
-            self.player.load(Phonon.MediaSource(filename))
-            self.player.mediaObject().setTickInterval(100)
-            self.player.mediaObject().tick.connect(self.tock)
-            self.player.play()
-
-
-
-    def playPause(self):
-    # allows the video to load through whenever a new file is chosen 
-        if self.player.mediaObject().state() == Phonon.PlayingState:
-            self.player.pause()
-        else:
-            self.player.play()
-
-    def tock(self, time):
-        time = time/1000
-        h = time/3600
-        m = (time-3600*h) / 60
-        s = (time-3600*h-m*60)
-        self.status.setText('%02d:%02d:%02d'%(h,m,s))
-
-    # def cutVideoClip(self,startTime,endTime,fps = 25):
-    #     print os.path.split(self.fileName)[1]
-    #     video = VideoFileClip(os.path.split(self.fileName)[1]).subclip(startTime,endTime)
-    #     result = CompositeVideoClip([video])
-    #     result.write_videofile("temp.mp4",fps)
-
-    def gettingTime(self):
-        startMinutes = int(self.minutes.text())
-        startSeconds = int(self.seconds.text())
-        endMinutes = int(self.endMinutes.text())
-        endSeconds = int(self.endSeconds.text())
-        startTime = (startMinutes*60+startSeconds)
-        endTime = (endMinutes*60+endSeconds)
-        self.player.seek(startTime*1000)
-        #self.cutVideoClip(startTime,endTime)
-
-        # opens a video file 
-    def openVideo(self):        
-        # filevideo = 
-        global filename 
-        filename = str(QtGui.QFileDialog.getOpenFileName(self,'Open File', os.getenv('HOME')))
-        # print filename
+        self.ui.homography_results.load_image(QtGui.QImage(aerial_goodness_path))  # Load aerial goodness image into gui
 
 
 ##########################################################################################################################
 
 class configGui_features(QtGui.QWidget):
 
-    
     def __init__(self):
         super(configGui_features, self).__init__()
-        
         self.initUI()
-        
 
-    def initUI(self): 
-
-     
+    def initUI(self):
         # lbl1.move(15, 10)
 
         self.btn = QtGui.QPushButton('Set Config', self)
         # self.btn.move(20, 20)
         self.btn.clicked.connect(self.createConfig_features)
 
-      
         self.label1 = QtGui.QLabel("first frame to process")
-        # input box 
+        # input box
         self.input1 = QtGui.QLineEdit()
         # self.input1.setMaximumWidth(10)
 
@@ -371,7 +316,6 @@ class configGui_features(QtGui.QWidget):
 
         self.label3 = QtGui.QLabel("Max number of features added at each frame")
         self.input3 = QtGui.QLineEdit()
-
         self.label4 = QtGui.QLabel("Number of deplacement to test")
         # self.input4 = QtGui.QLineEdit()
 
@@ -393,10 +337,9 @@ class configGui_features(QtGui.QWidget):
         self.label10 = QtGui.QLabel("a feature for grouping")
         self.input10 = QtGui.QLineEdit()
 
-
         grid = QtGui.QGridLayout()
         grid.setSpacing(10)
-        
+
         grid.addWidget(self.label1, 2, 0)
         grid.addWidget(self.input1, 2, 1)
 
@@ -407,7 +350,7 @@ class configGui_features(QtGui.QWidget):
         grid.addWidget(self.input3, 4, 1)
 
         grid.addWidget(self.label4, 5, 0)
-       
+
         grid.addWidget(self.label5, 6, 0)
         grid.addWidget(self.input5, 6, 1)
 
@@ -426,27 +369,27 @@ class configGui_features(QtGui.QWidget):
 
         grid.addWidget(self.btn, 12, 0)
 
-        self.setLayout(grid) 
+        self.setLayout(grid)
 
         # size gets fixed
         # self.setFixedSize(450,350)
-        
-        # window box location and size 
+
+        # window box location and size
         # self.setGeometry(500, 100, 150, 20)
 
         self.setWindowTitle('Input config')
         # self.show()
 
-        # opens a cofig file 
+        # opens a cofig file
     def openConfig(self):
+
         # path = QFileDialog.getOpenFileName(self, 'Open File', '/') 
         # global path1
         path1= str(path)
 
         # path1 = "../project_dir/test1"
-        
-       
-    def createConfig_features(self,path):
+
+    def createConfig_features(self, path):
         """
         Create a config file
         """
@@ -456,24 +399,27 @@ class configGui_features(QtGui.QWidget):
 
         # update test1 name with file chose
 
-        path1 = "../project_dir/test1/tracking.cfg"
+        
         
         config = ConfigParser.ConfigParser()
 
         # create test folder 
-        if not os.path.exists("../project_dir/test1/test_feature"):
-            os.mkdir("../project_dir/test1/test_feature")
+        if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/test_feature"):
+            os.mkdir(ac.CURRENT_PROJECT_PATH + "/test_feature")
 
         # removes feature_tracking.cfg
-        if os.path.exists("../project_dir/test1/test_feature/feature_tracking.cfg"):
-            os.remove("../project_dir/test1/test_feature/feature_tracking.cfg")
+        if os.path.exists(ac.CURRENT_PROJECT_PATH + "/test_feature/feature_tracking.cfg"):
+            os.remove(ac.CURRENT_PROJECT_PATH + "/test_feature/feature_tracking.cfg")
 
         # creates new config file 
-        shutil.copyfile("tracking.cfg","../project_dir/test1/test_feature/feature_tracking.cfg")
+        shutil.copyfile("tracking.cfg",ac.CURRENT_PROJECT_PATH + "/test_feature/feature_tracking.cfg")
+
+        path1 = ac.CURRENT_PROJECT_PATH + "/test_feature/feature_tracking.cfg"
 
 
-        # add new content to config file 
+        # add new content to config file
         config.add_section("added")
+        # config.set("added", "video-filename",)
         config.set("added", "frame1", self.input1.text())
         config.set("added", "nframes", self.input2.text())
         config.set("added", "max-nfeatures", self.input3.text())
@@ -482,64 +428,56 @@ class configGui_features(QtGui.QWidget):
         config.set("added", "max-number-iterations", self.input8.text())
         config.set("added", "min-feature-time", self.input10.text())
 
-
         try:
             path1
         except NameError:
-          # self.player.load(Phonon.MediaSource(""))
+            # self.player.load(Phonon.MediaSource(""))
             error = QtGui.QErrorMessage()
             error.showMessage('''\
             no config files chosen''')
             error.exec_()
             print "no config chosen"
         else:
-            with open(path1,"a") as config_file:
+            with open(path1, "a") as config_file:
                 config.write(config_file)
 
-            # to remove the section header from config file  
+            # to remove the section header from config file
 
-            #opens the file to read      
-            f = open(path1,"r")
+            # opens the file to read
+            f = open(path1, "r")
             lines = f.readlines()
             f.close()
-            #opens the file to write 
-            f = open(path1,"w")
+            # opens the file to write
+            f = open(path1, "w")
             for line in lines:
-                #removes the section header 
-                if line!="[added]"+"\n":
+                # removes the section header
+                if line != "[added]"+"\n":
                     f.write(line)
             f.close()
 
-        # self.path1 = "dash"     
+        # self.path1 = "dash"
         # grid = QtGui.QGridLayout()
         # self.lbl1 = QtGui.QLabel(self.path1)
         # grid.addWidget(lbl1, 1, 0)
-        # self.setLayout(grid) 
+        # self.setLayout(grid)
 
 
 ##########################################################################################################################
 
 class configGui_object(QtGui.QWidget):
 
-    
     def __init__(self):
         super(configGui_object, self).__init__()
-        
         self.initUI()
-        
 
-    def initUI(self): 
-
-     
+    def initUI(self):
         # lbl1.move(15, 10)
 
         self.btn = QtGui.QPushButton('Set Config', self)
         # self.btn.move(20, 20)
         self.btn.clicked.connect(self.createConfig_objects)
-
-      
         self.label1 = QtGui.QLabel("first frame to process")
-        # input box 
+        # input box
         self.input1 = QtGui.QLineEdit()
         # self.input1.setMaximumWidth(10)
 
@@ -554,10 +492,8 @@ class configGui_object(QtGui.QWidget):
         self.label4 = QtGui.QLabel("maximum segmentation-distance")
         self.input4 = QtGui.QLineEdit()
 
-
         grid = QtGui.QGridLayout()
         grid.setSpacing(10)
-        
 
         grid.addWidget(self.label1, 2, 0)
         grid.addWidget(self.input1, 2, 1)
@@ -575,19 +511,18 @@ class configGui_object(QtGui.QWidget):
 
         # path1 = "3"
 
-        self.setLayout(grid) 
+        self.setLayout(grid)
 
         self.setWindowTitle('Input config')
         # self.show()
 
-        # opens a cofig file 
+        # opens a cofig file
     def openConfig(self):
-        path = QFileDialog.getOpenFileName(self, 'Open File', '/') 
+        path = QFileDialog.getOpenFileName(self, 'Open File', '/')
         # global path1
-        path1= str(path)
-        
-       
-    def createConfig_objects(self,path):
+        path1 = str(path)
+
+    def createConfig_objects(self, path):
         """
         Create a config file
         """
@@ -595,18 +530,23 @@ class configGui_object(QtGui.QWidget):
 
         config = ConfigParser.ConfigParser()
 
-                # create test folder 
-        if not os.path.exists("../project_dir/test1/test_object"):
-            os.mkdir("../project_dir/test1/test_object")
 
-        # removes feature_tracking.cfg
-        if os.path.exists("../project_dir/test1/test_object/object_tracking.cfg"):
-            os.remove("../project_dir/test1/test_object/object_tracking.cfg")
+        # create test folder 
+        if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/test_object"):
+            os.mkdir(ac.CURRENT_PROJECT_PATH + "/test_object")
+
+        # removes object tracking.cfg
+        if os.path.exists(ac.CURRENT_PROJECT_PATH + "/test_object/object_tracking.cfg"):
+            os.remove(ac.CURRENT_PROJECT_PATH + "/test_object/object_tracking.cfg")
 
         # creates new config file 
-        shutil.copyfile("../project_dir/test1/test_feature/feature_tracking.cfg","../project_dir/test1/test_object/object_tracking.cfg")
+        shutil.copyfile(ac.CURRENT_PROJECT_PATH + "/test_feature/feature_tracking.cfg",ac.CURRENT_PROJECT_PATH + "/test_object/object_tracking.cfg")
+
+        path1 = ac.CURRENT_PROJECT_PATH + "/test_object/object_tracking.cfg"
+
 
         # add new content to config file 
+
         config.add_section("added")
         config.set("added", "frame1", self.input1.text())
         config.set("added", "nframes", self.input2.text())
@@ -616,36 +556,35 @@ class configGui_object(QtGui.QWidget):
         try:
             path1
         except NameError:
-          # self.player.load(Phonon.MediaSource(""))
+            # self.player.load(Phonon.MediaSource(""))
             error = QtGui.QErrorMessage()
             error.showMessage('''\
             no config files chosen''')
             error.exec_()
             print "no config chosen"
         else:
-            with open(path1,"a") as config_file:
+            with open(path1, "a") as config_file:
                 config.write(config_file)
 
-            # to remove the section header from config file  
+            # to remove the section header from config file
 
-            #opens the file to read      
-            f = open(path1,"r")
+            # opens the file to read
+            f = open(path1, "r")
             lines = f.readlines()
             f.close()
-            #opens the file to write 
-            f = open(path1,"w")
+            # opens the file to write
+            f = open(path1, "w")
             for line in lines:
-                #removes the section header 
-                if line!="[added]"+"\n":
+                # removes the section header
+                if line != "[added]"+"\n":
                     f.write(line)
             f.close()
 
-        # self.path1 = "dash"     
+        # self.path1 = "dash"
         # grid = QtGui.QGridLayout()
         # self.lbl1 = QtGui.QLabel(self.path1)
         # grid.addWidget(lbl1, 1, 0)
-        # self.setLayout(grid) 
-
+        # self.setLayout(grid)
 
 ##########################################################################################################################
 
