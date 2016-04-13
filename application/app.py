@@ -107,8 +107,10 @@ class MainGUI(QtGui.QMainWindow):
     def open_project(self):
         fname = str(QtGui.QFileDialog.getExistingDirectory(self, "Open Existing Project Folder...", ac.PROJECT_DIR))
         # TODO: Instead of select folder, perhaps select config file?
-        pm.load_project(fname, self)
-        pass
+        if fname:
+            pm.load_project(fname, self)
+        else:
+            pass  # If no folder selected, don't load anything.
 
     def create_new_project(self):
         self.newp.restart()
@@ -206,7 +208,6 @@ class MainGUI(QtGui.QMainWindow):
         cv2.imwrite(camera_goodness_path, videoImg)  # Save camera goodness image
 
         self.ui.homography_results.load_image(QtGui.QImage(aerial_goodness_path))  # Load aerial goodness image into gui
-
 
 
 def main():
