@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys
 import shutil
-from custom.videoplayer import VideoPlayer
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 from subprocess import call 
@@ -71,15 +70,14 @@ class MainGUI(QtGui.QMainWindow):
 
 ##########################################################################################################################################
 
-        # Track features page
+        # Track features page 
 
-
+        # video play 
         self.videoplayer = VideoPlayer()
-        # self.ui.actionOpen_Video.triggered.connect(self.videoplayer.openVideo)
+        self.ui.actionOpen_Video.triggered.connect(self.videoplayer.openVideo)
         self.ui.feature_tracking_video_layout.addWidget(self.videoplayer)
-        self.videoplayer.loadVideo("/home/reggert/Documents/easthall/3.mp4")
 
-    
+
         # config 
         self.configGui_features = configGui_features()
         self.ui.actionOpen_Config.triggered.connect(self.configGui_features.openConfig)
@@ -94,9 +92,8 @@ class MainGUI(QtGui.QMainWindow):
 
         # video play 
         self.videoplayer3 = VideoPlayer() 
-        # self.ui.actionOpen_Video.triggered.connect(self.videoplayer3.openVideo)
+        self.ui.actionOpen_Video.triggered.connect(self.videoplayer3.openVideo)
         self.ui.roadusers_tracking_video_layout.addWidget(self.videoplayer3)
-        self.videoplayer3.loadVideo("/home/reggert/Documents/easthall/3.mp4")
 
 
         # config 
@@ -107,6 +104,8 @@ class MainGUI(QtGui.QMainWindow):
         # test button 
         self.ui.button_roadusers_tracking_test.clicked.connect(self.test_object)
 
+        # run button
+        self.ui.button_roadusers_tracking_run.clicked.connect(self.run_object)
 
 ###########################################################################################################################################
         # self.ui.track_image.mousePressEvent = self.get_image_position
@@ -135,8 +134,31 @@ class MainGUI(QtGui.QMainWindow):
         call(["feature-based-tracking","tracking.cfg","--tf","--database-filename","test1.sqlite"])
         call(["feature-based-tracking","tracking.cfg","--gf","--database-filename","test1.sqlite"])
         call(["display-trajectories.py","-i","7.mp4","-d","test1.sqlite","-o","homography.txt","-t","object"])
-                   
+    
+    def run_object(self):
+        f = open(path1, 'r')
+        lines = f.readlines()
+        f.close()
+        f = open(path1,'r+')
+        for line in lines:
+            if "frame1" in line:
+                print "frame1"
+                f.write("frame1 = 0 \n")
+            elif "nframe" in line:
+                f.write("nframe = 0 \n")
+            else:
+                f.write(line)
+        f.close()
+        call(["feature-based-tracking","tracking.cfg","--tf","--database-filename","test1.sqlite"])
+        call(["feature-based-tracking","tracking.cfg","--gf","--database-filename","test1.sqlite"])
+        call(["display-trajectories.py","-i","7.mp4","-d","test1.sqlite","-o","homography.txt","-t","object"])
+
+
+
 ################################################################################################33
+
+
+
     def homography_load_aerial_image(self):
         pass
 
@@ -223,9 +245,123 @@ class MainGUI(QtGui.QMainWindow):
             image = None
         return image
 
+    # def open_image(self):
+    #     fname = QtGui.QFileDialog.getOpenFileName(self, 'Open Project', '')
+    #     print(fname)
+    #     tracking_image = QtGui.QImage(fname)
+    #     pixmap = QtGui.QPixmap.fromImage(tracking_image)
+    #     pixmap = pixmap.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
+    #     self._tracking_image = DisplayImage(tracking_image, pixmap)
+    #     self.ui.track_image.setPixmap(pixmap)
+
     def get_image_position(self, event):
         print(event.pos())
         print(self._tracking_image.image.pixel(event.x(), event.y()))
+
+###############################################################################################################################
+
+class VideoPlayer(QtGui.QWidget):
+
+    def __init__(self, parent = None):
+
+
+        QtGui.QWidget.__init__(self, parent)
+        self.setSizePolicy(QtGui.QSizePolicy.Expanding,
+            QtGui.QSizePolicy.Preferred)
+        # filename = 1
+        # self.filename = filename
+        # print filename
+        self.player = Phonon.VideoPlayer(Phonon.VideoCategory,self)
+
+        self.play_pause = QtGui.QPushButton('Load Video',self)
+        self.play_pause.clicked.connect(self.playClicked)
+
+        self.pause = QtGui.QPushButton('Play/Pause',self)
+        self.pause.clicked.connect(self.playPause)
+
+
+        self.slider = Phonon.SeekSlider(self.player.mediaObject() , self)
+        # self.minutes = QtGui.QLineEdit('min',self)
+        # self.seconds = QtGui.QLineEdit('sec',self)
+        # self.endMinutes = QtGui.QLineEdit('End Min',self)
+        # self.endSeconds = QtGui.QLineEdit('End Sec',self)
+        # self.getTime = QtGui.QPushButton('set time period', self)
+        # self.getTime.clicked.connect(self.gettingTime)
+
+
+        self.status = QtGui.QLabel(self)
+        self.status.setAlignment(QtCore.Qt.AlignRight |
+            QtCore.Qt.AlignVCenter)
+
+        
+        topLayout = QtGui.QVBoxLayout(self)
+        topLayout.addWidget(self.player)
+        layout = QtGui.QHBoxLayout(self)
+        layout.addWidget(self.play_pause)
+        layout.addWidget(self.pause)
+        layout.addWidget(self.slider)
+        # layout.addWidget(self.minutes)
+        # layout.addWidget(self.seconds)
+        # layout.addWidget(self.endMinutes)
+        # layout.addWidget(self.endSeconds)
+        # layout.addWidget(self.getTime)
+        topLayout.addLayout(layout)
+        self.setLayout(topLayout)
+
+    def playClicked(self):
+        # allows the video to load through whenever a new file is chosen 
+
+        # try is needed incase no file is chosen by the user 
+
+        try:
+            filename
+        except NameError:
+            self.player.load(Phonon.MediaSource(""))
+
+        else:
+            self.player.load(Phonon.MediaSource(filename))
+            self.player.mediaObject().setTickInterval(100)
+            self.player.mediaObject().tick.connect(self.tock)
+            self.player.play()
+
+
+
+    def playPause(self):
+    # allows the video to load through whenever a new file is chosen 
+        if self.player.mediaObject().state() == Phonon.PlayingState:
+            self.player.pause()
+        else:
+            self.player.play()
+
+    def tock(self, time):
+        time = time/1000
+        h = time/3600
+        m = (time-3600*h) / 60
+        s = (time-3600*h-m*60)
+        self.status.setText('%02d:%02d:%02d'%(h,m,s))
+
+    # def cutVideoClip(self,startTime,endTime,fps = 25):
+    #     print os.path.split(self.fileName)[1]
+    #     video = VideoFileClip(os.path.split(self.fileName)[1]).subclip(startTime,endTime)
+    #     result = CompositeVideoClip([video])
+    #     result.write_videofile("temp.mp4",fps)
+
+    def gettingTime(self):
+        startMinutes = int(self.minutes.text())
+        startSeconds = int(self.seconds.text())
+        endMinutes = int(self.endMinutes.text())
+        endSeconds = int(self.endSeconds.text())
+        startTime = (startMinutes*60+startSeconds)
+        endTime = (endMinutes*60+endSeconds)
+        self.player.seek(startTime*1000)
+        #self.cutVideoClip(startTime,endTime)
+
+        # opens a video file 
+    def openVideo(self):        
+        # filevideo = 
+        global filename 
+        filename = str(QtGui.QFileDialog.getOpenFileName(self,'Open File', os.getenv('HOME')))
+        # print filename
 
 
 ##########################################################################################################################
@@ -341,13 +477,11 @@ class configGui_features(QtGui.QWidget):
         Create a config file
         """
 
-        global path1
+        #global path1
         # path1= str(path)
 
-        # update test1 name with project chosen 
+        #path1 = "../Project/temp/tracking.cfg"
 
-        # path1 = "../project_dir/test1/tracking.cfg"
-        
         config = ConfigParser.ConfigParser()
 
         # # if not os.path.exists("../project_dir/test1"):
@@ -467,7 +601,7 @@ class configGui_object(QtGui.QWidget):
         # opens a cofig file 
     def openConfig(self):
         path = QFileDialog.getOpenFileName(self, 'Open File', '/') 
-        # global path1
+        global path1
         path1= str(path)
         
        
