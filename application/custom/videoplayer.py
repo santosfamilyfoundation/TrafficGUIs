@@ -56,7 +56,6 @@ class VideoPlayer(QtGui.QWidget):
 
 
     def loadVideo(self,filename):
-        print filename
         self.player.load(Phonon.MediaSource(filename))
         self.player.mediaObject().setTickInterval(100)
         self.player.mediaObject().tick.connect(self.tock)
