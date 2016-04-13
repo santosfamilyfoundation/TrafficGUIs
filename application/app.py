@@ -5,6 +5,7 @@ from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 from subprocess import call 
 
+
 ##############################################3
 # testing feature objects 
 # import display-trajectories
@@ -22,6 +23,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 
 from app_config import AppConfig as ac
+import playVideo
 import pm
 
 from plotting import visualization
