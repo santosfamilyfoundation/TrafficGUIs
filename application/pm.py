@@ -215,18 +215,23 @@ def load_roadusers_tracking(main_window):
 def update_project_cfg(section, option, value):
     """
     Updates a single value in the current open project's configuration file.
-    Writes nothing and returns -1 if no project currently open.
+    Writes nothing and returns -1 if no project currently open. Creates sections
+    in the config file if they do not already exist.
 
     Args:
         section (str): Name of the section to write new option-value pair to write.
         option (str): Name of the option to write/update.
         value (str): Value to write/update assocaited with the specified option.
     """
+    if not ac.CURRENT_PROJECT_CONFIG:
+        return -1
     cfp = SafeConfigParser()
     cfp.read(ac.CURRENT_PROJECT_CONFIG)
-    cfp.set(section, option, value)
+    if section not in cfp.sections():  # If the given section does not exist,
+        cfp.add_section(section)        # then create it.
+    cfp.set(section, option, value)  # Set the option-value pair
     with open(ac.CURRENT_PROJECT_CONFIG, "wb") as cfg_file:
-        cfp.write(cfg_file)
+        cfp.write(cfg_file)  # Write changes
 
 
 def check_project_cfg_option(section, option):
