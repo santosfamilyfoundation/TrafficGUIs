@@ -109,9 +109,9 @@ class MainGUI(QtGui.QMainWindow):
         self.canvas2.draw()
 
     def open_project(self):
-        fname = QtGui.QFileDialog.getExistingDirectory()
-        #     self, 'Open Project', '/home')
-        # print(fname)
+        fname = str(QtGui.QFileDialog.getExistingDirectory(self, "Open Existing Project Folder...", ac.PROJECT_DIR))
+        # TODO: Instead of select folder, perhaps select config file?
+        pm.load_project(fname, self)
         pass
 
     def create_new_project(self):

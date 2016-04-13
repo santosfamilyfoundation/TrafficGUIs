@@ -5,6 +5,10 @@ from ConfigParser import SafeConfigParser
 class AppConfig(object):
     PROJECT_DIR = None
     TI_INSTALL_DIR = None
+    # TODO: Link CURRENT_PROJECT_* with a @property.setter which automatically sets all from one, (e.g., set all using just folder dir)
+    CURRENT_PROJECT_PATH = None  # Path to base of currently open project's folder
+    CURRENT_PROJECT_NAME = None
+    CURRENT_PROJECT_CONFIG = None
 
     def __init__(self):
         super(AppConfig, self).__init__()
