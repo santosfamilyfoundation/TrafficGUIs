@@ -43,7 +43,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
         self.newp = pm.ProjectWizard(self)
-        
+
         # Experimenting with organizational objects
         self.feature_tracking = Organizer()
         self.results = Organizer()
@@ -64,7 +64,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.feature_tracking_continue_button.clicked.connect(self.show_next_tab)
         self.ui.feature_tracking_back_button.clicked.connect(self.show_prev_tab)
 
-##############################################################################################################################################     
+###########################################################################################################################################
 
         # Results plotting
         # self.figure1 = Figure()
@@ -72,7 +72,7 @@ class MainGUI(QtGui.QMainWindow):
         # self.ui.results_plot_layout1.addWidget(self.canvas1)
         # self.results_plot_plot1()
 
-        ####Graphs for Sam
+        #### Graphs for Sam
         # aplot = visualization.road_user_traj('stmarc.sqlite', 30, 'homography.txt', 'stmarc_image.png')
         # aplot.add_to_widget(self.ui.results_plot_layout1)
         # aplot.show()
@@ -81,46 +81,43 @@ class MainGUI(QtGui.QMainWindow):
         # self.canvas2 = FigureCanvas(self.figure2)
         # self.ui.results_plot_layout2.addWidget(self.canvas2)
         # self.results_plot_plot2()
-        # back button for track roadusers 
-        self.ui.roadusers_tracking_back_button.clicked.connect(self.show_prev_tab) 
-        self.ui.roadusers_tracking_continue_button.clicked.connect(self.show_next_tab) 
+        # back button for track roadusers
+        self.ui.roadusers_tracking_back_button.clicked.connect(self.show_prev_tab)
+        self.ui.roadusers_tracking_continue_button.clicked.connect(self.show_next_tab)
 
 ##########################################################################################################################################
 
         # Track features page
-
 
         self.videoplayer = VideoPlayer()
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer.openVideo)
         self.ui.feature_tracking_video_layout.addWidget(self.videoplayer)
         self.videoplayer.loadVideo("/home/reggert/Documents/easthall/3.mp4")
 
-    
-        # config 
+        # config
         self.configGui_features = configGui_features()
         self.ui.actionOpen_Config.triggered.connect(self.configGui_features.openConfig)
         self.ui.feature_tracking_parameter_layout.addWidget(self.configGui_features)
 
-        # test button 
+        # test button
         self.ui.button_feature_tracking_test.clicked.connect(self.test_feature)
 
 ##########################################################################################################################################
 
-        # roadusers page 
+        # roadusers page
 
-        # video play 
-        self.videoplayer3 = VideoPlayer() 
+        # video play
+        self.videoplayer3 = VideoPlayer()
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer3.openVideo)
         self.ui.roadusers_tracking_video_layout.addWidget(self.videoplayer3)
         self.videoplayer3.loadVideo("/home/reggert/Documents/easthall/3.mp4")
 
-
-        # config 
+        # config
         self.configGui_object = configGui_object()
         self.ui.actionOpen_Config.triggered.connect(self.configGui_object.openConfig)
         self.ui.roadusers_tracking_parameter_layout.addWidget(self.configGui_object)
 
-        # test button 
+        # test button
         self.ui.button_roadusers_tracking_test.clicked.connect(self.test_object)
 
 
@@ -143,17 +140,16 @@ class MainGUI(QtGui.QMainWindow):
          # self.btn.clicked.connect(self.createConfig_features)
 
         # self.features.createConfig_features
-        
-        call(["feature-based-tracking","tracking.cfg","--tf","--database-filename","test1.sqlite"])
-        call(["display-trajectories.py","-i","7.mp4","-d","test1.sqlite","-o","homography.txt","-t","feature"])
 
+        call(["feature-based-tracking", "tracking.cfg", "--tf", "--database-filename", "test1.sqlite"])
+        call(["display-trajectories.py", "-i", "7.mp4", "-d", "test1.sqlite", "-o", "homography.txt", "-t", "feature"])
 
     def test_object(self):
-        call(["feature-based-tracking","tracking.cfg","--tf","--database-filename","test1.sqlite"])
-        call(["feature-based-tracking","tracking.cfg","--gf","--database-filename","test1.sqlite"])
-        call(["display-trajectories.py","-i","7.mp4","-d","test1.sqlite","-o","homography.txt","-t","object"])
-                   
-################################################################################################33
+        call(["feature-based-tracking", "tracking.cfg", "--tf", "--database-filename", "test1.sqlite"])
+        call(["feature-based-tracking", "tracking.cfg", "--gf", "--database-filename", "test1.sqlite"])
+        call(["display-trajectories.py", "-i", "7.mp4", "-d", "test1.sqlite", "-o", "homography.txt", "-t", "object"])
+
+################################################################################################
     def homography_load_aerial_image(self):
         pass
 
@@ -297,25 +293,19 @@ class MainGUI(QtGui.QMainWindow):
 
 class configGui_features(QtGui.QWidget):
 
-    
     def __init__(self):
         super(configGui_features, self).__init__()
-        
         self.initUI()
-        
 
-    def initUI(self): 
-
-     
+    def initUI(self):
         # lbl1.move(15, 10)
 
         self.btn = QtGui.QPushButton('Set Config', self)
         # self.btn.move(20, 20)
         self.btn.clicked.connect(self.createConfig_features)
 
-      
         self.label1 = QtGui.QLabel("first frame to process")
-        # input box 
+        # input box
         self.input1 = QtGui.QLineEdit()
         # self.input1.setMaximumWidth(10)
 
@@ -347,10 +337,9 @@ class configGui_features(QtGui.QWidget):
         self.label10 = QtGui.QLabel("a feature for grouping")
         self.input10 = QtGui.QLineEdit()
 
-
         grid = QtGui.QGridLayout()
         grid.setSpacing(10)
-        
+
         grid.addWidget(self.label1, 2, 0)
         grid.addWidget(self.input1, 2, 1)
 
@@ -361,7 +350,7 @@ class configGui_features(QtGui.QWidget):
         grid.addWidget(self.input3, 4, 1)
 
         grid.addWidget(self.label4, 5, 0)
-       
+
         grid.addWidget(self.label5, 6, 0)
         grid.addWidget(self.input5, 6, 1)
 
@@ -380,27 +369,26 @@ class configGui_features(QtGui.QWidget):
 
         grid.addWidget(self.btn, 12, 0)
 
-        self.setLayout(grid) 
+        self.setLayout(grid)
 
         # size gets fixed
         # self.setFixedSize(450,350)
-        
-        # window box location and size 
+
+        # window box location and size
         # self.setGeometry(500, 100, 150, 20)
 
         self.setWindowTitle('Input config')
         # self.show()
 
-        # opens a cofig file 
+        # opens a cofig file
     def openConfig(self):
-        path = QFileDialog.getOpenFileName(self, 'Open File', '/') 
+        path = QFileDialog.getOpenFileName(self, 'Open File', '/')
         global path1
-        path1= str(path)
+        path1 = str(path)
 
         # path1 = "../project_dir/test1"
-        
-       
-    def createConfig_features(self,path):
+
+    def createConfig_features(self, path):
         """
         Create a config file
         """
@@ -408,10 +396,10 @@ class configGui_features(QtGui.QWidget):
         global path1
         # path1= str(path)
 
-        # update test1 name with project chosen 
+        # update test1 name with project chosen
 
         # path1 = "../project_dir/test1/tracking.cfg"
-        
+
         config = ConfigParser.ConfigParser()
 
         # # if not os.path.exists("../project_dir/test1"):
@@ -420,7 +408,7 @@ class configGui_features(QtGui.QWidget):
         #     os.remove("../project_dir/test1/feature_tracking.cfg")
         # shutil.copyfile("feature_tracking.cfg","../project_dir/test1/tracking.cfg")
 
-        # add new content to config file 
+        # add new content to config file
         config.add_section("added")
         config.set("added", "frame1", self.input1.text())
         config.set("added", "nframes", self.input2.text())
@@ -430,64 +418,56 @@ class configGui_features(QtGui.QWidget):
         config.set("added", "max-number-iterations", self.input8.text())
         config.set("added", "min-feature-time", self.input10.text())
 
-
         try:
             path1
         except NameError:
-          # self.player.load(Phonon.MediaSource(""))
+            # self.player.load(Phonon.MediaSource(""))
             error = QtGui.QErrorMessage()
             error.showMessage('''\
             no config files chosen''')
             error.exec_()
             print "no config chosen"
         else:
-            with open(path1,"a") as config_file:
+            with open(path1, "a") as config_file:
                 config.write(config_file)
 
-            # to remove the section header from config file  
+            # to remove the section header from config file
 
-            #opens the file to read      
-            f = open(path1,"r")
+            # opens the file to read
+            f = open(path1, "r")
             lines = f.readlines()
             f.close()
-            #opens the file to write 
-            f = open(path1,"w")
+            # opens the file to write
+            f = open(path1, "w")
             for line in lines:
-                #removes the section header 
-                if line!="[added]"+"\n":
+                # removes the section header
+                if line != "[added]"+"\n":
                     f.write(line)
             f.close()
 
-        # self.path1 = "dash"     
+        # self.path1 = "dash"
         # grid = QtGui.QGridLayout()
         # self.lbl1 = QtGui.QLabel(self.path1)
         # grid.addWidget(lbl1, 1, 0)
-        # self.setLayout(grid) 
+        # self.setLayout(grid)
 
 
 ##########################################################################################################################
 
 class configGui_object(QtGui.QWidget):
 
-    
     def __init__(self):
         super(configGui_object, self).__init__()
-        
         self.initUI()
-        
 
-    def initUI(self): 
-
-     
+    def initUI(self):
         # lbl1.move(15, 10)
 
         self.btn = QtGui.QPushButton('Set Config', self)
         # self.btn.move(20, 20)
         self.btn.clicked.connect(self.createConfig_objects)
-
-      
         self.label1 = QtGui.QLabel("first frame to process")
-        # input box 
+        # input box
         self.input1 = QtGui.QLineEdit()
         # self.input1.setMaximumWidth(10)
 
@@ -502,10 +482,8 @@ class configGui_object(QtGui.QWidget):
         self.label4 = QtGui.QLabel("maximum segmentation-distance")
         self.input4 = QtGui.QLineEdit()
 
-
         grid = QtGui.QGridLayout()
         grid.setSpacing(10)
-        
 
         grid.addWidget(self.label1, 2, 0)
         grid.addWidget(self.input1, 2, 1)
@@ -523,26 +501,25 @@ class configGui_object(QtGui.QWidget):
 
         # path1 = "3"
 
-        self.setLayout(grid) 
+        self.setLayout(grid)
 
         self.setWindowTitle('Input config')
         # self.show()
 
-        # opens a cofig file 
+        # opens a cofig file
     def openConfig(self):
-        path = QFileDialog.getOpenFileName(self, 'Open File', '/') 
+        path = QFileDialog.getOpenFileName(self, 'Open File', '/')
         # global path1
-        path1= str(path)
-        
-       
-    def createConfig_objects(self,path):
+        path1 = str(path)
+
+    def createConfig_objects(self, path):
         """
         Create a config file
         """
 
         config = ConfigParser.ConfigParser()
 
-        # add new content to config file 
+        # add new content to config file
         config.add_section("added")
         config.set("added", "frame1", self.input1.text())
         config.set("added", "nframes", self.input2.text())
@@ -552,36 +529,35 @@ class configGui_object(QtGui.QWidget):
         try:
             path1
         except NameError:
-          # self.player.load(Phonon.MediaSource(""))
+            # self.player.load(Phonon.MediaSource(""))
             error = QtGui.QErrorMessage()
             error.showMessage('''\
             no config files chosen''')
             error.exec_()
             print "no config chosen"
         else:
-            with open(path1,"a") as config_file:
+            with open(path1, "a") as config_file:
                 config.write(config_file)
 
-            # to remove the section header from config file  
+            # to remove the section header from config file
 
-            #opens the file to read      
-            f = open(path1,"r")
+            # opens the file to read
+            f = open(path1, "r")
             lines = f.readlines()
             f.close()
-            #opens the file to write 
-            f = open(path1,"w")
+            # opens the file to write
+            f = open(path1, "w")
             for line in lines:
-                #removes the section header 
-                if line!="[added]"+"\n":
+                # removes the section header
+                if line != "[added]"+"\n":
                     f.write(line)
             f.close()
 
-        # self.path1 = "dash"     
+        # self.path1 = "dash"
         # grid = QtGui.QGridLayout()
         # self.lbl1 = QtGui.QLabel(self.path1)
         # grid.addWidget(lbl1, 1, 0)
-        # self.setLayout(grid) 
-
+        # self.setLayout(grid)
 
 ##########################################################################################################################
 
