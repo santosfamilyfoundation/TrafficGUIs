@@ -122,10 +122,9 @@ class MainGUI(QtGui.QMainWindow):
         # self.features = configGui_features() 
          # self.btn.clicked.connect(self.createConfig_features)
 
-        # self.features.createConfig_features
-        
-        call(["feature-based-tracking","tracking.cfg","--tf","--database-filename","test1.sqlite"])
-        call(["display-trajectories.py","-i","7.mp4","-d","test1.sqlite","-o","homography.txt","-t","feature"])
+        # self.features.createConfig_features  
+        call(["feature-based-tracking","../project_dir/test1/test_feature/feature_tracking.cfg","--tf","--database-filename","../project_dir/test1/test_feature/test1.sqlite"])
+        call(["display-trajectories.py","-i","7.mp4","-d","../project_dir/test1/test_feature/test1.sqlite","-o","homography.txt","-t","feature"])
 
 
     def test_object(self):
@@ -440,8 +439,8 @@ class configGui_features(QtGui.QWidget):
 
         # opens a cofig file 
     def openConfig(self):
-        path = QFileDialog.getOpenFileName(self, 'Open File', '/') 
-        global path1
+        # path = QFileDialog.getOpenFileName(self, 'Open File', '/') 
+        # global path1
         path1= str(path)
 
         # path1 = "../project_dir/test1"
@@ -452,20 +451,26 @@ class configGui_features(QtGui.QWidget):
         Create a config file
         """
 
-        global path1
+        # global path1
         # path1= str(path)
 
-        # update test1 name with project chosen 
+        # update test1 name with file chose
 
-        # path1 = "../project_dir/test1/tracking.cfg"
+        path1 = "../project_dir/test1/tracking.cfg"
         
         config = ConfigParser.ConfigParser()
 
-        # # if not os.path.exists("../project_dir/test1"):
-        # #     os.mkdir("../project_dir/test1")
-        # if os.path.exists("../project_dir/test1/feature_tracking.cfg"):
-        #     os.remove("../project_dir/test1/feature_tracking.cfg")
-        # shutil.copyfile("feature_tracking.cfg","../project_dir/test1/tracking.cfg")
+        # create test folder 
+        if not os.path.exists("../project_dir/test1/test_feature"):
+            os.mkdir("../project_dir/test1/test_feature")
+
+        # removes feature_tracking.cfg
+        if os.path.exists("../project_dir/test1/test_feature/feature_tracking.cfg"):
+            os.remove("../project_dir/test1/test_feature/feature_tracking.cfg")
+
+        # creates new config file 
+        shutil.copyfile("tracking.cfg","../project_dir/test1/test_feature/feature_tracking.cfg")
+
 
         # add new content to config file 
         config.add_section("added")
@@ -586,8 +591,20 @@ class configGui_object(QtGui.QWidget):
         """
         Create a config file
         """
+        path1 = "../project_dir/test1/tracking.cfg"
 
         config = ConfigParser.ConfigParser()
+
+                # create test folder 
+        if not os.path.exists("../project_dir/test1/test_object"):
+            os.mkdir("../project_dir/test1/test_object")
+
+        # removes feature_tracking.cfg
+        if os.path.exists("../project_dir/test1/test_object/object_tracking.cfg"):
+            os.remove("../project_dir/test1/test_object/object_tracking.cfg")
+
+        # creates new config file 
+        shutil.copyfile("../project_dir/test1/test_feature/feature_tracking.cfg","../project_dir/test1/test_object/object_tracking.cfg")
 
         # add new content to config file 
         config.add_section("added")
