@@ -3,14 +3,14 @@ import sys
 import cv2
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
-
+import random
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-import random 
 import numpy as np
 import cvutils
-
+from app_config import AppConfig as ac
+import pm
 from plotting import visualization
 
 
@@ -25,15 +25,15 @@ class MainGUI(QtGui.QMainWindow):
         super(MainGUI, self).__init__()
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
-
+        self.newp = pm.ProjectWizard(self)
+        
         # Experimenting with organizational objects
         self.feature_tracking = Organizer()
         self.results = Organizer()
 
-        # self.this
-
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
+        self.ui.actionNew_Project.triggered.connect(self.create_new_project)
         # self.ui.actionLoad_Image.triggered.connect(self.open_image)
         self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_aerial)  # TODO: New method. Check which tab is open. Move to homography tab if not already there. Then call open_image_aerial.
         self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_camera)
@@ -54,9 +54,11 @@ class MainGUI(QtGui.QMainWindow):
         # self.canvas1 = FigureCanvas(self.figure1)
         # self.ui.results_plot_layout1.addWidget(self.canvas1)
         # self.results_plot_plot1()
-        aplot = visualization.road_user_traj('stmarc.sqlite', 30, 'homography.txt', 'stmarc_image.png')
-        aplot.add_to_widget(self.ui.results_plot_layout1)
-        aplot.show()
+
+        ####Graphs for Sam
+        # aplot = visualization.road_user_traj('stmarc.sqlite', 30, 'homography.txt', 'stmarc_image.png')
+        # aplot.add_to_widget(self.ui.results_plot_layout1)
+        # aplot.show()
 
         # self.figure2 = Figure()
         # self.canvas2 = FigureCanvas(self.figure2)
@@ -107,9 +109,14 @@ class MainGUI(QtGui.QMainWindow):
         self.canvas2.draw()
 
     def open_project(self):
-        fname = QtGui.QFileDialog.getOpenFileName(
-            self, 'Open Project', '/home')
-        print(fname)
+        fname = QtGui.QFileDialog.getExistingDirectory()
+        #     self, 'Open Project', '/home')
+        # print(fname)
+        pass
+
+    def create_new_project(self):
+        self.newp.restart()
+        self.newp.show()
 
     def homography_open_image_camera(self):
         """Opens a file dialog, allowing user to select an camera image file.
@@ -173,10 +180,6 @@ class MainGUI(QtGui.QMainWindow):
         self.worldPts = self.unitPixRatio * (np.array(self.ui.homography_aerialview.list_points()))
         self.videoPts = np.array(self.ui.homography_cameraview.list_points())
 
-        print self.worldPts
-        print self.videoPts
-
-
         if len(self.worldPts) >= 4:
             if len(self.worldPts) == len(self.videoPts):
                 self.homography, self.mask = cv2.findHomography(self.videoPts, self.worldPts)
@@ -184,11 +187,7 @@ class MainGUI(QtGui.QMainWindow):
         if self.homography is None:
             return
 
-        # self.homography = np.loadtxt("laurier-homography.txt")
-        # f = open('point-correspondences.txt', 'a')
-        # np.savetxt(f, self.worldPts.T)
-        # np.savetxt(f, self.videoPts.T)
-        # f.close()
+        # self.homography = np.loadtxt("homography.txt")
 
         if self.homography.size>0:
             np.savetxt("homography.txt",self.homography)
@@ -226,6 +225,7 @@ def main():
     app.exec_()
 
 if __name__ == '__main__':
+    ac.load_application_config()
     app = QtGui.QApplication(sys.argv)
     ex = MainGUI()
     sys.exit(main())
