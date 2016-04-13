@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import sys
 import cv2
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from safety_main import Ui_TransportationSafety
 import random
+import os
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
@@ -34,7 +35,6 @@ class MainGUI(QtGui.QMainWindow):
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
         self.ui.actionNew_Project.triggered.connect(self.create_new_project)
-        # self.ui.actionLoad_Image.triggered.connect(self.open_image)
         self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_aerial)  # TODO: New method. Check which tab is open. Move to homography tab if not already there. Then call open_image_aerial.
         self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_camera)
         self.ui.main_tab_widget.setCurrentIndex(0)  # Start on the first tab
@@ -64,7 +64,6 @@ class MainGUI(QtGui.QMainWindow):
         # self.canvas2 = FigureCanvas(self.figure2)
         # self.ui.results_plot_layout2.addWidget(self.canvas2)
         # self.results_plot_plot2()
-        # self.ui.track_image.mousePressEvent = self.get_image_position
 
         ## CONFIGURE HOMOGRAPHY ##
         self.ui.homography_hslider_zoom_camera_image.zoom_target = self.ui.homography_cameraview
@@ -72,11 +71,8 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.homography_hslider_zoom_computed_image.zoom_target = self.ui.homography_results
         self.ui.homography_cameraview.status_label = self.ui.homography_camera_status_label
         self.ui.homography_aerialview.status_label = self.ui.homography_aerial_status_label
-        self.ui.homography_compute_button.clicked.connect(self.compute_homography)
+        self.ui.homography_compute_button.clicked.connect(self.homography_compute)
         self.show()
-
-    def homography_load_aerial_image(self):
-        pass
 
     def show_next_tab(self):
         curr_i = self.ui.main_tab_widget.currentIndex()
@@ -161,20 +157,7 @@ class MainGUI(QtGui.QMainWindow):
             image = None
         return image
 
-    # def open_image(self):
-    #     fname = QtGui.QFileDialog.getOpenFileName(self, 'Open Project', '')
-    #     print(fname)
-    #     tracking_image = QtGui.QImage(fname)
-    #     pixmap = QtGui.QPixmap.fromImage(tracking_image)
-    #     pixmap = pixmap.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
-    #     self._tracking_image = DisplayImage(tracking_image, pixmap)
-    #     self.ui.track_image.setPixmap(pixmap)
-
-    def get_image_position(self, event):
-        print(event.pos())
-        print(self._tracking_image.image.pixel(event.x(), event.y()))
-
-    def compute_homography(self):
+    def homography_compute(self):
         px_text = self.ui.unit_px_input.text()
         self.unitPixRatio = float(unicode(px_text))
         self.worldPts = self.unitPixRatio * (np.array(self.ui.homography_aerialview.list_points()))
@@ -187,37 +170,42 @@ class MainGUI(QtGui.QMainWindow):
         if self.homography is None:
             return
 
+        homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
         # self.homography = np.loadtxt("homography.txt")
 
-        if self.homography.size>0:
-            np.savetxt("homography.txt",self.homography)
+        if self.homography.size > 0:
+            txt_path = os.path.join(homography_path, "homography.txt")
+            np.savetxt(txt_path, self.homography)  # Save computed homography.
 
-        self.display_results()
+        self.homography_display_results()
 
-    def display_results(self):
-        
-        worldImg = cv2.imread("aerial.png")
-        videoImg = cv2.imread("camera.png")
+    def homography_display_results(self):
+        homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
+        worldImg = cv2.imread(os.path.join(homography_path, "aerial.png"))
+        videoImg = cv2.imread(os.path.join(homography_path, "camera.png"))
 
         invHomography = np.linalg.inv(self.homography)
 
         projectedWorldPts = cvutils.projectArray(invHomography, self.worldPts.T).T
         projectedVideoPts = cvutils.projectArray(self.homography, self.videoPts.T).T
 
+        # TODO: Nicer formatting for computed goodness images
         for i in range(self.worldPts.shape[0]):
             # world image
-            cv2.circle(worldImg,tuple(np.int32(np.round(self.worldPts[i]/self.unitPixRatio))),2,cvutils.cvBlue)
-            cv2.circle(worldImg,tuple(np.int32(np.round(projectedVideoPts[i]/self.unitPixRatio))),2,cvutils.cvRed)
-            cv2.putText(worldImg, str(i+1), tuple(np.int32(np.round(self.worldPts[i]/self.unitPixRatio))+5), cv2.FONT_HERSHEY_PLAIN, 2., cvutils.cvBlue, 2)
+            cv2.circle(worldImg, tuple(np.int32(np.round(self.worldPts[i] / self.unitPixRatio))), 2, cvutils.cvBlue)
+            cv2.circle(worldImg, tuple(np.int32(np.round(projectedVideoPts[i] / self.unitPixRatio))), 2, cvutils.cvRed)
+            cv2.putText(worldImg, str(i+1), tuple(np.int32(np.round(self.worldPts[i]/self.unitPixRatio)) + 5), cv2.FONT_HERSHEY_PLAIN, 2., cvutils.cvBlue, 2)
             # video image
-            cv2.circle(videoImg,tuple(np.int32(np.round(self.videoPts[i]))),2,cvutils.cvBlue)
-            cv2.circle(videoImg,tuple(np.int32(np.round(projectedWorldPts[i]))),2,cvutils.cvRed)
-            cv2.putText(videoImg, str(i+1), tuple(np.int32(np.round(self.videoPts[i])+5)), cv2.FONT_HERSHEY_PLAIN, 2., cvutils.cvBlue, 2)
-       
-        cv2.imwrite('aerial_test.png', worldImg)
-        cv2.imwrite('camera_test.png', videoImg)
+            cv2.circle(videoImg, tuple(np.int32(np.round(self.videoPts[i]))), 2, cvutils.cvBlue)
+            cv2.circle(videoImg, tuple(np.int32(np.round(projectedWorldPts[i]))), 2, cvutils.cvRed)
+            cv2.putText(videoImg, str(i+1), tuple(np.int32(np.round(self.videoPts[i]) + 5)), cv2.FONT_HERSHEY_PLAIN, 2., cvutils.cvBlue, 2)
+        aerial_goodness_path = os.path.join(homography_path, "homography_goodness_aerial.png")
+        camera_goodness_path = os.path.join(homography_path, "homography_goodness_camera.png")
 
-        self.ui.homography_results.load_image(QtGui.QImage('aerial_test.png'))
+        cv2.imwrite(aerial_goodness_path, worldImg)  # Save aerial goodness image
+        cv2.imwrite(camera_goodness_path, videoImg)  # Save camera goodness image
+
+        self.ui.homography_results.load_image(QtGui.QImage(aerial_goodness_path))  # Load aerial goodness image into gui
 
 
 
