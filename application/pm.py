@@ -151,7 +151,8 @@ class ProjectWizard(QtGui.QWizard):
         self.config_parser.set("info", "project_name", self.project_name)
         self.config_parser.set("info", "creation_date", timestamp)
         self.config_parser.add_section("video")
-        self.config_parser.set("video", "path", self.videopath)
+        self.config_parser.set("video", "name", os.path.basename(self.videopath))
+        self.config_parser.set("video", "source", self.videopath)
         self.config_parser.set("video", "framerate", str(self.ui.newp_video_fps_input.text()))
         self.config_parser.set("video", "start", video_timestamp)
 
@@ -169,7 +170,7 @@ def load_project(folder_path, main_window):
 
     config_parser = SafeConfigParser()
     config_parser.read(project_cfg)  # Read project config file.
-
+    ac.CURRENT_PROJECT_VIDEO_PATH = os.path.join(ac.CURRENT_PROJECT_PATH, config_parser.get("video", "name"))
     load_homography(main_window)
     load_feature_tracking(main_window)
     load_roadusers_tracking(main_window)
@@ -190,32 +191,25 @@ def load_homography(main_window):
     gui.homography_cameraview.load_image_from_path(camera_path)
 
     # Has a homography been previously computed?
+    if check_project_cfg_section("homography"):
+        # load unit-pixel ratio
+        upr_exists, upr = check_project_cfg_option("homography", "unitpixelratio")
+        if upr_exists:
+            gui.unit_px_input.setText(upr)
 
 
 def load_feature_tracking(main_window):
-    video_path_exists, video_path = check_project_cfg_option("video", "path")
-    if video_path_exists:
-        if os.path.exists(video_path):
-            main_window.feature_tracking_video_player.loadVideo(video_path)
-        else:
-            # Path specified in config file no longer exists
-            print("ERR: Video not found at \"{}\".".format(video_path))
-    else:
-        # No video specified in project config file
-        print("ERR: No video specified in project configuration file. Invalid project.")
+    """
+    Loads feature_tracking information into the specified main window.
+    """
+    main_window.feature_tracking_video_player.loadVideo(ac.CURRENT_PROJECT_VIDEO_PATH)
 
 
 def load_roadusers_tracking(main_window):
-    video_path_exists, video_path = check_project_cfg_option("video", "path")
-    if video_path_exists:
-        if os.path.exists(video_path):
-            main_window.roadusers_tracking_video_player.loadVideo(video_path)
-        else:
-            # Path specified in config file no longer exists
-            print("ERR: Video not found at \"{}\".".format(video_path))
-    else:
-        # No video specified in project config file
-        print("ERR: No video specified in project configuration file. Invalid project.")
+    """
+    Loads road user tracking information into the specified main window.
+    """
+    main_window.feature_tracking_video_player.loadVideo(ac.CURRENT_PROJECT_VIDEO_PATH)
 
 
 def update_project_cfg(section, option, value):
