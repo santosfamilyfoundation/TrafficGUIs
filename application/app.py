@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 import sys
+import cv2
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 import random
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-
+import numpy as np
+import cvutils
 from app_config import AppConfig as ac
 import pm
-
 from plotting import visualization
 
 
@@ -27,7 +28,6 @@ class MainGUI(QtGui.QMainWindow):
         self.newp = pm.ProjectWizard(self)
         
         # Experimenting with organizational objects
-        self.homography = Organizer()
         self.feature_tracking = Organizer()
         self.results = Organizer()
 
@@ -48,14 +48,17 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.feature_tracking_continue_button.clicked.connect(self.show_next_tab)
         self.ui.feature_tracking_back_button.clicked.connect(self.show_prev_tab)
 
+
         # Results plotting
         # self.figure1 = Figure()
         # self.canvas1 = FigureCanvas(self.figure1)
         # self.ui.results_plot_layout1.addWidget(self.canvas1)
         # self.results_plot_plot1()
-        aplot = visualization.road_user_traj('stmarc.sqlite', 30, 'homography.txt', 'stmarc_image.png')
-        aplot.add_to_widget(self.ui.results_plot_layout1)
-        aplot.show()
+
+        ####Graphs for Sam
+        # aplot = visualization.road_user_traj('stmarc.sqlite', 30, 'homography.txt', 'stmarc_image.png')
+        # aplot.add_to_widget(self.ui.results_plot_layout1)
+        # aplot.show()
 
         # self.figure2 = Figure()
         # self.canvas2 = FigureCanvas(self.figure2)
@@ -69,6 +72,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.homography_hslider_zoom_computed_image.zoom_target = self.ui.homography_results
         self.ui.homography_cameraview.status_label = self.ui.homography_camera_status_label
         self.ui.homography_aerialview.status_label = self.ui.homography_aerial_status_label
+        self.ui.homography_compute_button.clicked.connect(self.compute_homography)
         self.show()
 
     def homography_load_aerial_image(self):
@@ -169,6 +173,52 @@ class MainGUI(QtGui.QMainWindow):
     def get_image_position(self, event):
         print(event.pos())
         print(self._tracking_image.image.pixel(event.x(), event.y()))
+
+    def compute_homography(self):
+        px_text = self.ui.unit_px_input.text()
+        self.unitPixRatio = float(unicode(px_text))
+        self.worldPts = self.unitPixRatio * (np.array(self.ui.homography_aerialview.list_points()))
+        self.videoPts = np.array(self.ui.homography_cameraview.list_points())
+
+        if len(self.worldPts) >= 4:
+            if len(self.worldPts) == len(self.videoPts):
+                self.homography, self.mask = cv2.findHomography(self.videoPts, self.worldPts)
+
+        if self.homography is None:
+            return
+
+        # self.homography = np.loadtxt("homography.txt")
+
+        if self.homography.size>0:
+            np.savetxt("homography.txt",self.homography)
+
+        self.display_results()
+
+    def display_results(self):
+        
+        worldImg = cv2.imread("aerial.png")
+        videoImg = cv2.imread("camera.png")
+
+        invHomography = np.linalg.inv(self.homography)
+
+        projectedWorldPts = cvutils.projectArray(invHomography, self.worldPts.T).T
+        projectedVideoPts = cvutils.projectArray(self.homography, self.videoPts.T).T
+
+        for i in range(self.worldPts.shape[0]):
+            # world image
+            cv2.circle(worldImg,tuple(np.int32(np.round(self.worldPts[i]/self.unitPixRatio))),2,cvutils.cvBlue)
+            cv2.circle(worldImg,tuple(np.int32(np.round(projectedVideoPts[i]/self.unitPixRatio))),2,cvutils.cvRed)
+            cv2.putText(worldImg, str(i+1), tuple(np.int32(np.round(self.worldPts[i]/self.unitPixRatio))+5), cv2.FONT_HERSHEY_PLAIN, 2., cvutils.cvBlue, 2)
+            # video image
+            cv2.circle(videoImg,tuple(np.int32(np.round(self.videoPts[i]))),2,cvutils.cvBlue)
+            cv2.circle(videoImg,tuple(np.int32(np.round(projectedWorldPts[i]))),2,cvutils.cvRed)
+            cv2.putText(videoImg, str(i+1), tuple(np.int32(np.round(self.videoPts[i])+5)), cv2.FONT_HERSHEY_PLAIN, 2., cvutils.cvBlue, 2)
+       
+        cv2.imwrite('aerial_test.png', worldImg)
+        cv2.imwrite('camera_test.png', videoImg)
+
+        self.ui.homography_results.load_image(QtGui.QImage('aerial_test.png'))
+
 
 
 def main():
