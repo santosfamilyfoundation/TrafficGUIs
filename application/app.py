@@ -440,11 +440,11 @@ class configGui_features(QtGui.QWidget):
 
         # opens a cofig file 
     def openConfig(self):
-        # path = QFileDialog.getOpenFileName(self, 'Open File', '/') 
+        path = QFileDialog.getOpenFileName(self, 'Open File', '/') 
         global path1
-        # path1= str(path)
+        path1= str(path)
 
-        path1 = "../Project/temp"
+        # path1 = "../project_dir/test1"
         
        
     def createConfig_features(self,path):
@@ -455,16 +455,17 @@ class configGui_features(QtGui.QWidget):
         global path1
         # path1= str(path)
 
-        path1 = "../Project/temp/tracking.cfg"
+        # update test1 name with project chosen 
+
+        # path1 = "../project_dir/test1/tracking.cfg"
         
         config = ConfigParser.ConfigParser()
 
-        if not os.path.exists("../Project/temp"):
-            os.mkdir("../Project/temp")
-        if os.path.exists("../Project/temp/tracking.cfg"):
-            os.remove("../Project/temp/tracking.cfg")
-        shutil.copyfile("tracking.cfg","../Project/temp/tracking.cfg")
-
+        # # if not os.path.exists("../project_dir/test1"):
+        # #     os.mkdir("../project_dir/test1")
+        # if os.path.exists("../project_dir/test1/feature_tracking.cfg"):
+        #     os.remove("../project_dir/test1/feature_tracking.cfg")
+        # shutil.copyfile("feature_tracking.cfg","../project_dir/test1/tracking.cfg")
 
         # add new content to config file 
         config.add_section("added")
