@@ -171,7 +171,9 @@ def load_project(folder_path, main_window):
     config_parser.read(project_cfg)  # Read project config file.
 
     load_homography(main_window)
-    
+    load_feature_tracking(main_window)
+    load_roadusers_tracking(main_window)
+
 
 def load_homography(main_window):
     """
@@ -186,6 +188,34 @@ def load_homography(main_window):
     # Load images
     gui.homography_aerialview.load_image_from_path(aerial_path)
     gui.homography_cameraview.load_image_from_path(camera_path)
+
+    # Has a homography been previously computed?
+
+
+def load_feature_tracking(main_window):
+    video_path_exists, video_path = check_project_cfg_option("video", "path")
+    if video_path_exists:
+        if os.path.exists(video_path):
+            main_window.feature_tracking_video_player.loadVideo(video_path)
+        else:
+            # Path specified in config file no longer exists
+            print("ERR: Video not found at \"{}\".".format(video_path))
+    else:
+        # No video specified in project config file
+        print("ERR: No video specified in project configuration file. Invalid project.")
+
+
+def load_roadusers_tracking(main_window):
+    video_path_exists, video_path = check_project_cfg_option("video", "path")
+    if video_path_exists:
+        if os.path.exists(video_path):
+            main_window.roadusers_tracking_video_player.loadVideo(video_path)
+        else:
+            # Path specified in config file no longer exists
+            print("ERR: Video not found at \"{}\".".format(video_path))
+    else:
+        # No video specified in project config file
+        print("ERR: No video specified in project configuration file. Invalid project.")
 
 
 def update_project_cfg(section, option, value):
