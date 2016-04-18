@@ -11,6 +11,8 @@ import datetime
 from shutil import copy
 import cv2
 import Image
+import cvutils
+import numpy as np
 
 from app_config import AppConfig as ac
 
@@ -46,7 +48,7 @@ class ProjectWizard(QtGui.QWizard):
 
     def open_aerial_image(self):
         filt = "Images (*.png *.jpg *.jpeg *.bmp *.tif *.gif)"  # Select only images
-        # default_dir = 
+        # default_dir =
         fname = self.open_fd(dialog_text="Select aerial image", file_filter=filt)
         if fname:
             self.ui.newp_aerial_image_input.setText(fname)
@@ -57,7 +59,7 @@ class ProjectWizard(QtGui.QWizard):
 
     def open_video(self):
         filt = "Videos (*.mp4 *.avi *.mpg *mpeg)"  # Select only videos
-        # default_dir = 
+        # default_dir =
         fname = self.open_fd(dialog_text="Select video for analysis", file_filter=filt)
         if fname:
             self.ui.newp_video_input.setText(fname)
@@ -151,7 +153,8 @@ class ProjectWizard(QtGui.QWizard):
         self.config_parser.set("info", "project_name", self.project_name)
         self.config_parser.set("info", "creation_date", timestamp)
         self.config_parser.add_section("video")
-        self.config_parser.set("video", "path", self.videopath)
+        self.config_parser.set("video", "name", os.path.basename(self.videopath))
+        self.config_parser.set("video", "source", self.videopath)
         self.config_parser.set("video", "framerate", str(self.ui.newp_video_fps_input.text()))
         self.config_parser.set("video", "start", video_timestamp)
 
@@ -169,9 +172,11 @@ def load_project(folder_path, main_window):
 
     config_parser = SafeConfigParser()
     config_parser.read(project_cfg)  # Read project config file.
-
+    ac.CURRENT_PROJECT_VIDEO_PATH = os.path.join(ac.CURRENT_PROJECT_PATH, config_parser.get("video", "name"))
     load_homography(main_window)
-    
+    load_feature_tracking(main_window)
+    load_roadusers_tracking(main_window)
+
 
 def load_homography(main_window):
     """
@@ -187,22 +192,58 @@ def load_homography(main_window):
     gui.homography_aerialview.load_image_from_path(aerial_path)
     gui.homography_cameraview.load_image_from_path(camera_path)
 
+    corr_path = os.path.join(path, "homography", "point-correspondences.txt")
+    homo_path = os.path.join(path, "homography", "homography.txt")
+
+    if check_project_cfg_section("homography"):
+        # load unit-pixel ratio
+        upr_exists, upr = check_project_cfg_option("homography", "unitpixelratio")
+        if upr_exists:
+            gui.unit_px_input.setText(upr)
+
+    worldPts, videoPts = cvutils.loadPointCorrespondences(corr_path)
+    main_window.homography = np.loadtxt(homo_path)
+    for point in worldPts:
+        main_window.ui.homography_aerialview.scene().add_point(point)
+    for point in videoPts:
+        main_window.ui.homography_cameraview.scene().add_point(point)
+    # Has a homography been previously computed?
+
+
+def load_feature_tracking(main_window):
+    """
+    Loads feature_tracking information into the specified main window.
+    """
+    main_window.feature_tracking_video_player.loadVideo(ac.CURRENT_PROJECT_VIDEO_PATH)
+
+
+def load_roadusers_tracking(main_window):
+    """
+    Loads road user tracking information into the specified main window.
+    """
+    main_window.roadusers_tracking_video_player.loadVideo(ac.CURRENT_PROJECT_VIDEO_PATH)
+
 
 def update_project_cfg(section, option, value):
     """
     Updates a single value in the current open project's configuration file.
-    Writes nothing and returns -1 if no project currently open.
+    Writes nothing and returns -1 if no project currently open. Creates sections
+    in the config file if they do not already exist.
 
     Args:
         section (str): Name of the section to write new option-value pair to write.
         option (str): Name of the option to write/update.
         value (str): Value to write/update assocaited with the specified option.
     """
+    if not ac.CURRENT_PROJECT_CONFIG:
+        return -1
     cfp = SafeConfigParser()
     cfp.read(ac.CURRENT_PROJECT_CONFIG)
-    cfp.set(section, option, value)
+    if section not in cfp.sections():  # If the given section does not exist,
+        cfp.add_section(section)        # then create it.
+    cfp.set(section, option, value)  # Set the option-value pair
     with open(ac.CURRENT_PROJECT_CONFIG, "wb") as cfg_file:
-        cfp.write(cfg_file)
+        cfp.write(cfg_file)  # Write changes
 
 
 def check_project_cfg_option(section, option):
@@ -227,3 +268,19 @@ def check_project_cfg_option(section, option):
         return (False, None)
     else:
         return (True, value)
+
+
+def check_project_cfg_section(section):
+    """
+    Checks the currently open project's configuration file for the section. If it exists,
+    this returns True. If it does not exist, this returns False.
+
+    Args:
+        section (str): Name of the section to check existance of.
+    """
+    cfp = SafeConfigParser()
+    cfp.read(ac.CURRENT_PROJECT_CONFIG)
+    if section in cfp.sections():  # If the given section exists,
+        return True                # then return True.
+    else:                          # Otherwise,
+        return False               # then return False

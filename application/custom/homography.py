@@ -2,6 +2,7 @@
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
 
+
 class HomographyView(QtGui.QGraphicsView):
     """QGraphicsView used for manipulating and computing image-based homographies.
     """
@@ -51,6 +52,7 @@ class HomographyView(QtGui.QGraphicsView):
             return
         self.status_label.setText("{} points selected.".format(len(point_list)))
 
+
 class HomographyResultView(QtGui.QGraphicsView):
     """QGraphicsView used for viewing the result of image-based homographies.
     """
@@ -79,6 +81,18 @@ class HomographyResultView(QtGui.QGraphicsView):
         self.setScene(new_scene)
         self.show()
         self.image_loaded = True
+
+    def clear_image(self):
+        """
+        Call this to clear the image from this HomographyView's scene.
+        The scene will be filled with a placeholder grey background and message.
+        """
+        new_scene = QtGui.QGraphicsScene(self)
+        new_scene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(124, 124, 124)))
+        txt = QtGui.QGraphicsSimpleTextItem("Compute homography to see results here.")
+        new_scene.addItem(txt)
+        self.setScene(new_scene)
+        self.show()
 
 
 class HomographyScene(QtGui.QGraphicsScene):
@@ -217,8 +231,3 @@ class HomographyScene(QtGui.QGraphicsScene):
                 return False
         else:
             return False
-
-
-
-
-
