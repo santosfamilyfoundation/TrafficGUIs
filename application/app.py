@@ -92,10 +92,6 @@ class MainGUI(QtGui.QMainWindow):
         self.feature_tracking_video_player = VideoPlayer()
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer.openVideo)
         self.ui.feature_tracking_video_layout.addWidget(self.feature_tracking_video_player)
-<<<<<<< HEAD
-        self.feature_tracking_video_player.loadVideo("/home/reggert/Documents/easthall/3.mp4")
-=======
->>>>>>> de73d79153a16e8dbc1a0c5570f83cb1b97e7363
 
         # config
         self.configGui_features = configGui_features()
@@ -113,11 +109,7 @@ class MainGUI(QtGui.QMainWindow):
         self.roadusers_tracking_video_player = VideoPlayer()
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer3.openVideo)
         self.ui.roadusers_tracking_video_layout.addWidget(self.roadusers_tracking_video_player)
-<<<<<<< HEAD
-        self.roadusers_tracking_video_player.loadVideo("/home/reggert/Documents/easthall/3.mp4")
 
-=======
->>>>>>> de73d79153a16e8dbc1a0c5570f83cb1b97e7363
         # config
         self.configGui_object = configGui_object()
         self.ui.actionOpen_Config.triggered.connect(self.configGui_object.openConfig)
@@ -146,12 +138,12 @@ class MainGUI(QtGui.QMainWindow):
 
     def test_feature(self):
         call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg","--tf","--database-filename",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/test1.sqlite"])
-        call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/test1.sqlite","-o","homography.txt","-t","feature"])
+        call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/test1.sqlite","-o","homography/homography.txt","-t","feature"])
 
     def test_object(self):
         call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg","--tf","--database-filename",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/test1.sqlite"])
         call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg","--gf","--database-filename",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/test1.sqlite"])
-        call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/test1.sqlite","-o","homography.txt","-t","object"])
+        call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/test1.sqlite","-o","homography/homography.txt","-t","object"])
 
 
 # for the run button
@@ -185,7 +177,7 @@ class MainGUI(QtGui.QMainWindow):
 
         call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg","--tf","--database-filename",ac.CURRENT_PROJECT_PATH + "/run/test1.sqlite"])
         call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg","--gf","--database-filename",ac.CURRENT_PROJECT_PATH + "/run/test1.sqlite"])
-        call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/run/test1.sqlite","-o","homography.txt","-t","object"])
+        call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/run/test1.sqlite","-o","homography/homography.txt","-t","object"])
 
 ################################################################################################
     def homography_load_aerial_image(self):

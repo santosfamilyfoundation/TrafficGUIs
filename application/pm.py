@@ -71,10 +71,8 @@ class ProjectWizard(QtGui.QWizard):
     # def move_video
     def open_fd(self, dialog_text="Open", file_filter="", default_dir=""):
         """Opens a file dialog, allowing user to select a file.
-
         Returns the selected filename. If the user presses cancel, this returns
         a null string ("").
-
         Args:
             dialog_text [Optional(str.)]: Text to prompt user with in open file
                 dialog. Defaults to "Open".
@@ -82,7 +80,6 @@ class ProjectWizard(QtGui.QWizard):
                 types. Defaults to "".
             default_dir [Optional(str.)]: Path of the default directory to open
                 the file dialog box to. Defaults to "".
-
         Returns:
             str: Filename selected. Null string ("") if no file selected.
         """
@@ -192,21 +189,15 @@ def load_homography(main_window):
     gui.homography_aerialview.load_image_from_path(aerial_path)
     gui.homography_cameraview.load_image_from_path(camera_path)
 
-<<<<<<< HEAD
-    # Has a homography been previously computed?
-=======
     corr_path = os.path.join(path, "homography", "point-correspondences.txt")
     homo_path = os.path.join(path, "homography", "homography.txt")
 
->>>>>>> de73d79153a16e8dbc1a0c5570f83cb1b97e7363
     if check_project_cfg_section("homography"):
         # load unit-pixel ratio
         upr_exists, upr = check_project_cfg_option("homography", "unitpixelratio")
         if upr_exists:
             gui.unit_px_input.setText(upr)
 
-<<<<<<< HEAD
-=======
     worldPts, videoPts = cvutils.loadPointCorrespondences(corr_path)
     main_window.homography = np.loadtxt(homo_path)
     for point in worldPts:
@@ -215,7 +206,6 @@ def load_homography(main_window):
         main_window.ui.homography_cameraview.scene().add_point(point)
     # Has a homography been previously computed?
 
->>>>>>> de73d79153a16e8dbc1a0c5570f83cb1b97e7363
 
 def load_feature_tracking(main_window):
     """
@@ -228,11 +218,7 @@ def load_roadusers_tracking(main_window):
     """
     Loads road user tracking information into the specified main window.
     """
-<<<<<<< HEAD
-    main_window.feature_tracking_video_player.loadVideo(ac.CURRENT_PROJECT_VIDEO_PATH)
-=======
     main_window.roadusers_tracking_video_player.loadVideo(ac.CURRENT_PROJECT_VIDEO_PATH)
->>>>>>> de73d79153a16e8dbc1a0c5570f83cb1b97e7363
 
 
 def update_project_cfg(section, option, value):
@@ -240,7 +226,6 @@ def update_project_cfg(section, option, value):
     Updates a single value in the current open project's configuration file.
     Writes nothing and returns -1 if no project currently open. Creates sections
     in the config file if they do not already exist.
-
     Args:
         section (str): Name of the section to write new option-value pair to write.
         option (str): Name of the option to write/update.
@@ -262,7 +247,6 @@ def check_project_cfg_option(section, option):
     Checks the currently open project's configuration file for the specified option
     in the specified section. If it exists, this returns (True, <value>). If it does not
     exist, this returns (False, None).
-
     Args:
         section (str): Name of the section to check for option.
         option (str): Name of the option check/return.
@@ -285,7 +269,6 @@ def check_project_cfg_section(section):
     """
     Checks the currently open project's configuration file for the section. If it exists,
     this returns True. If it does not exist, this returns False.
-
     Args:
         section (str): Name of the section to check existance of.
     """
