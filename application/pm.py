@@ -11,6 +11,8 @@ import datetime
 from shutil import copy
 import cv2
 import Image
+import cvutils
+import numpy as np
 
 from app_config import AppConfig as ac
 
@@ -190,13 +192,30 @@ def load_homography(main_window):
     gui.homography_aerialview.load_image_from_path(aerial_path)
     gui.homography_cameraview.load_image_from_path(camera_path)
 
+<<<<<<< HEAD
     # Has a homography been previously computed?
+=======
+    corr_path = os.path.join(path, "homography", "point-correspondences.txt")
+    homo_path = os.path.join(path, "homography", "homography.txt")
+
+>>>>>>> de73d79153a16e8dbc1a0c5570f83cb1b97e7363
     if check_project_cfg_section("homography"):
         # load unit-pixel ratio
         upr_exists, upr = check_project_cfg_option("homography", "unitpixelratio")
         if upr_exists:
             gui.unit_px_input.setText(upr)
 
+<<<<<<< HEAD
+=======
+    worldPts, videoPts = cvutils.loadPointCorrespondences(corr_path)
+    main_window.homography = np.loadtxt(homo_path)
+    for point in worldPts:
+        main_window.ui.homography_aerialview.scene().add_point(point)
+    for point in videoPts:
+        main_window.ui.homography_cameraview.scene().add_point(point)
+    # Has a homography been previously computed?
+
+>>>>>>> de73d79153a16e8dbc1a0c5570f83cb1b97e7363
 
 def load_feature_tracking(main_window):
     """
@@ -209,7 +228,11 @@ def load_roadusers_tracking(main_window):
     """
     Loads road user tracking information into the specified main window.
     """
+<<<<<<< HEAD
     main_window.feature_tracking_video_player.loadVideo(ac.CURRENT_PROJECT_VIDEO_PATH)
+=======
+    main_window.roadusers_tracking_video_player.loadVideo(ac.CURRENT_PROJECT_VIDEO_PATH)
+>>>>>>> de73d79153a16e8dbc1a0c5570f83cb1b97e7363
 
 
 def update_project_cfg(section, option, value):

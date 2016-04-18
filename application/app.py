@@ -92,7 +92,10 @@ class MainGUI(QtGui.QMainWindow):
         self.feature_tracking_video_player = VideoPlayer()
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer.openVideo)
         self.ui.feature_tracking_video_layout.addWidget(self.feature_tracking_video_player)
+<<<<<<< HEAD
         self.feature_tracking_video_player.loadVideo("/home/reggert/Documents/easthall/3.mp4")
+=======
+>>>>>>> de73d79153a16e8dbc1a0c5570f83cb1b97e7363
 
         # config
         self.configGui_features = configGui_features()
@@ -110,8 +113,11 @@ class MainGUI(QtGui.QMainWindow):
         self.roadusers_tracking_video_player = VideoPlayer()
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer3.openVideo)
         self.ui.roadusers_tracking_video_layout.addWidget(self.roadusers_tracking_video_player)
+<<<<<<< HEAD
         self.roadusers_tracking_video_player.loadVideo("/home/reggert/Documents/easthall/3.mp4")
 
+=======
+>>>>>>> de73d79153a16e8dbc1a0c5570f83cb1b97e7363
         # config
         self.configGui_object = configGui_object()
         self.ui.actionOpen_Config.triggered.connect(self.configGui_object.openConfig)
@@ -271,6 +277,7 @@ class MainGUI(QtGui.QMainWindow):
         return image
 
     def homography_compute(self):
+        #TO DO: display error message if points are < 4
         px_text = self.ui.unit_px_input.text()
         self.unitPixRatio = float(unicode(px_text))
         self.worldPts = self.unitPixRatio * (np.array(self.ui.homography_aerialview.list_points()))
@@ -285,11 +292,17 @@ class MainGUI(QtGui.QMainWindow):
 
         pm.update_project_cfg("homography", "unitpixelratio", str(self.unitPixRatio))
         homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
-        # self.homography = np.loadtxt("homography.txt")
 
         if self.homography.size > 0:
             txt_path = os.path.join(homography_path, "homography.txt")
             np.savetxt(txt_path, self.homography)  # Save computed homography.
+
+        corr_path = os.path.join(homography_path, "point-correspondences.txt")
+        f = open(corr_path, 'w') #save points to be loaded later
+        
+        np.savetxt(f, self.worldPts.T)
+        np.savetxt(f, self.videoPts.T)
+        f.close()
 
         self.homography_display_results()
 
