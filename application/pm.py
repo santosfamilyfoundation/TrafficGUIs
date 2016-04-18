@@ -209,7 +209,7 @@ def load_roadusers_tracking(main_window):
     """
     Loads road user tracking information into the specified main window.
     """
-    main_window.feature_tracking_video_player.loadVideo(ac.CURRENT_PROJECT_VIDEO_PATH)
+    main_window.roadusers_tracking_video_player.loadVideo(ac.CURRENT_PROJECT_VIDEO_PATH)
 
 
 def update_project_cfg(section, option, value):
