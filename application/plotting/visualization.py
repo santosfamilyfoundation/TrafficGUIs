@@ -137,7 +137,7 @@ def road_user_traj(fig, filename, fps, homographyFile, roadImageFile):
     # return aplot
 
 
-def road_user_vels(filename, fps):
+def road_user_vels(fig, filename, fps):
     """
     Creates a histogram of road-user velocities, segregated by road user type.
     """
@@ -198,7 +198,7 @@ def road_user_vels(filename, fps):
     width = 0.1       # the width of the bars
     bins = np.linspace(0, 40, 20)
 
-    fig = plt.figure()
+    # fig = plt.figure()
     ax = fig.add_subplot(111)
 
     colors = [(0, 0, 0), (0, 0, 1), (0, 1, 0), (1, 0, 0),
@@ -223,7 +223,7 @@ def road_user_vels(filename, fps):
     connection.close()
 
 
-def vel_histograms(filename, fps, vistype='overall'):
+def vel_histograms(fig, filename, fps, vistype='overall'):
     """
     Obtains trajectory (position and velocity data) from object-trajectory table)
     Creates visualizations.
@@ -278,7 +278,7 @@ def vel_histograms(filename, fps, vistype='overall'):
 
     # Histogram of all road user average velocities
     if(vistype == 'overall'):
-        fig = plt.figure()
+        # fig = plt.figure()
         ax = fig.add_subplot(111)
 
         ax.hist(obj_vels, 25, normed=1, facecolor='green', alpha=0.75)
@@ -292,7 +292,7 @@ def vel_histograms(filename, fps, vistype='overall'):
     connection.close()
 
 
-def road_user_chart(filename):
+def road_user_chart(fig, filename):
     """
     Obtains trajectory (position and velocity data) from object-trajectory table)
     Creates visualizations.
@@ -323,7 +323,7 @@ def road_user_chart(filename):
 
     # print numusers
 
-    fig = plt.figure()
+    # fig = plt.figure()
     ax = fig.add_subplot(111)
 
     width = 0.5

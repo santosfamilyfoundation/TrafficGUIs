@@ -25,7 +25,7 @@ import matplotlib.patches as mpatches
 
 
 """
-Test this file with: python visualization.py stmarc.sqlite 30 homography.txt
+Test this file with: python visualization-script.py stmarc.sqlite 30 homography.txt
 In the video_tracking/stmarc/stmarc-vis folder.
 """
 
