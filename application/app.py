@@ -177,7 +177,7 @@ class MainGUI(QtGui.QMainWindow):
 
         call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg","--tf","--database-filename",ac.CURRENT_PROJECT_PATH + "/run/test1.sqlite"])
         call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg","--gf","--database-filename",ac.CURRENT_PROJECT_PATH + "/run/test1.sqlite"])
-        call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/run/test1.sqlite","-o",ac.CURRENT_PROJECT_PATH + "/homography/homography.txt","-t","object"])
+        call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/run/results.sqlite","-o",ac.CURRENT_PROJECT_PATH + "/homography/homography.txt","-t","object"])
 
 ################################################################################################
     def homography_load_aerial_image(self):
