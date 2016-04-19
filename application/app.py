@@ -28,7 +28,7 @@ import cvutils
 from app_config import AppConfig as ac
 import pm
 
-from plotting import visualization
+from plotting import visualization, qt_plot
 
 
 class Organizer(object):  # TODO: Phase out.
@@ -92,7 +92,6 @@ class MainGUI(QtGui.QMainWindow):
         self.feature_tracking_video_player = VideoPlayer()
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer.openVideo)
         self.ui.feature_tracking_video_layout.addWidget(self.feature_tracking_video_player)
-        self.feature_tracking_video_player.loadVideo("/home/reggert/Documents/easthall/3.mp4")
 
         # config
         self.configGui_features = configGui_features()
@@ -110,7 +109,6 @@ class MainGUI(QtGui.QMainWindow):
         self.roadusers_tracking_video_player = VideoPlayer()
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer3.openVideo)
         self.ui.roadusers_tracking_video_layout.addWidget(self.roadusers_tracking_video_player)
-        self.roadusers_tracking_video_player.loadVideo("/home/reggert/Documents/easthall/3.mp4")
 
         # config
         self.configGui_object = configGui_object()
@@ -120,7 +118,7 @@ class MainGUI(QtGui.QMainWindow):
         # test button
         self.ui.button_roadusers_tracking_test.clicked.connect(self.test_object)
 
-
+        qt_plot.plot_results(self)
 ###########################################################################################################################################
         # self.ui.track_image.mousePressEvent = self.get_image_position
 
@@ -251,7 +249,8 @@ class MainGUI(QtGui.QMainWindow):
         if self.homography is None:
             return
 
-        pm.update_project_cfg("homography", "unitpixelratio", str(self.unitPixRatio))
+        pm.update_project_cfg("homography", "unitpixelratio", str(self
+            .unitPixRatio))
         homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
         # self.homography = np.loadtxt("homography.txt")
 

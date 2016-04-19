@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Wed Apr 13 11:44:39 2016
+# Created: Sun Apr 17 17:48:19 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -334,14 +334,6 @@ class Ui_TransportationSafety(object):
         self.verticalLayout_5.setObjectName(_fromUtf8("verticalLayout_5"))
         self.results_grid = QtGui.QGridLayout()
         self.results_grid.setObjectName(_fromUtf8("results_grid"))
-        self.results_label3 = QtGui.QLabel(self.tab_results)
-        self.results_label3.setAlignment(QtCore.Qt.AlignCenter)
-        self.results_label3.setObjectName(_fromUtf8("results_label3"))
-        self.results_grid.addWidget(self.results_label3, 1, 1, 1, 1)
-        self.results_label4 = QtGui.QLabel(self.tab_results)
-        self.results_label4.setAlignment(QtCore.Qt.AlignCenter)
-        self.results_label4.setObjectName(_fromUtf8("results_label4"))
-        self.results_grid.addWidget(self.results_label4, 1, 0, 1, 1)
         self.results_plot_widget1 = QtGui.QWidget(self.tab_results)
         self.results_plot_widget1.setObjectName(_fromUtf8("results_plot_widget1"))
         self.verticalLayout_8 = QtGui.QVBoxLayout(self.results_plot_widget1)
@@ -351,9 +343,15 @@ class Ui_TransportationSafety(object):
         self.results_plot_layout1.setObjectName(_fromUtf8("results_plot_layout1"))
         self.verticalLayout_8.addLayout(self.results_plot_layout1)
         self.results_grid.addWidget(self.results_plot_widget1, 0, 1, 1, 1)
-        self.results_plot_layout2 = QtGui.QVBoxLayout()
-        self.results_plot_layout2.setObjectName(_fromUtf8("results_plot_layout2"))
-        self.results_grid.addLayout(self.results_plot_layout2, 0, 0, 1, 1)
+        self.results_plot0 = MatplotlibWidget(self.tab_results)
+        self.results_plot0.setObjectName(_fromUtf8("results_plot0"))
+        self.results_grid.addWidget(self.results_plot0, 0, 0, 1, 1)
+        self.results_plot3 = QtGui.QWidget(self.tab_results)
+        self.results_plot3.setObjectName(_fromUtf8("results_plot3"))
+        self.results_grid.addWidget(self.results_plot3, 1, 0, 1, 1)
+        self.results_plot2 = QtGui.QWidget(self.tab_results)
+        self.results_plot2.setObjectName(_fromUtf8("results_plot2"))
+        self.results_grid.addWidget(self.results_plot2, 1, 1, 1, 1)
         self.verticalLayout_5.addLayout(self.results_grid)
         self.main_tab_widget.addTab(self.tab_results, _fromUtf8(""))
         self.gridLayout_2.addWidget(self.main_tab_widget, 0, 0, 1, 1)
@@ -424,7 +422,7 @@ class Ui_TransportationSafety(object):
         self.menuBar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(TransportationSafety)
-        self.main_tab_widget.setCurrentIndex(2)
+        self.main_tab_widget.setCurrentIndex(3)
         QtCore.QMetaObject.connectSlotsByName(TransportationSafety)
 
     def retranslateUi(self, TransportationSafety):
@@ -450,8 +448,6 @@ class Ui_TransportationSafety(object):
         self.roadusers_tracking_back_button.setText(_translate("TransportationSafety", "<Track Features", None))
         self.roadusers_tracking_continue_button.setText(_translate("TransportationSafety", " Continue >", None))
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.roadusers_tab), _translate("TransportationSafety", "Track Road Users", None))
-        self.results_label3.setText(_translate("TransportationSafety", "Look at all the glorious data!", None))
-        self.results_label4.setText(_translate("TransportationSafety", "More data", None))
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_results), _translate("TransportationSafety", "Results", None))
         self.menuTraffic_Analysis.setTitle(_translate("TransportationSafety", "File", None))
         self.menuProject.setTitle(_translate("TransportationSafety", "Project", None))
@@ -476,4 +472,5 @@ class Ui_TransportationSafety(object):
         self.actionNew_Project.setShortcut(_translate("TransportationSafety", "Ctrl+N", None))
 
 from custom.homography import HomographyResultView, HomographyView
+from plotting.qt_plot import MatplotlibWidget
 from custom.zoomslider import ZoomSlider

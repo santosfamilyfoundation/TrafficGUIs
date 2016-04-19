@@ -27,7 +27,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -686,26 +686,6 @@
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <layout class="QGridLayout" name="results_grid">
-          <item row="1" column="1">
-           <widget class="QLabel" name="results_label3">
-            <property name="text">
-             <string>Look at all the glorious data!</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="results_label4">
-            <property name="text">
-             <string>More data</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="QWidget" name="results_plot_widget1" native="true">
             <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -716,7 +696,13 @@
            </widget>
           </item>
           <item row="0" column="0">
-           <layout class="QVBoxLayout" name="results_plot_layout2"/>
+           <widget class="MatplotlibWidget" name="results_plot0" native="true"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QWidget" name="results_plot3" native="true"/>
+          </item>
+          <item row="1" column="1">
+           <widget class="QWidget" name="results_plot2" native="true"/>
           </item>
          </layout>
         </item>
@@ -844,7 +830,6 @@
     <string>About</string>
    </property>
   </action>
-
   <action name="actionOpen_Video">
    <property name="text">
     <string>Open Video</string>
@@ -855,17 +840,14 @@
     <string>Open Config </string>
    </property>
   </action>
-
-    <action name="actionNew_Project">
+  <action name="actionNew_Project">
    <property name="text">
     <string>New Project</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
-      </property>
+   </property>
   </action>
-
-
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -883,6 +865,12 @@
    <class>HomographyResultView</class>
    <extends>QGraphicsView</extends>
    <header>custom/homography.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MatplotlibWidget</class>
+   <extends>QWidget</extends>
+   <header>plotting/qt_plot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
