@@ -26,9 +26,10 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as Naviga
 import numpy as np
 import cvutils
 from app_config import AppConfig as ac
+import app_config as pm
 import pm
 
-from plotting import visualization, qt_plot
+import qt_plot
 
 
 class Organizer(object):  # TODO: Phase out.

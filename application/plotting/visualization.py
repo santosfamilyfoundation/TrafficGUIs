@@ -217,8 +217,6 @@ def road_user_vels(fig, filename, fps):
     plt.ylabel('Road Users')
     plt.title('Road User Velocity By Category')
 
-    plt.show()
-
     connection.commit()
     connection.close()
 
@@ -286,7 +284,6 @@ def vel_histograms(fig, filename, fps, vistype='overall'):
         plt.xlabel('Velocity (mph)')
         plt.ylabel('Road Users')
         plt.title('All Road User Velocities')
-        plt.show()
 
     connection.commit()
     connection.close()
@@ -336,7 +333,6 @@ def road_user_chart(fig, filename):
     plt.xlabel('Road User Type')
     plt.ylabel('Number of Road Users')
     plt.title('Road User Type Counts')
-    plt.show()
 
     connection.commit()
     connection.close()

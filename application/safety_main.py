@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Sun Apr 17 17:48:19 2016
+# Created: Tue Apr 19 11:27:04 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -334,6 +334,9 @@ class Ui_TransportationSafety(object):
         self.verticalLayout_5.setObjectName(_fromUtf8("verticalLayout_5"))
         self.results_grid = QtGui.QGridLayout()
         self.results_grid.setObjectName(_fromUtf8("results_grid"))
+        self.results_plot2 = MatplotlibWidget(self.tab_results)
+        self.results_plot2.setObjectName(_fromUtf8("results_plot2"))
+        self.results_grid.addWidget(self.results_plot2, 1, 1, 1, 1)
         self.results_plot_widget1 = QtGui.QWidget(self.tab_results)
         self.results_plot_widget1.setObjectName(_fromUtf8("results_plot_widget1"))
         self.verticalLayout_8 = QtGui.QVBoxLayout(self.results_plot_widget1)
@@ -346,12 +349,9 @@ class Ui_TransportationSafety(object):
         self.results_plot0 = MatplotlibWidget(self.tab_results)
         self.results_plot0.setObjectName(_fromUtf8("results_plot0"))
         self.results_grid.addWidget(self.results_plot0, 0, 0, 1, 1)
-        self.results_plot3 = QtGui.QWidget(self.tab_results)
+        self.results_plot3 = MatplotlibWidget(self.tab_results)
         self.results_plot3.setObjectName(_fromUtf8("results_plot3"))
         self.results_grid.addWidget(self.results_plot3, 1, 0, 1, 1)
-        self.results_plot2 = QtGui.QWidget(self.tab_results)
-        self.results_plot2.setObjectName(_fromUtf8("results_plot2"))
-        self.results_grid.addWidget(self.results_plot2, 1, 1, 1, 1)
         self.verticalLayout_5.addLayout(self.results_grid)
         self.main_tab_widget.addTab(self.tab_results, _fromUtf8(""))
         self.gridLayout_2.addWidget(self.main_tab_widget, 0, 0, 1, 1)
@@ -472,5 +472,5 @@ class Ui_TransportationSafety(object):
         self.actionNew_Project.setShortcut(_translate("TransportationSafety", "Ctrl+N", None))
 
 from custom.homography import HomographyResultView, HomographyView
-from plotting.qt_plot import MatplotlibWidget
+from qt_plot import MatplotlibWidget
 from custom.zoomslider import ZoomSlider

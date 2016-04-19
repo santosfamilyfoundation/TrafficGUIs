@@ -686,6 +686,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <layout class="QGridLayout" name="results_grid">
+          <item row="1" column="1">
+           <widget class="MatplotlibWidget" name="results_plot2" native="true"/>
+          </item>
           <item row="0" column="1">
            <widget class="QWidget" name="results_plot_widget1" native="true">
             <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -699,10 +702,7 @@
            <widget class="MatplotlibWidget" name="results_plot0" native="true"/>
           </item>
           <item row="1" column="0">
-           <widget class="QWidget" name="results_plot3" native="true"/>
-          </item>
-          <item row="1" column="1">
-           <widget class="QWidget" name="results_plot2" native="true"/>
+           <widget class="MatplotlibWidget" name="results_plot3" native="true"/>
           </item>
          </layout>
         </item>
@@ -869,7 +869,7 @@
   <customwidget>
    <class>MatplotlibWidget</class>
    <extends>QWidget</extends>
-   <header>plotting/qt_plot.h</header>
+   <header>qt_plot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

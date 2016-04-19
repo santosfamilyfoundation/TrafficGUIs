@@ -1,11 +1,20 @@
 from PyQt4 import QtGui, QtCore
 import matplotlib
+import os
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.figure import Figure
 
-import visualization
+# # from application_config import AppConfig as ac
+# import application
+
+from app_config import AppConfig as ac
+from app_config import check_project_cfg_option
+# from .. import pm 
+# from .. import app_config
+# ac = app_config.AppConfig
+from plotting import visualization
 import random
 
 
@@ -74,9 +83,23 @@ class MatplotlibWidget(QtGui.QWidget):
         self.canvas.draw()
 
 
-def plot_results(main_window):
 
-    plot0 = main_window.ui.results_plot0
-    visualization.road_user_traj(plot0.getFigure(), 'stmarc.sqlite', 30, 'homography.txt', 'stmarc_image.png')
-    plot0.draw()
+def plot_results(main_window):
+    if ac.CURRENT_PROJECT_PATH:
+        database_filename = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")
+        homography_filename = os.path.join(ac.CURRENT_PROJECT_PATH, "homography", "homography.txt")
+        camera_image = os.path.join(ac.CURRENT_PROJECT_PATH, "homography", "camera.png")
+        fps_exists, video_fps = check_project_cfg_option("video", "framerate")
+        video_fps = float(video_fps)
+        plot0 = main_window.ui.results_plot0
+        visualization.road_user_traj(plot0.getFigure(), database_filename, video_fps, homography_filename, camera_image)
+        plot0.draw()
+
+        plot2 = main_window.ui.results_plot2
+        visualization.road_user_vels(plot2.getFigure(), database_filename, video_fps)
+        plot2.draw()
+
+        plot3 = main_window.ui.results_plot3
+        visualization.road_user_chart(plot3.getFigure(), database_filename)
+        plot3.draw()
 
