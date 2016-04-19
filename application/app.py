@@ -30,6 +30,10 @@ import pm
 
 from plotting import visualization
 
+#####################################
+# import displaytrajectories2  
+##################################
+
 
 class Organizer(object):  # TODO: Phase out.
     def __init__(self):
@@ -139,6 +143,7 @@ class MainGUI(QtGui.QMainWindow):
     def test_feature(self):
         call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg","--tf","--database-filename",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/test1.sqlite"])
         call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/test1.sqlite","-o",ac.CURRENT_PROJECT_PATH + "/homography/homography.txt","-t","feature"])
+        # displaytrajectories2.makeTrajectories()
 
     def test_object(self):
         call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg","--tf","--database-filename",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/test1.sqlite"])
@@ -171,12 +176,14 @@ class MainGUI(QtGui.QMainWindow):
                 f.write("frame1 = 0 \n")
             elif "nframe" in line:
                 f.write("nframe = 0 \n")
+            elif "database-filename" in line:
+                f.write("database-filename = results.sqlite \n")
             else:
                 f.write(line)
         f.close()
 
-        call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg","--tf","--database-filename",ac.CURRENT_PROJECT_PATH + "/run/test1.sqlite"])
-        call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg","--gf","--database-filename",ac.CURRENT_PROJECT_PATH + "/run/test1.sqlite"])
+        call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg","--tf","--database-filename",ac.CURRENT_PROJECT_PATH + "/run/results.sqlite"])
+        call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg","--gf","--database-filename",ac.CURRENT_PROJECT_PATH + "/run/results.sqlite"])
         call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/run/results.sqlite","-o",ac.CURRENT_PROJECT_PATH + "/homography/homography.txt","-t","object"])
 
 ################################################################################################
