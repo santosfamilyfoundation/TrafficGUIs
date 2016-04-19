@@ -138,6 +138,11 @@ class ProjectWizard(QtGui.QWizard):
             im = Image.open(self.aerialpath)
             aerial_dest = os.path.join(pr_path, "homography", "aerial.png")
             im.save(aerial_dest)
+            progress_bar.setValue(95)
+            progress_msg.setText("Complete.")
+
+            progress_msg.setText("Opening {} project...".format(self.project_name))
+            self.load_new_project()
             progress_bar.setValue(100)
             progress_msg.setText("Complete.")
 
@@ -160,6 +165,9 @@ class ProjectWizard(QtGui.QWizard):
 
         with open(os.path.join(self.PROJECT_PATH, "{}.cfg".format(self.project_name)), 'wb') as configfile:
             self.config_parser.write(configfile)
+
+    def load_new_project(self):
+        load_project(self.PROJECT_PATH, self.parent())
 
 
 def load_project(folder_path, main_window):
@@ -216,9 +224,6 @@ def load_roadusers_tracking(main_window):
 
 
 def load_results(main_window):
-    print("THINKING ABOUT PLOTTING THINGS")
     if os.path.exists(os.path.join(ac.CURRENT_PROJECT_PATH, "homography", "homography.txt")):
-        print("FOUND HOMOGRAPHY FOR PLOTTING THINGS")
         if os.path.exists(os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")):
-            print("FOUND DB FOR PLOTTING THINGS")
             plot_results(main_window)
