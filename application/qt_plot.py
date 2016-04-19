@@ -83,7 +83,6 @@ class MatplotlibWidget(QtGui.QWidget):
         self.canvas.draw()
 
 
-
 def plot_results(main_window):
     if ac.CURRENT_PROJECT_PATH:
         database_filename = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")
@@ -91,9 +90,14 @@ def plot_results(main_window):
         camera_image = os.path.join(ac.CURRENT_PROJECT_PATH, "homography", "camera.png")
         fps_exists, video_fps = check_project_cfg_option("video", "framerate")
         video_fps = float(video_fps)
+
         plot0 = main_window.ui.results_plot0
         visualization.road_user_traj(plot0.getFigure(), database_filename, video_fps, homography_filename, camera_image)
         plot0.draw()
+
+        plot1 = main_window.ui.results_plot1
+        visualization.vel_histograms(plot1.getFigure(), database_filename, video_fps, "overall")
+        plot1.draw()
 
         plot2 = main_window.ui.results_plot2
         visualization.road_user_vels(plot2.getFigure(), database_filename, video_fps)
@@ -102,4 +106,3 @@ def plot_results(main_window):
         plot3 = main_window.ui.results_plot3
         visualization.road_user_chart(plot3.getFigure(), database_filename)
         plot3.draw()
-

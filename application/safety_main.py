@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Tue Apr 19 11:27:04 2016
+# Created: Tue Apr 19 12:04:48 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -337,15 +337,9 @@ class Ui_TransportationSafety(object):
         self.results_plot2 = MatplotlibWidget(self.tab_results)
         self.results_plot2.setObjectName(_fromUtf8("results_plot2"))
         self.results_grid.addWidget(self.results_plot2, 1, 1, 1, 1)
-        self.results_plot_widget1 = QtGui.QWidget(self.tab_results)
-        self.results_plot_widget1.setObjectName(_fromUtf8("results_plot_widget1"))
-        self.verticalLayout_8 = QtGui.QVBoxLayout(self.results_plot_widget1)
-        self.verticalLayout_8.setMargin(0)
-        self.verticalLayout_8.setObjectName(_fromUtf8("verticalLayout_8"))
-        self.results_plot_layout1 = QtGui.QVBoxLayout()
-        self.results_plot_layout1.setObjectName(_fromUtf8("results_plot_layout1"))
-        self.verticalLayout_8.addLayout(self.results_plot_layout1)
-        self.results_grid.addWidget(self.results_plot_widget1, 0, 1, 1, 1)
+        self.results_plot1 = MatplotlibWidget(self.tab_results)
+        self.results_plot1.setObjectName(_fromUtf8("results_plot1"))
+        self.results_grid.addWidget(self.results_plot1, 0, 1, 1, 1)
         self.results_plot0 = MatplotlibWidget(self.tab_results)
         self.results_plot0.setObjectName(_fromUtf8("results_plot0"))
         self.results_grid.addWidget(self.results_plot0, 0, 0, 1, 1)

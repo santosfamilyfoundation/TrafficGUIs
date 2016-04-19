@@ -690,13 +690,7 @@
            <widget class="MatplotlibWidget" name="results_plot2" native="true"/>
           </item>
           <item row="0" column="1">
-           <widget class="QWidget" name="results_plot_widget1" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_8">
-             <item>
-              <layout class="QVBoxLayout" name="results_plot_layout1"/>
-             </item>
-            </layout>
-           </widget>
+           <widget class="MatplotlibWidget" name="results_plot1" native="true"/>
           </item>
           <item row="0" column="0">
            <widget class="MatplotlibWidget" name="results_plot0" native="true"/>
