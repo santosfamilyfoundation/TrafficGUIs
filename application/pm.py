@@ -15,6 +15,8 @@ import cvutils
 import numpy as np
 
 from app_config import AppConfig as ac
+from app_config import check_project_cfg_option, update_project_cfg, check_project_cfg_section
+from qt_plot import plot_results
 
 
 class ProjectWizard(QtGui.QWizard):
@@ -71,8 +73,10 @@ class ProjectWizard(QtGui.QWizard):
     # def move_video
     def open_fd(self, dialog_text="Open", file_filter="", default_dir=""):
         """Opens a file dialog, allowing user to select a file.
+
         Returns the selected filename. If the user presses cancel, this returns
         a null string ("").
+
         Args:
             dialog_text [Optional(str.)]: Text to prompt user with in open file
                 dialog. Defaults to "Open".
@@ -80,6 +84,7 @@ class ProjectWizard(QtGui.QWizard):
                 types. Defaults to "".
             default_dir [Optional(str.)]: Path of the default directory to open
                 the file dialog box to. Defaults to "".
+
         Returns:
             str: Filename selected. Null string ("") if no file selected.
         """
@@ -135,6 +140,11 @@ class ProjectWizard(QtGui.QWizard):
             im = Image.open(self.aerialpath)
             aerial_dest = os.path.join(pr_path, "homography", "aerial.png")
             im.save(aerial_dest)
+            progress_bar.setValue(95)
+            progress_msg.setText("Complete.")
+
+            progress_msg.setText("Opening {} project...".format(self.project_name))
+            self.load_new_project()
             progress_bar.setValue(100)
             progress_msg.setText("Complete.")
 
@@ -158,6 +168,9 @@ class ProjectWizard(QtGui.QWizard):
         with open(os.path.join(self.PROJECT_PATH, "{}.cfg".format(self.project_name)), 'wb') as configfile:
             self.config_parser.write(configfile)
 
+    def load_new_project(self):
+        load_project(self.PROJECT_PATH, self.parent())
+
 
 def load_project(folder_path, main_window):
     path = os.path.normpath(folder_path)  # Clean path. May not be necessary.
@@ -166,13 +179,13 @@ def load_project(folder_path, main_window):
     ac.CURRENT_PROJECT_PATH = path  # Set application-level variables indicating the currently open project
     ac.CURRENT_PROJECT_NAME = project_name
     ac.CURRENT_PROJECT_CONFIG = project_cfg
-
     config_parser = SafeConfigParser()
     config_parser.read(project_cfg)  # Read project config file.
     ac.CURRENT_PROJECT_VIDEO_PATH = os.path.join(ac.CURRENT_PROJECT_PATH, config_parser.get("video", "name"))
     load_homography(main_window)
     load_feature_tracking(main_window)
     load_roadusers_tracking(main_window)
+    load_results(main_window)
 
 
 def load_homography(main_window):
@@ -183,28 +196,47 @@ def load_homography(main_window):
     aerial_path = os.path.join(path, "homography", "aerial.png")
     camera_path = os.path.join(path, "homography", "camera.png")
     # TODO: Handle if above two paths do not exist
-
+    load_from = 'image_pts'  # "image_pts" or "pt_corrs"
     gui = main_window.ui
     # Load images
     gui.homography_aerialview.load_image_from_path(aerial_path)
     gui.homography_cameraview.load_image_from_path(camera_path)
 
-    corr_path = os.path.join(path, "homography", "point-correspondences.txt")
+    goodness_path = os.path.join(path, "homography", "homography_goodness_aerial.png")
+    image_pts_path = os.path.join(path, "homography", "image-points.txt")
+    pt_corrs_path = os.path.join(path, "homography", "point-correspondences.txt")
     homo_path = os.path.join(path, "homography", "homography.txt")
 
-    if check_project_cfg_section("homography"):
+    if load_from is "image_pts":
+        corr_path = image_pts_path
+    else:
+        corr_path = pt_corrs_path
+
+    # Has a homography been previously computed?
+    if check_project_cfg_section("homography"):  # If we can load homography unit-pix ratio load it
         # load unit-pixel ratio
         upr_exists, upr = check_project_cfg_option("homography", "unitpixelratio")
         if upr_exists:
             gui.unit_px_input.setText(upr)
+    if os.path.exists(corr_path):  # If points have been previously selected
+        worldPts, videoPts = cvutils.loadPointCorrespondences(corr_path)
+        main_window.homography = np.loadtxt(homo_path)
+        if load_from is "image_pts":
+            for point in worldPts:
+                main_window.ui.homography_aerialview.scene().add_point(point)
+        elif load_from is "pt_corrs":
+            for point in worldPts:
+                main_window.ui.homography_aerialview.scene().add_point(point/float(upr))
+        else:
+            print("ERR: Invalid point source {} specified. Points not loaded".format(load_from))
+        for point in videoPts:
+            main_window.ui.homography_cameraview.scene().add_point(point)
+        gui.homography_results.load_image_from_path(goodness_path)
+    else:
+        print ("{} does not exist. No points loaded.".format(corr_path))
 
-    worldPts, videoPts = cvutils.loadPointCorrespondences(corr_path)
-    main_window.homography = np.loadtxt(homo_path)
-    for point in worldPts:
-        main_window.ui.homography_aerialview.scene().add_point(point)
-    for point in videoPts:
-        main_window.ui.homography_cameraview.scene().add_point(point)
-    # Has a homography been previously computed?
+
+
 
 
 def load_feature_tracking(main_window):
@@ -221,60 +253,7 @@ def load_roadusers_tracking(main_window):
     main_window.roadusers_tracking_video_player.loadVideo(ac.CURRENT_PROJECT_VIDEO_PATH)
 
 
-def update_project_cfg(section, option, value):
-    """
-    Updates a single value in the current open project's configuration file.
-    Writes nothing and returns -1 if no project currently open. Creates sections
-    in the config file if they do not already exist.
-    Args:
-        section (str): Name of the section to write new option-value pair to write.
-        option (str): Name of the option to write/update.
-        value (str): Value to write/update assocaited with the specified option.
-    """
-    if not ac.CURRENT_PROJECT_CONFIG:
-        return -1
-    cfp = SafeConfigParser()
-    cfp.read(ac.CURRENT_PROJECT_CONFIG)
-    if section not in cfp.sections():  # If the given section does not exist,
-        cfp.add_section(section)        # then create it.
-    cfp.set(section, option, value)  # Set the option-value pair
-    with open(ac.CURRENT_PROJECT_CONFIG, "wb") as cfg_file:
-        cfp.write(cfg_file)  # Write changes
-
-
-def check_project_cfg_option(section, option):
-    """
-    Checks the currently open project's configuration file for the specified option
-    in the specified section. If it exists, this returns (True, <value>). If it does not
-    exist, this returns (False, None).
-    Args:
-        section (str): Name of the section to check for option.
-        option (str): Name of the option check/return.
-    """
-    cfp = SafeConfigParser()
-    cfp.read(ac.CURRENT_PROJECT_CONFIG)
-    try:
-        value = cfp.get(section, option)
-    except NoSectionError:
-        print("ERR [check_project_cfg_option()]: Section {} is not available in {}.".format(section, ac.CURRENT_PROJECT_CONFIG))
-        return (False, None)
-    except NoOptionError:
-        print("Option {} is not available in {}.".format(option, ac.CURRENT_PROJECT_CONFIG))
-        return (False, None)
-    else:
-        return (True, value)
-
-
-def check_project_cfg_section(section):
-    """
-    Checks the currently open project's configuration file for the section. If it exists,
-    this returns True. If it does not exist, this returns False.
-    Args:
-        section (str): Name of the section to check existance of.
-    """
-    cfp = SafeConfigParser()
-    cfp.read(ac.CURRENT_PROJECT_CONFIG)
-    if section in cfp.sections():  # If the given section exists,
-        return True                # then return True.
-    else:                          # Otherwise,
-        return False               # then return False
+def load_results(main_window):
+    if os.path.exists(os.path.join(ac.CURRENT_PROJECT_PATH, "homography", "homography.txt")):
+        if os.path.exists(os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")):
+            plot_results(main_window)

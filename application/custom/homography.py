@@ -82,6 +82,10 @@ class HomographyResultView(QtGui.QGraphicsView):
         self.show()
         self.image_loaded = True
 
+    def load_image_from_path(self, path):
+        im = QtGui.QImage(path)
+        self.load_image(im)
+
     def clear_image(self):
         """
         Call this to clear the image from this HomographyView's scene.

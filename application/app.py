@@ -7,6 +7,8 @@ from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 from subprocess import call 
 
+from plotting.make_object_trajectories import main as db_make_objtraj
+
 ##############################################3
 # testing feature objects 
 # import display-trajectories
@@ -26,13 +28,10 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as Naviga
 import numpy as np
 import cvutils
 from app_config import AppConfig as ac
+import app_config as pm
 import pm
 
-from plotting import visualization
-
-#####################################
-# import displaytrajectories2  
-##################################
+import qt_plot
 
 
 class Organizer(object):  # TODO: Phase out.
@@ -70,22 +69,6 @@ class MainGUI(QtGui.QMainWindow):
 
 ###########################################################################################################################################
 
-        # Results plotting
-        # self.figure1 = Figure()
-        # self.canvas1 = FigureCanvas(self.figure1)
-        # self.ui.results_plot_layout1.addWidget(self.canvas1)
-        # self.results_plot_plot1()
-
-        #### Graphs for Sam
-        # aplot = visualization.road_user_traj('stmarc.sqlite', 30, 'homography.txt', 'stmarc_image.png')
-        # aplot.add_to_widget(self.ui.results_plot_layout1)
-        # aplot.show()
-
-        # self.figure2 = Figure()
-        # self.canvas2 = FigureCanvas(self.figure2)
-        # self.ui.results_plot_layout2.addWidget(self.canvas2)
-        # self.results_plot_plot2()
-        # back button for track roadusers
         self.ui.roadusers_tracking_back_button.clicked.connect(self.show_prev_tab)
         self.ui.roadusers_tracking_continue_button.clicked.connect(self.show_next_tab)
 
@@ -126,6 +109,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.button_roadusers_tracking_run.clicked.connect(self.run)
        
 
+        qt_plot.plot_results(self)
 ###########################################################################################################################################
         # self.ui.track_image.mousePressEvent = self.get_image_position
 
@@ -141,20 +125,33 @@ class MainGUI(QtGui.QMainWindow):
 ######################################################################################################
 
     def test_feature(self):
-        call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg","--tf","--database-filename",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/test1.sqlite"])
-        call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/test1.sqlite","-o",ac.CURRENT_PROJECT_PATH + "/homography/homography.txt","-t","feature"])
+        tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "feature_tracking.cfg")
+        db_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "test1.sqlite")
+        if os.path.exists(db_path):
+            os.remove(db_path)
+        call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
+        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "feature"])
         # displaytrajectories2.makeTrajectories()
 
     def test_object(self):
-        call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg","--tf","--database-filename",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/test1.sqlite"])
-        call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg","--gf","--database-filename",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/test1.sqlite"])
-        call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/test1.sqlite","-o",ac.CURRENT_PROJECT_PATH + "/homography/homography.txt","-t","object"])
+        tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object", "object_tracking.cfg")
+        obj_db_path = os.path.join(ac.CURRENT_PROJECT_PATH,".temp", "test", "test_object", "test1.sqlite")
+        feat_db_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "test1.sqlite")
+        if os.path.exists(obj_db_path):
+            os.remove(obj_db_path)
+        shutil.copyfile(feat_db_path, obj_db_path)
+        # call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg","--tf","--database-filename", obj_db_path])
+        call(["feature-based-tracking",tracking_path,"--gf","--database-filename", obj_db_path])
+        call(["classify-objects.py", "--cfg", tracking_path, "-d", obj_db_path])  # Classify road users
+        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH,"-d", obj_db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object"])
 
 
 # for the run button
     def run(self):
-
-                # create test folder 
+        """
+        Runs TrafficIntelligence trackers and support scripts.
+        """
+        # create test folder 
         if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/run"):
             os.mkdir(ac.CURRENT_PROJECT_PATH + "/run")
 
@@ -162,29 +159,39 @@ class MainGUI(QtGui.QMainWindow):
         if os.path.exists(ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg"):
             os.remove(ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg")
 
-        # creates new config file 
-        shutil.copyfile(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg")
+        # creates new config file
+        shutil.copyfile(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg", ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg")
 
         path1 = ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg"
 
         f = open(path1, 'r')
         lines = f.readlines()
         f.close()
-        f = open(path1,'w')
-        for line in lines:
-            if "frame1" in line:
-                f.write("frame1 = 0 \n")
-            elif "nframe" in line:
-                f.write("nframe = 0 \n")
-            elif "database-filename" in line:
-                f.write("database-filename = results.sqlite \n")
-            else:
-                f.write(line)
-        f.close()
+        with open(path1, "w") as wf:
+            for line in lines:
+                line_param = line.split('=')[0].strip()
+                if "frame1" == line_param:  # Replace parameter "frame1"
+                    wf.write("frame1 = 0\n")
+                elif "nframes" == line_param:  # Remove parameter "nframes"
+                    wf.write("nframes = 0\n")
+                elif "database-filename" == line_param:
+                    wf.write("database-filename = results.sqlite\n")
+                else:
+                    wf.write(line)
 
-        call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg","--tf","--database-filename",ac.CURRENT_PROJECT_PATH + "/run/results.sqlite"])
-        call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg","--gf","--database-filename",ac.CURRENT_PROJECT_PATH + "/run/results.sqlite"])
-        call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/run/results.sqlite","-o",ac.CURRENT_PROJECT_PATH + "/homography/homography.txt","-t","object"])
+        db_path = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")
+        tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "run_tracking.cfg")
+
+        if os.path.exists(db_path):  # If results database already exists,
+            os.remove(db_path)  # then remove it--it'll be recreated.
+        call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
+        call(["feature-based-tracking", tracking_path, "--gf", "--database-filename", db_path])
+
+        call(["classify-objects.py", "--cfg", tracking_path, "-d", db_path])  # Classify road users
+
+        db_make_objtraj(db_path)  # Make our object_trajectories db table
+
+        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object"])
 
 ################################################################################################
     def homography_load_aerial_image(self):
@@ -192,7 +199,11 @@ class MainGUI(QtGui.QMainWindow):
 
     def show_next_tab(self):
         curr_i = self.ui.main_tab_widget.currentIndex()
-        self.ui.main_tab_widget.setCurrentIndex(curr_i + 1)
+        new_i = curr_i + 1
+        self.ui.main_tab_widget.setCurrentIndex(new_i)
+        if new_i is 3:  # If we are moving to the plots page
+           qt_plot.plot_results(self) 
+
 
     def show_prev_tab(self):
         curr_i = self.ui.main_tab_widget.currentIndex()
@@ -276,12 +287,12 @@ class MainGUI(QtGui.QMainWindow):
         return image
 
     def homography_compute(self):
-        #TO DO: display error message if points are < 4
+        #TODO: display error message if points are < 4
         px_text = self.ui.unit_px_input.text()
         self.unitPixRatio = float(unicode(px_text))
-        self.worldPts = self.unitPixRatio * (np.array(self.ui.homography_aerialview.list_points()))
+        self.unscaled_world_pts = (np.array(self.ui.homography_aerialview.list_points()))
+        self.worldPts = self.unitPixRatio * self.unscaled_world_pts
         self.videoPts = np.array(self.ui.homography_cameraview.list_points())
-
         if len(self.worldPts) >= 4:
             if len(self.worldPts) == len(self.videoPts):
                 self.homography, self.mask = cv2.findHomography(self.videoPts, self.worldPts)
@@ -289,7 +300,8 @@ class MainGUI(QtGui.QMainWindow):
         if self.homography is None:
             return
 
-        pm.update_project_cfg("homography", "unitpixelratio", str(self.unitPixRatio))
+        pm.update_project_cfg("homography", "unitpixelratio", str(self
+            .unitPixRatio))
         homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
 
         if self.homography.size > 0:
@@ -297,11 +309,16 @@ class MainGUI(QtGui.QMainWindow):
             np.savetxt(txt_path, self.homography)  # Save computed homography.
 
         corr_path = os.path.join(homography_path, "point-correspondences.txt")
+        points_path = os.path.join(homography_path, "image-points.txt")
+
         f = open(corr_path, 'w') #save points to be loaded later
-        
         np.savetxt(f, self.worldPts.T)
         np.savetxt(f, self.videoPts.T)
         f.close()
+
+        with open(points_path, 'w') as pp:
+            np.savetxt(pp, self.unscaled_world_pts.T)
+            np.savetxt(pp, self.videoPts.T)
 
         self.homography_display_results()
 
@@ -332,7 +349,6 @@ class MainGUI(QtGui.QMainWindow):
         cv2.imwrite(camera_goodness_path, videoImg)  # Save camera goodness image
 
         self.ui.homography_results.load_image(QtGui.QImage(aerial_goodness_path))  # Load aerial goodness image into gui
-
 
 ##########################################################################################################################
 
@@ -454,7 +470,8 @@ class configGui_features(QtGui.QWidget):
             os.remove(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg")
 
         # creates new config file 
-        shutil.copyfile("tracking.cfg",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg")
+        proj_tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, "tracking.cfg")
+        shutil.copyfile(proj_tracking_path, ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg")
 
         path1 = ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg"
 
@@ -555,49 +572,46 @@ class configGui_object(QtGui.QWidget):
         self.setWindowTitle('Input config')
         # self.show()
 
-
-        # opens a cofig file
+        # opens a config file
     def openConfig(self):
         path = QFileDialog.getOpenFileName(self, 'Open File', '/')
         # global path1
         path1 = str(path)
 
- 
     def createConfig_objects(self, path):
         """
         Create a config file
         """
         config = ConfigParser.ConfigParser()
-
+        object_dir = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object")
+        feature_cfg = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "feature_tracking.cfg")
+        object_cfg = os.path.join(object_dir, "object_tracking.cfg")
 
         # create test folder 
-        if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object"):
-            os.mkdir(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object")
+        if not os.path.exists(object_dir):
+            os.mkdir(object_dir)
 
         # removes object tracking.cfg
-        if os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg"):
-            os.remove(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg")
+        if os.path.exists(object_cfg):
+            os.remove(object_cfg)
 
-        # creates new config file 
-        shutil.copyfile(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg")
+        # creates new config file
+        shutil.copyfile(feature_cfg, object_cfg)
 
-        path1 = ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg"
+        with open(object_cfg, 'r') as rf:
+            lines = rf.readlines()
 
-        f = open(path1, 'r')
-        lines = f.readlines()
-        f.close()
-        f = open(path1,'w')
-        for line in lines:
-            if "frame1" in line:
-                pass
-            elif "nframe" in line:
-                pass
-            else:
-                f.write(line)
-        f.close()
+        with open(object_cfg, 'w') as wf:
+            for line in lines:
+                line_param = line.split('=')[0].strip()
+                if "frame1" == line_param:  # Remove parameter "frame1"
+                    pass
+                elif "nframes" == line_param:  # Remove parameter "nframes"
+                    pass
+                else:
+                    wf.write(line)
 
-
-        # add new content to config file 
+        # add new content to config file
 
         config.add_section("added")
         config.set("added", "frame1", self.input1.text())
@@ -605,33 +619,20 @@ class configGui_object(QtGui.QWidget):
         config.set("added", "mm-connection-distance", self.input3.text())
         config.set("added", "mm-segmentation-distance", self.input4.text())
 
-        try:
-            path1
-        except NameError:
-            # self.player.load(Phonon.MediaSource(""))
-            error = QtGui.QErrorMessage()
-            error.showMessage('''\
-            no config files chosen''')
-            error.exec_()
-            print "no config chosen"
-        else:
-            with open(path1, "a") as config_file:
-                config.write(config_file)
+        with open(object_cfg, "a") as config_file:
+            config.write(config_file)
 
-            # to remove the section header from config file
+        # to remove the section header from config file
 
-            # opens the file to read
-            f = open(path1, "r")
+        # opens the file to read
+        with open(object_cfg, "r") as f:
             lines = f.readlines()
-            f.close()
-            # opens the file to write
-            f = open(path1, "w")
+        # opens the file to write
+        with open(object_cfg, 'w') as wf:
             for line in lines:
                 # removes the section header
-                if line != "[added]"+"\n":
-                    f.write(line)
-            f.close()
-
+                if line != "[added]\n":
+                    wf.write(line)
 
 ##########################################################################################################################
 

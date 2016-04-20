@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Wed Apr 13 11:44:39 2016
+# Created: Wed Apr 20 12:49:37 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -126,7 +126,8 @@ class Ui_TransportationSafety(object):
         self.homography_cameraview.setObjectName(_fromUtf8("homography_cameraview"))
         self.homography_layout.addWidget(self.homography_cameraview)
         self.homography_results = HomographyResultView(self.tab_homography)
-        self.homography_results.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.CrossCursor))
+        self.homography_results.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.homography_results.setResizeAnchor(QtGui.QGraphicsView.NoAnchor)
         self.homography_results.setObjectName(_fromUtf8("homography_results"))
         self.homography_layout.addWidget(self.homography_results)
         self.homography_aerialview = HomographyView(self.tab_homography)
@@ -334,26 +335,18 @@ class Ui_TransportationSafety(object):
         self.verticalLayout_5.setObjectName(_fromUtf8("verticalLayout_5"))
         self.results_grid = QtGui.QGridLayout()
         self.results_grid.setObjectName(_fromUtf8("results_grid"))
-        self.results_label3 = QtGui.QLabel(self.tab_results)
-        self.results_label3.setAlignment(QtCore.Qt.AlignCenter)
-        self.results_label3.setObjectName(_fromUtf8("results_label3"))
-        self.results_grid.addWidget(self.results_label3, 1, 1, 1, 1)
-        self.results_label4 = QtGui.QLabel(self.tab_results)
-        self.results_label4.setAlignment(QtCore.Qt.AlignCenter)
-        self.results_label4.setObjectName(_fromUtf8("results_label4"))
-        self.results_grid.addWidget(self.results_label4, 1, 0, 1, 1)
-        self.results_plot_widget1 = QtGui.QWidget(self.tab_results)
-        self.results_plot_widget1.setObjectName(_fromUtf8("results_plot_widget1"))
-        self.verticalLayout_8 = QtGui.QVBoxLayout(self.results_plot_widget1)
-        self.verticalLayout_8.setMargin(0)
-        self.verticalLayout_8.setObjectName(_fromUtf8("verticalLayout_8"))
-        self.results_plot_layout1 = QtGui.QVBoxLayout()
-        self.results_plot_layout1.setObjectName(_fromUtf8("results_plot_layout1"))
-        self.verticalLayout_8.addLayout(self.results_plot_layout1)
-        self.results_grid.addWidget(self.results_plot_widget1, 0, 1, 1, 1)
-        self.results_plot_layout2 = QtGui.QVBoxLayout()
-        self.results_plot_layout2.setObjectName(_fromUtf8("results_plot_layout2"))
-        self.results_grid.addLayout(self.results_plot_layout2, 0, 0, 1, 1)
+        self.results_plot2 = MatplotlibWidget(self.tab_results)
+        self.results_plot2.setObjectName(_fromUtf8("results_plot2"))
+        self.results_grid.addWidget(self.results_plot2, 1, 1, 1, 1)
+        self.results_plot1 = MatplotlibWidget(self.tab_results)
+        self.results_plot1.setObjectName(_fromUtf8("results_plot1"))
+        self.results_grid.addWidget(self.results_plot1, 0, 1, 1, 1)
+        self.results_plot0 = MatplotlibWidget(self.tab_results)
+        self.results_plot0.setObjectName(_fromUtf8("results_plot0"))
+        self.results_grid.addWidget(self.results_plot0, 0, 0, 1, 1)
+        self.results_plot3 = MatplotlibWidget(self.tab_results)
+        self.results_plot3.setObjectName(_fromUtf8("results_plot3"))
+        self.results_grid.addWidget(self.results_plot3, 1, 0, 1, 1)
         self.verticalLayout_5.addLayout(self.results_grid)
         self.main_tab_widget.addTab(self.tab_results, _fromUtf8(""))
         self.gridLayout_2.addWidget(self.main_tab_widget, 0, 0, 1, 1)
@@ -406,17 +399,12 @@ class Ui_TransportationSafety(object):
         self.actionNew_Project.setObjectName(_fromUtf8("actionNew_Project"))
         self.menuTraffic_Analysis.addAction(self.actionNew_Project)
         self.menuTraffic_Analysis.addAction(self.actionOpen_Project)
-        self.menuTraffic_Analysis.addAction(self.actionOpen_Video)
-        self.menuTraffic_Analysis.addAction(self.actionOpen_Config)
         self.menuHomography_2.addAction(self.actionAdd_Replace_Aerial_Image)
         self.menuHomography_2.addAction(self.actionAdd_Replace_Camera_Image)
         self.menuHomography_2.addSeparator()
         self.menuHomography_2.addAction(self.actionCompute_Homography_Performance)
         self.menuHomography_2.addAction(self.actionAcquire_Aerial_Image)
-        self.menuProject.addAction(self.actionAdd_Replace_Video)
         self.menuProject.addAction(self.menuHomography_2.menuAction())
-        self.menuProject.addAction(self.actionFeature_Tracking)
-        self.menuProject.addAction(self.actionRoad_User_Tracking)
         self.menuHelp.addAction(self.actionUser_s_Guide)
         self.menuHelp.addAction(self.actionAbout)
         self.menuBar.addAction(self.menuTraffic_Analysis.menuAction())
@@ -424,7 +412,7 @@ class Ui_TransportationSafety(object):
         self.menuBar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(TransportationSafety)
-        self.main_tab_widget.setCurrentIndex(2)
+        self.main_tab_widget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(TransportationSafety)
 
     def retranslateUi(self, TransportationSafety):
@@ -450,8 +438,6 @@ class Ui_TransportationSafety(object):
         self.roadusers_tracking_back_button.setText(_translate("TransportationSafety", "<Track Features", None))
         self.roadusers_tracking_continue_button.setText(_translate("TransportationSafety", " Continue >", None))
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.roadusers_tab), _translate("TransportationSafety", "Track Road Users", None))
-        self.results_label3.setText(_translate("TransportationSafety", "Look at all the glorious data!", None))
-        self.results_label4.setText(_translate("TransportationSafety", "More data", None))
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_results), _translate("TransportationSafety", "Results", None))
         self.menuTraffic_Analysis.setTitle(_translate("TransportationSafety", "File", None))
         self.menuProject.setTitle(_translate("TransportationSafety", "Project", None))
@@ -476,4 +462,5 @@ class Ui_TransportationSafety(object):
         self.actionNew_Project.setShortcut(_translate("TransportationSafety", "Ctrl+N", None))
 
 from custom.homography import HomographyResultView, HomographyView
+from qt_plot import MatplotlibWidget
 from custom.zoomslider import ZoomSlider
