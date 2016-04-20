@@ -195,7 +195,6 @@ def load_homography(main_window):
     path = ac.CURRENT_PROJECT_PATH
     aerial_path = os.path.join(path, "homography", "aerial.png")
     camera_path = os.path.join(path, "homography", "camera.png")
-    goodness_path = os.path.join(path, "homography", "homography_goodness_camera.png")
     # TODO: Handle if above two paths do not exist
     load_from = 'image_pts'  # "image_pts" or "pt_corrs"
     gui = main_window.ui
@@ -203,6 +202,7 @@ def load_homography(main_window):
     gui.homography_aerialview.load_image_from_path(aerial_path)
     gui.homography_cameraview.load_image_from_path(camera_path)
 
+    goodness_path = os.path.join(path, "homography", "homography_goodness_aerial.png")
     image_pts_path = os.path.join(path, "homography", "image-points.txt")
     pt_corrs_path = os.path.join(path, "homography", "point-correspondences.txt")
     homo_path = os.path.join(path, "homography", "homography.txt")
