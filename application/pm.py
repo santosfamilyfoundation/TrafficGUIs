@@ -11,6 +11,8 @@ import datetime
 from shutil import copy
 import cv2
 import Image
+import cvutils
+import numpy as np
 
 from app_config import AppConfig as ac
 from app_config import check_project_cfg_option, update_project_cfg, check_project_cfg_section
@@ -201,12 +203,23 @@ def load_homography(main_window):
     gui.homography_aerialview.load_image_from_path(aerial_path)
     gui.homography_cameraview.load_image_from_path(camera_path)
 
+    corr_path = os.path.join(path, "homography", "point-correspondences.txt")
+    homo_path = os.path.join(path, "homography", "homography.txt")
+
     # Has a homography been previously computed?
     if check_project_cfg_section("homography"):
         # load unit-pixel ratio
         upr_exists, upr = check_project_cfg_option("homography", "unitpixelratio")
         if upr_exists:
             gui.unit_px_input.setText(upr)
+
+    worldPts, videoPts = cvutils.loadPointCorrespondences(corr_path)
+    main_window.homography = np.loadtxt(homo_path)
+    for point in worldPts:
+        main_window.ui.homography_aerialview.scene().add_point(point)
+    for point in videoPts:
+        main_window.ui.homography_cameraview.scene().add_point(point)
+    # Has a homography been previously computed?
 
 
 def load_feature_tracking(main_window):
