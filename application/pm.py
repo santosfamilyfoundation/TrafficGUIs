@@ -71,10 +71,8 @@ class ProjectWizard(QtGui.QWizard):
     # def move_video
     def open_fd(self, dialog_text="Open", file_filter="", default_dir=""):
         """Opens a file dialog, allowing user to select a file.
-
         Returns the selected filename. If the user presses cancel, this returns
         a null string ("").
-
         Args:
             dialog_text [Optional(str.)]: Text to prompt user with in open file
                 dialog. Defaults to "Open".
@@ -82,7 +80,6 @@ class ProjectWizard(QtGui.QWizard):
                 types. Defaults to "".
             default_dir [Optional(str.)]: Path of the default directory to open
                 the file dialog box to. Defaults to "".
-
         Returns:
             str: Filename selected. Null string ("") if no file selected.
         """
@@ -229,7 +226,6 @@ def update_project_cfg(section, option, value):
     Updates a single value in the current open project's configuration file.
     Writes nothing and returns -1 if no project currently open. Creates sections
     in the config file if they do not already exist.
-
     Args:
         section (str): Name of the section to write new option-value pair to write.
         option (str): Name of the option to write/update.
@@ -251,7 +247,6 @@ def check_project_cfg_option(section, option):
     Checks the currently open project's configuration file for the specified option
     in the specified section. If it exists, this returns (True, <value>). If it does not
     exist, this returns (False, None).
-
     Args:
         section (str): Name of the section to check for option.
         option (str): Name of the option check/return.
@@ -274,7 +269,6 @@ def check_project_cfg_section(section):
     """
     Checks the currently open project's configuration file for the section. If it exists,
     this returns True. If it does not exist, this returns False.
-
     Args:
         section (str): Name of the section to check existance of.
     """
