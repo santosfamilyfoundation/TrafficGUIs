@@ -179,7 +179,6 @@ def load_project(folder_path, main_window):
     ac.CURRENT_PROJECT_PATH = path  # Set application-level variables indicating the currently open project
     ac.CURRENT_PROJECT_NAME = project_name
     ac.CURRENT_PROJECT_CONFIG = project_cfg
-
     config_parser = SafeConfigParser()
     config_parser.read(project_cfg)  # Read project config file.
     ac.CURRENT_PROJECT_VIDEO_PATH = os.path.join(ac.CURRENT_PROJECT_PATH, config_parser.get("video", "name"))
@@ -196,15 +195,22 @@ def load_homography(main_window):
     path = ac.CURRENT_PROJECT_PATH
     aerial_path = os.path.join(path, "homography", "aerial.png")
     camera_path = os.path.join(path, "homography", "camera.png")
+    goodness_path = os.path.join(path, "homography", "homography_goodness_camera.png")
     # TODO: Handle if above two paths do not exist
-
+    load_from = 'image_pts'  # "image_pts" or "pt_corrs"
     gui = main_window.ui
     # Load images
     gui.homography_aerialview.load_image_from_path(aerial_path)
     gui.homography_cameraview.load_image_from_path(camera_path)
 
-    corr_path = os.path.join(path, "homography", "point-correspondences.txt")
+    image_pts_path = os.path.join(path, "homography", "image-points.txt")
+    pt_corrs_path = os.path.join(path, "homography", "point-correspondences.txt")
     homo_path = os.path.join(path, "homography", "homography.txt")
+
+    if load_from is "image_pts":
+        corr_path = image_pts_path
+    else:
+        corr_path = pt_corrs_path
 
     # Has a homography been previously computed?
     if check_project_cfg_section("homography"):  # If we can load homography unit-pix ratio load it
@@ -215,10 +221,22 @@ def load_homography(main_window):
     if os.path.exists(corr_path):  # If points have been previously selected
         worldPts, videoPts = cvutils.loadPointCorrespondences(corr_path)
         main_window.homography = np.loadtxt(homo_path)
-        for point in worldPts:
-            main_window.ui.homography_aerialview.scene().add_point(point)
+        if load_from is "image_pts":
+            for point in worldPts:
+                main_window.ui.homography_aerialview.scene().add_point(point)
+        elif load_from is "pt_corrs":
+            for point in worldPts:
+                main_window.ui.homography_aerialview.scene().add_point(point/float(upr))
+        else:
+            print("ERR: Invalid point source {} specified. Points not loaded".format(load_from))
         for point in videoPts:
             main_window.ui.homography_cameraview.scene().add_point(point)
+        gui.homography_results.load_image_from_path(goodness_path)
+    else:
+        print ("{} does not exist. No points loaded.".format(corr_path))
+
+
+
 
 
 def load_feature_tracking(main_window):

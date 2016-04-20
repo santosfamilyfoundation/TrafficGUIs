@@ -92,17 +92,25 @@ def plot_results(main_window):
         video_fps = float(video_fps)
 
         plot0 = main_window.ui.results_plot0
-        visualization.road_user_traj(plot0.getFigure(), database_filename, video_fps, homography_filename, camera_image)
+        fig0 = plot0.getFigure()
+        fig0.clf()
+        visualization.road_user_traj(fig0, database_filename, video_fps, homography_filename, camera_image)
         plot0.draw()
 
         plot1 = main_window.ui.results_plot1
-        visualization.vel_histograms(plot1.getFigure(), database_filename, video_fps, "overall")
+        fig1 = plot1.getFigure()
+        fig1.clf()
+        visualization.vel_histograms(fig1, database_filename, video_fps, "overall")
         plot1.draw()
 
         plot2 = main_window.ui.results_plot2
-        visualization.road_user_vels(plot2.getFigure(), database_filename, video_fps)
+        fig2 = plot2.getFigure()
+        fig2.clf()
+        visualization.road_user_vels(fig2, database_filename, video_fps)
         plot2.draw()
 
         plot3 = main_window.ui.results_plot3
-        visualization.road_user_chart(plot3.getFigure(), database_filename)
+        fig3 = plot3.getFigure()
+        fig3.clf()
+        visualization.road_user_chart(fig3, database_filename)
         plot3.draw()
