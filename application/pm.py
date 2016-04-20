@@ -207,19 +207,18 @@ def load_homography(main_window):
     homo_path = os.path.join(path, "homography", "homography.txt")
 
     # Has a homography been previously computed?
-    if check_project_cfg_section("homography"):
+    if check_project_cfg_section("homography"):  # If we can load homography unit-pix ratio load it
         # load unit-pixel ratio
         upr_exists, upr = check_project_cfg_option("homography", "unitpixelratio")
         if upr_exists:
             gui.unit_px_input.setText(upr)
-
-    worldPts, videoPts = cvutils.loadPointCorrespondences(corr_path)
-    main_window.homography = np.loadtxt(homo_path)
-    for point in worldPts:
-        main_window.ui.homography_aerialview.scene().add_point(point)
-    for point in videoPts:
-        main_window.ui.homography_cameraview.scene().add_point(point)
-    # Has a homography been previously computed?
+    if os.path.exists(corr_path):  # If points have been previously selected
+        worldPts, videoPts = cvutils.loadPointCorrespondences(corr_path)
+        main_window.homography = np.loadtxt(homo_path)
+        for point in worldPts:
+            main_window.ui.homography_aerialview.scene().add_point(point)
+        for point in videoPts:
+            main_window.ui.homography_cameraview.scene().add_point(point)
 
 
 def load_feature_tracking(main_window):

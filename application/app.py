@@ -7,6 +7,8 @@ from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 from subprocess import call 
 
+from plotting.make_object_trajectories import main as db_make_objtraj
+
 ##############################################3
 # testing feature objects 
 # import display-trajectories
@@ -67,22 +69,6 @@ class MainGUI(QtGui.QMainWindow):
 
 ###########################################################################################################################################
 
-        # Results plotting
-        # self.figure1 = Figure()
-        # self.canvas1 = FigureCanvas(self.figure1)
-        # self.ui.results_plot_layout1.addWidget(self.canvas1)
-        # self.results_plot_plot1()
-
-        #### Graphs for Sam
-        # aplot = visualization.road_user_traj('stmarc.sqlite', 30, 'homography.txt', 'stmarc_image.png')
-        # aplot.add_to_widget(self.ui.results_plot_layout1)
-        # aplot.show()
-
-        # self.figure2 = Figure()
-        # self.canvas2 = FigureCanvas(self.figure2)
-        # self.ui.results_plot_layout2.addWidget(self.canvas2)
-        # self.results_plot_plot2()
-        # back button for track roadusers
         self.ui.roadusers_tracking_back_button.clicked.connect(self.show_prev_tab)
         self.ui.roadusers_tracking_continue_button.clicked.connect(self.show_next_tab)
 
@@ -151,8 +137,10 @@ class MainGUI(QtGui.QMainWindow):
 
 # for the run button
     def run(self):
-
-                # create test folder 
+        """
+        Runs TrafficIntelligence trackers and support scripts.
+        """
+        # create test folder 
         if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/run"):
             os.mkdir(ac.CURRENT_PROJECT_PATH + "/run")
 
@@ -160,15 +148,15 @@ class MainGUI(QtGui.QMainWindow):
         if os.path.exists(ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg"):
             os.remove(ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg")
 
-        # creates new config file 
-        shutil.copyfile(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg")
+        # creates new config file
+        shutil.copyfile(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg", ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg")
 
         path1 = ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg"
 
         f = open(path1, 'r')
         lines = f.readlines()
         f.close()
-        f = open(path1,'w')
+        f = open(path1, 'w')
         for line in lines:
             if "frame1" in line:
                 f.write("frame1 = 0 \n")
@@ -179,10 +167,19 @@ class MainGUI(QtGui.QMainWindow):
             else:
                 f.write(line)
         f.close()
+        db_path = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")
+        tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "run_tracking.cfg")
 
-        call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg","--tf","--database-filename",ac.CURRENT_PROJECT_PATH + "/run/results.sqlite"])
-        call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg","--gf","--database-filename",ac.CURRENT_PROJECT_PATH + "/run/results.sqlite"])
-        call(["display-trajectories.py","-i",ac.CURRENT_PROJECT_VIDEO_PATH,"-d",ac.CURRENT_PROJECT_PATH + "/run/results.sqlite","-o",ac.CURRENT_PROJECT_PATH + "/homography/homography.txt","-t","object"])
+        if os.path.exists(db_path):  # If results database already exists,
+            os.remove(db_path)  # then remove it--it'll be recreated.
+        call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
+        call(["feature-based-tracking", tracking_path, "--gf", "--database-filename", db_path])
+
+        call(["classify-objects.py", tracking_path, "-d", db_path])  # Classify road users
+
+        db_make_objtraj(db_path)  # Make our object_trajectories db table
+
+        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object"])
 
 ################################################################################################
     def homography_load_aerial_image(self):
@@ -190,7 +187,11 @@ class MainGUI(QtGui.QMainWindow):
 
     def show_next_tab(self):
         curr_i = self.ui.main_tab_widget.currentIndex()
-        self.ui.main_tab_widget.setCurrentIndex(curr_i + 1)
+        new_i = curr_i + 1
+        self.ui.main_tab_widget.setCurrentIndex(new_i)
+        if new_i is 3:  # If we are moving to the plots page
+           qt_plot.plot_results(self) 
+
 
     def show_prev_tab(self):
         curr_i = self.ui.main_tab_widget.currentIndex()
@@ -331,7 +332,6 @@ class MainGUI(QtGui.QMainWindow):
         cv2.imwrite(camera_goodness_path, videoImg)  # Save camera goodness image
 
         self.ui.homography_results.load_image(QtGui.QImage(aerial_goodness_path))  # Load aerial goodness image into gui
-
 
 ##########################################################################################################################
 
