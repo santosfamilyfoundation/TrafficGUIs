@@ -455,6 +455,21 @@ class MainGUI(QtGui.QMainWindow):
         if len(self.worldPts) >= 4:
             if len(self.worldPts) == len(self.videoPts):
                 self.homography, self.mask = cv2.findHomography(self.videoPts, self.worldPts)
+            else:
+                error = QtGui.QErrorMessage()
+                error.showMessage('''\
+                To compute the homography, please make sure you choose the same
+                number of points on each image.''')
+                error.exec_()
+                return
+
+        else:
+            error = QtGui.QErrorMessage()
+            error.showMessage('''\
+            To compute the homography, please choose at least 4 points on 
+            each image.''')
+            error.exec_()
+            return
 
         if self.homography is None:
             return
