@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'safety_main.ui'
 #
-# Created: Tue Apr 19 12:04:48 2016
+# Created: Wed Apr 20 12:49:37 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -126,7 +126,8 @@ class Ui_TransportationSafety(object):
         self.homography_cameraview.setObjectName(_fromUtf8("homography_cameraview"))
         self.homography_layout.addWidget(self.homography_cameraview)
         self.homography_results = HomographyResultView(self.tab_homography)
-        self.homography_results.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.CrossCursor))
+        self.homography_results.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.homography_results.setResizeAnchor(QtGui.QGraphicsView.NoAnchor)
         self.homography_results.setObjectName(_fromUtf8("homography_results"))
         self.homography_layout.addWidget(self.homography_results)
         self.homography_aerialview = HomographyView(self.tab_homography)
@@ -398,17 +399,12 @@ class Ui_TransportationSafety(object):
         self.actionNew_Project.setObjectName(_fromUtf8("actionNew_Project"))
         self.menuTraffic_Analysis.addAction(self.actionNew_Project)
         self.menuTraffic_Analysis.addAction(self.actionOpen_Project)
-        self.menuTraffic_Analysis.addAction(self.actionOpen_Video)
-        self.menuTraffic_Analysis.addAction(self.actionOpen_Config)
         self.menuHomography_2.addAction(self.actionAdd_Replace_Aerial_Image)
         self.menuHomography_2.addAction(self.actionAdd_Replace_Camera_Image)
         self.menuHomography_2.addSeparator()
         self.menuHomography_2.addAction(self.actionCompute_Homography_Performance)
         self.menuHomography_2.addAction(self.actionAcquire_Aerial_Image)
-        self.menuProject.addAction(self.actionAdd_Replace_Video)
         self.menuProject.addAction(self.menuHomography_2.menuAction())
-        self.menuProject.addAction(self.actionFeature_Tracking)
-        self.menuProject.addAction(self.actionRoad_User_Tracking)
         self.menuHelp.addAction(self.actionUser_s_Guide)
         self.menuHelp.addAction(self.actionAbout)
         self.menuBar.addAction(self.menuTraffic_Analysis.menuAction())
@@ -416,7 +412,7 @@ class Ui_TransportationSafety(object):
         self.menuBar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(TransportationSafety)
-        self.main_tab_widget.setCurrentIndex(3)
+        self.main_tab_widget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(TransportationSafety)
 
     def retranslateUi(self, TransportationSafety):

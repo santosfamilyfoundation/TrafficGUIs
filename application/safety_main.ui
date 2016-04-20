@@ -27,7 +27,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -261,7 +261,10 @@
           <item>
            <widget class="HomographyResultView" name="homography_results">
             <property name="cursor" stdset="0">
-             <cursorShape>CrossCursor</cursorShape>
+             <cursorShape>ArrowCursor</cursorShape>
+            </property>
+            <property name="resizeAnchor">
+             <enum>QGraphicsView::NoAnchor</enum>
             </property>
            </widget>
           </item>
@@ -721,8 +724,6 @@
     </property>
     <addaction name="actionNew_Project"/>
     <addaction name="actionOpen_Project"/>
-    <addaction name="actionOpen_Video"/>
-    <addaction name="actionOpen_Config"/>
    </widget>
    <widget class="QMenu" name="menuProject">
     <property name="title">
@@ -738,10 +739,7 @@
      <addaction name="actionCompute_Homography_Performance"/>
      <addaction name="actionAcquire_Aerial_Image"/>
     </widget>
-    <addaction name="actionAdd_Replace_Video"/>
     <addaction name="menuHomography_2"/>
-    <addaction name="actionFeature_Tracking"/>
-    <addaction name="actionRoad_User_Tracking"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
