@@ -166,7 +166,7 @@ class HomographyScene(QtGui.QGraphicsScene):
         offset = 0
         for pt in need_update:
             pt.homography_index = index + offset
-            text_box = pt.childItems()[0]
+            text_box = pt.childI tems()[0]
             redraw_box = text_box.boundingRect()
             pt.childItems()[0].setText("{}".format(pt.homography_index + 1))
             self.update(redraw_box)  # Get rid of text artifacts. These can occur when changing from 10 to 9, for example.
@@ -174,6 +174,11 @@ class HomographyScene(QtGui.QGraphicsScene):
         self.update_point_list_status()
 
     def mouseReleaseEvent(self, event):
+        """
+        PyQt has several built in event handlers that you can re-implement.
+        This is one of them. If the mouse is released, it stops dragging one of
+        the homography points.
+        """
         super(HomographyScene, self).mouseReleaseEvent(event)
         if self.point_selected:
             # Note that we are no longer moving a point.
@@ -181,7 +186,12 @@ class HomographyScene(QtGui.QGraphicsScene):
             self.point_selected = False
             self.selected_point = None
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event ):
+        """
+        Another event handler. If the mouse is clicked, it checks to see if the
+        point is one of the existing points. It then allows the user to drag it
+        if it is selected. Adds a new point if there is not already a point.
+        """
         super(HomographyScene, self).mousePressEvent(event)
         loc = (event.scenePos().x(), event.scenePos().y())
         clicked_point, cp_index = self.find_clicked_point(loc)
