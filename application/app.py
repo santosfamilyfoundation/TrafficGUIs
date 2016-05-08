@@ -469,12 +469,16 @@ class MainGUI(QtGui.QMainWindow):
         return image
 
     def homography_compute(self):
+        """Computes a homography after the 'compute homography' button is pressed.
+        Scales points, and feeds them to open cv. Outputs a text file with the homography,
+        and the points selected.
+        """
         #TODO: display error message if points are < 4
         px_text = self.ui.unit_px_input.text()
-        self.unitPixRatio = float(unicode(px_text))
-        self.unscaled_world_pts = (np.array(self.ui.homography_aerialview.list_points()))
+        self.unitPixRatio = float(unicode(px_text)) #get the unit pixel ratio from UI
+        self.unscaled_world_pts = (np.array(self.ui.homography_aerialview.list_points())) #lists the points selected in aerial
         self.worldPts = self.unitPixRatio * self.unscaled_world_pts
-        self.videoPts = np.array(self.ui.homography_cameraview.list_points())
+        self.videoPts = np.array(self.ui.homography_cameraview.list_points()) #lists the points selected in video frame
         if len(self.worldPts) >= 4:
             if len(self.worldPts) == len(self.videoPts):
                 self.homography, self.mask = cv2.findHomography(self.videoPts, self.worldPts)
@@ -505,13 +509,18 @@ class MainGUI(QtGui.QMainWindow):
         self.homography_display_results()
 
     def homography_display_results(self):
+        """ 
+        Displays an image showing the "goodness" of the homography in the center panel.
+        Shows points calculated from the inverse homography next to the points originally
+        selected by the user. The closer the better.
+        """
         homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
         worldImg = cv2.imread(os.path.join(homography_path, "aerial.png"))
         videoImg = cv2.imread(os.path.join(homography_path, "camera.png"))
 
-        invHomography = np.linalg.inv(self.homography)
+        invHomography = np.linalg.inv(self.homography) #calculate inverse homography
 
-        projectedWorldPts = cvutils.projectArray(invHomography, self.worldPts.T).T
+        projectedWorldPts = cvutils.projectArray(invHomography, self.worldPts.T).T #calculate estimated points
         projectedVideoPts = cvutils.projectArray(self.homography, self.videoPts.T).T
 
         # TODO: Nicer formatting for computed goodness images
