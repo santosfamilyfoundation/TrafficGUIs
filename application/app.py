@@ -125,6 +125,16 @@ class MainGUI(QtGui.QMainWindow):
 ######################################################################################################
 
     def test_feature(self):
+        """
+        triggered when "test" button on "Track Features" page is clicked
+
+        creates folders "temp", "test" within "temp" and "test_feature" within "test"
+
+        creates cofig file and database file for feature tracking 
+
+        runs command lines for feature tracking 
+        """
+
         tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "feature_tracking.cfg")
         db_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "test1.sqlite")
         if os.path.exists(db_path):
@@ -147,6 +157,16 @@ class MainGUI(QtGui.QMainWindow):
         self.feature_tracking_video_player.loadFrames(os.path.join(ac.CURRENT_PROJECT_PATH, images_folder), fps)
 
     def test_object(self):
+        """
+        triggered when "test" button on "Track Road Users" page is clicked
+
+        creates folders "temp", "test" within "temp" and "test_object" within "test"
+
+        creates cofig file and database file for object tracking 
+
+        runs command lines for object tracking         
+        """
+
         tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object", "object_tracking.cfg")
         obj_db_path = os.path.join(ac.CURRENT_PROJECT_PATH,".temp", "test", "test_object", "test1.sqlite")
         feat_db_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "test1.sqlite")
@@ -201,13 +221,14 @@ class MainGUI(QtGui.QMainWindow):
 # for the run button
     def run(self):
         """
+        triggered when "run" button on "Track Road Users" page is clicked
+
         Runs TrafficIntelligence trackers and support scripts.
         """
-        # create test folder
+        # create run folder
         if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/run"):
             os.mkdir(ac.CURRENT_PROJECT_PATH + "/run")
 
-        # removes object tracking.cfg
         if os.path.exists(ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg"):
             os.remove(ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg")
 
@@ -216,6 +237,7 @@ class MainGUI(QtGui.QMainWindow):
 
         path1 = ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg"
 
+        # makes sure the entire video is analyzed, sets Frame1 and nfames to 0
         f = open(path1, 'r')
         lines = f.readlines()
         f.close()
@@ -513,12 +535,21 @@ class MainGUI(QtGui.QMainWindow):
 ##########################################################################################################################
 
 class configGui_features(QtGui.QWidget):
+    """ 
+    creates form of parameters related to feature tracking in "Track Features" page 
+
+    edit and set parameter values
+    """
 
     def __init__(self):
         super(configGui_features, self).__init__()
         self.initUI()
 
     def initUI(self):
+        """
+        creates form of parameters related to feature tracking in "Track Features" page 
+        """
+
         # lbl1.move(15, 10)
 
         self.btn = QtGui.QPushButton('Set Config', self)
@@ -593,29 +624,17 @@ class configGui_features(QtGui.QWidget):
         self.setLayout(grid)
 
         self.setWindowTitle('Input config')
-        # self.show()
 
         # opens a cofig file
     def openConfig(self):
-
-        # path = QFileDialog.getOpenFileName(self, 'Open File', '/')
-        # global path1
         path1= str(path)
-
-        # path1 = "../project_dir/test1"
 
     def createConfig_features(self, path):
         """
-        Create a config file
+        triggered when "Set Config" is clicked
+
+        adds parameter values to "feature_tracking.cfg"
         """
-
-        # global path1
-        # path1= str(path)
-
-        # update test1 name with file chose
-
-
-
         config = ConfigParser.ConfigParser()
 
         if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test"):
@@ -625,7 +644,6 @@ class configGui_features(QtGui.QWidget):
         if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature"):
             os.mkdir(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature")
 
-        # removes feature_tracking.cfg
         if os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg"):
             os.remove(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg")
 
@@ -635,8 +653,7 @@ class configGui_features(QtGui.QWidget):
 
         path1 = ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg"
 
-
-        # add new content to config file
+        # add new value to config file
         config.add_section("added")
         config.set("added", "video-filename",ac.CURRENT_PROJECT_VIDEO_PATH)
         config.set("added", "homography-filename",ac.CURRENT_PROJECT_PATH + "/homography/homography.txt")
@@ -651,7 +668,6 @@ class configGui_features(QtGui.QWidget):
         try:
             path1
         except NameError:
-            # self.player.load(Phonon.MediaSource(""))
             error = QtGui.QErrorMessage()
             error.showMessage('''\
             no config files chosen''')
@@ -707,12 +723,20 @@ class configGui_features(QtGui.QWidget):
 ##########################################################################################################################
 
 class configGui_object(QtGui.QWidget):
+    """ 
+    creates form of parameters related to object tracking in "Track Road Users" page 
+
+    edit and set parameter values
+    """
 
     def __init__(self):
         super(configGui_object, self).__init__()
         self.initUI()
 
     def initUI(self):
+        """
+        creates form of parameters related to object tracking in "Track Features" page 
+        """
         # lbl1.move(15, 10)
 
         self.btn = QtGui.QPushButton('Set Config', self)
@@ -768,7 +792,9 @@ class configGui_object(QtGui.QWidget):
 
     def createConfig_objects(self, path):
         """
-        Create a config file
+        triggered when "Set Config" is clicked
+
+        adds parameter values to "object_tracking.cfg"
         """
         config = ConfigParser.ConfigParser()
         object_folder = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object")
