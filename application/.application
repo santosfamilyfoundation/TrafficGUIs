@@ -1,4 +1,5 @@
 [info]
 default_project_dir = ../project_dir
-ti_install_dir = /home/jriedel/Traffic
+# If the next line gives problems, this could be changed to, for example, /home/svaughan/Traffic
+ti_install_dir = ~/Traffic
 

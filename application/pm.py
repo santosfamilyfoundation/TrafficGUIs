@@ -10,7 +10,10 @@ import time
 import datetime
 from shutil import copy
 import cv2
-import Image
+try:
+    from PIL import Image
+except:
+    import Image
 import cvutils
 import numpy as np
 
