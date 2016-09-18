@@ -1,5 +1,6 @@
 # app_config.py
 from ConfigParser import SafeConfigParser
+import os
 
 
 class AppConfig(object):
@@ -17,7 +18,7 @@ class AppConfig(object):
     @classmethod
     def load_application_config(cls):
         config_parser = SafeConfigParser()
-        config_parser.read(".application")
+        config_parser.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".application"))
         cls.PROJECT_DIR = config_parser.get("info", "default_project_dir")
         cls.TI_INSTALL_DIR = config_parser.get("info", "ti_install_dir")
 
