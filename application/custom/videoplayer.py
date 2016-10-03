@@ -16,7 +16,7 @@ class VideoPlayer(QtGui.QWidget):
         self.pause.clicked.connect(self.playPause)
 
 
-        self.slider = Phonon.SeekSlider(self.player.mediaObject() , self)
+        #self.slider = Phonon.SeekSlider(self.player.mediaObject() , self)
 
         self.status = QtGui.QLabel(self)
         self.status.setAlignment(QtCore.Qt.AlignRight |
@@ -27,7 +27,7 @@ class VideoPlayer(QtGui.QWidget):
         topLayout.addWidget(self.player)
         layout = QtGui.QHBoxLayout(self)
         layout.addWidget(self.pause)
-        layout.addWidget(self.slider)
+        #layout.addWidget(self.slider)
         topLayout.addLayout(layout)
         self.setLayout(topLayout)
 
