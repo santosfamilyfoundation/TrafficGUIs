@@ -3,19 +3,20 @@ import sys
 import shutil
 import cv2
 from custom.videoplayer import VideoPlayer
+from custom.video_frame_player import VideoFramePlayer
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
-from subprocess import call 
+from subprocess import call
 
 from plotting.make_object_trajectories import main as db_make_objtraj
 
 ##############################################3
-# testing feature objects 
+# testing feature objects
 # import display-trajectories
 
 ###############################################
 
-import os 
+import os
 from PyQt4.phonon import Phonon
 import ConfigParser
 from PyQt4.QtGui import *
@@ -76,7 +77,7 @@ class MainGUI(QtGui.QMainWindow):
 
         # Track features page
 
-        self.feature_tracking_video_player = VideoPlayer()
+        self.feature_tracking_video_player = VideoFramePlayer()
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer.openVideo)
         self.ui.feature_tracking_video_layout.addWidget(self.feature_tracking_video_player)
 
@@ -105,9 +106,9 @@ class MainGUI(QtGui.QMainWindow):
         # test button
         self.ui.button_roadusers_tracking_test.clicked.connect(self.test_object)
 
-        # run button 
+        # run button
         self.ui.button_roadusers_tracking_run.clicked.connect(self.run)
-       
+
 
         qt_plot.plot_results(self)
 ###########################################################################################################################################
@@ -151,7 +152,7 @@ class MainGUI(QtGui.QMainWindow):
         """
         Runs TrafficIntelligence trackers and support scripts.
         """
-        # create test folder 
+        # create test folder
         if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/run"):
             os.mkdir(ac.CURRENT_PROJECT_PATH + "/run")
 
@@ -202,7 +203,7 @@ class MainGUI(QtGui.QMainWindow):
         new_i = curr_i + 1
         self.ui.main_tab_widget.setCurrentIndex(new_i)
         if new_i is 3:  # If we are moving to the plots page
-           qt_plot.plot_results(self) 
+           qt_plot.plot_results(self)
 
 
     def show_prev_tab(self):
@@ -438,7 +439,7 @@ class configGui_features(QtGui.QWidget):
         # opens a cofig file
     def openConfig(self):
 
-        # path = QFileDialog.getOpenFileName(self, 'Open File', '/') 
+        # path = QFileDialog.getOpenFileName(self, 'Open File', '/')
         # global path1
         path1= str(path)
 
@@ -454,14 +455,14 @@ class configGui_features(QtGui.QWidget):
 
         # update test1 name with file chose
 
-        
-        
+
+
         config = ConfigParser.ConfigParser()
 
         if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test"):
             os.mkdir(ac.CURRENT_PROJECT_PATH + "/.temp/test")
 
-        # create test folder 
+        # create test folder
         if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature"):
             os.mkdir(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature")
 
@@ -469,7 +470,7 @@ class configGui_features(QtGui.QWidget):
         if os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg"):
             os.remove(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg")
 
-        # creates new config file 
+        # creates new config file
         proj_tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, "tracking.cfg")
         shutil.copyfile(proj_tracking_path, ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg")
 
@@ -530,7 +531,7 @@ class configGui_object(QtGui.QWidget):
         self.btn = QtGui.QPushButton('Set Config', self)
         # self.btn.move(20, 20)
         self.btn.clicked.connect(self.createConfig_objects)
-        
+
 
         self.label1 = QtGui.QLabel("first frame to process")
         # input box
@@ -587,7 +588,7 @@ class configGui_object(QtGui.QWidget):
         feature_cfg = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "feature_tracking.cfg")
         object_cfg = os.path.join(object_dir, "object_tracking.cfg")
 
-        # create test folder 
+        # create test folder
         if not os.path.exists(object_dir):
             os.mkdir(object_dir)
 
