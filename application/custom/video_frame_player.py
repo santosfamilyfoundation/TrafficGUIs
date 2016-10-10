@@ -11,8 +11,7 @@ class VideoFramePlayer(QtGui.QWidget):
             QtGui.QSizePolicy.Preferred)
 
         self.label = QtGui.QLabel(self)
-        scaledImage = QtGui.QPixmap(os.getcwd() + "/custom/image.png").scaled(self.size(), QtCore.Qt.KeepAspectRatio)
-        self.label.setPixmap(scaledImage)
+        self.setImage("custom/image.png")
 
         self.pause = QtGui.QPushButton('Play/Pause',self)
         self.pause.clicked.connect(self.playPause)
@@ -24,6 +23,9 @@ class VideoFramePlayer(QtGui.QWidget):
         self.status.setAlignment(QtCore.Qt.AlignRight |
             QtCore.Qt.AlignVCenter)
 
+        # Sets the image frames for this player to display
+        self.frames = []
+
         topLayout = QtGui.QVBoxLayout(self)
         topLayout.addWidget(self.label)
         layout = QtGui.QHBoxLayout(self)
@@ -31,6 +33,12 @@ class VideoFramePlayer(QtGui.QWidget):
         layout.addWidget(self.slider)
         topLayout.addLayout(layout)
         self.setLayout(topLayout)
+
+        self.reconfigure_player()
+
+    def setImage(self, imageFilename):
+        scaledImage = QtGui.QPixmap(os.path.join(os.getcwd(), imageFilename)).scaled(self.size(), QtCore.Qt.KeepAspectRatio)
+        self.label.setPixmap(scaledImage)
 
     def playPause(self):
         print('playPause')
@@ -57,6 +65,26 @@ class VideoFramePlayer(QtGui.QWidget):
         startTime = (startMinutes*60+startSeconds)
         endTime = (endMinutes*60+endSeconds)
         self.player.seek(startTime*1000)
+
+    def loadFrames(self, directory):
+        '''
+        This function takes a directory that holds a set of images, named 'image-001.png', 'image-002.png', etc.
+        and loads them into the frame player
+        '''
+        frames = []
+        for file in os.listdir(directory):
+            if file[0:6] == 'image-' and file[-4:] == '.png':
+                frames.append(os.path.join(directory, file))
+        self.frames = frames
+        self.reconfigure_player()
+
+    def reconfigure_player(self):
+        num_frames = len(self.frames)
+        self.slider.minimum = 0
+        self.slider.maximum = num_frames
+        self.slider.setValue(0)
+        if num_frames > 0:
+            self.setImage(self.frames[0])
 
     def loadVideo(self, filename):
         print('heklo')

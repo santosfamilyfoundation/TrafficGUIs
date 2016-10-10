@@ -130,10 +130,33 @@ class MainGUI(QtGui.QMainWindow):
         db_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "test1.sqlite")
         if os.path.exists(db_path):
             os.remove(db_path)
+        self.delete_feature_images()
         call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
         print('display-trajectories')
-        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "feature"])
+        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "feature", "--save-images", "--last-frame", "200"])
         # displaytrajectories2.makeTrajectories()
+        self.move_feature_images_to_project_dir()
+
+        self.feature_tracking_video_player.loadFrames(os.path.join(ac.CURRENT_PROJECT_PATH, "feature_images"))
+
+    def delete_feature_images(self):
+        feature_images_dir = os.path.join(ac.CURRENT_PROJECT_PATH, "feature_images")
+        if os.path.exists(feature_images_dir):
+            for file in os.listdir(feature_images_dir):
+                print(file)
+                if file[0:6] == 'image-' and file[-4:] == '.png':
+                    os.remove(os.path.join(feature_images_dir, file))
+        for file in os.listdir(os.getcwd()):
+            if file[0:6] == 'image-' and file[-4:] == '.png':
+                os.remove(os.path.join(os.getcwd(), file))
+
+    def move_feature_images_to_project_dir(self):
+        feature_images_dir = os.path.join(ac.CURRENT_PROJECT_PATH, "feature_images")
+        if not os.path.exists(feature_images_dir):
+            os.makedirs(feature_images_dir)
+        for file in os.listdir(os.getcwd()):
+            if file[0:6] == 'image-' and file[-4:] == '.png':
+                os.rename(file, os.path.join(feature_images_dir, file))
 
     def test_object(self):
         tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object", "object_tracking.cfg")
