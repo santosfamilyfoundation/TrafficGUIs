@@ -131,6 +131,7 @@ class MainGUI(QtGui.QMainWindow):
         if os.path.exists(db_path):
             os.remove(db_path)
         call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
+        print('display-trajectories')
         call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "feature"])
         # displaytrajectories2.makeTrajectories()
 

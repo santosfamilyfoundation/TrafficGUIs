@@ -1,6 +1,8 @@
 from PyQt4 import QtGui, QtCore
 import os
 
+print(os.getcwd() + "/image.png")
+
 class VideoFramePlayer(QtGui.QWidget):
 
     def __init__(self, parent = None):
@@ -9,32 +11,36 @@ class VideoFramePlayer(QtGui.QWidget):
             QtGui.QSizePolicy.Preferred)
 
         self.label = QtGui.QLabel(self)
-        print(os.getcwd() + "/image.png")
-        scaledImage = QtGui.QPixmap(os.getcwd() + "/image.png").scaled(self.size(), QtCore.Qt.KeepAspectRatio)
+        scaledImage = QtGui.QPixmap(os.getcwd() + "/custom/image.png").scaled(self.size(), QtCore.Qt.KeepAspectRatio)
         self.label.setPixmap(scaledImage)
 
         self.pause = QtGui.QPushButton('Play/Pause',self)
         self.pause.clicked.connect(self.playPause)
 
+        self.slider = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+        self.slider.valueChanged.connect(self.sliderChanged)
+
         self.status = QtGui.QLabel(self)
         self.status.setAlignment(QtCore.Qt.AlignRight |
             QtCore.Qt.AlignVCenter)
-
 
         topLayout = QtGui.QVBoxLayout(self)
         topLayout.addWidget(self.label)
         layout = QtGui.QHBoxLayout(self)
         layout.addWidget(self.pause)
-        #layout.addWidget(self.slider)
+        layout.addWidget(self.slider)
         topLayout.addLayout(layout)
         self.setLayout(topLayout)
 
     def playPause(self):
-    # allows the video to load through whenever a new file is chosen
-        if self.player.mediaObject().state() == Phonon.PlayingState:
-            self.player.pause()
-        else:
-            self.player.play()
+        print('playPause')
+
+    def sliderChanged(self):
+        '''
+        This method will be called when the slider is dragged by the user. The value() of the slider ranges from 1-99
+        '''
+        size = self.slider.value()
+        print('hi'+str(size))
 
     def tock(self, time):
         time = time/1000
@@ -52,6 +58,5 @@ class VideoFramePlayer(QtGui.QWidget):
         endTime = (endMinutes*60+endSeconds)
         self.player.seek(startTime*1000)
 
-
-    def loadVideo(self,filename):
+    def loadVideo(self, filename):
         print('heklo')
