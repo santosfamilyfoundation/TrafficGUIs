@@ -94,7 +94,7 @@ class MainGUI(QtGui.QMainWindow):
         # roadusers page
 
         # video play
-        self.roadusers_tracking_video_player = VideoPlayer()
+        self.roadusers_tracking_video_player = VideoFramePlayer()
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer3.openVideo)
         self.ui.roadusers_tracking_video_layout.addWidget(self.roadusers_tracking_video_player)
 
@@ -130,17 +130,52 @@ class MainGUI(QtGui.QMainWindow):
         db_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "test1.sqlite")
         if os.path.exists(db_path):
             os.remove(db_path)
-        self.delete_feature_images()
+
+        images_folder = "feature_images"
+
+        self.delete_images(images_folder)
+
+        # Get the frame information for the test
+        configuration = self.configGui_features.getConfig_features()
+        frame1 = int(configuration["frame1"])
+        nframes = int(configuration["nframes"])
+        fps = float(configuration["video-fps"])
+
         call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
-        print('display-trajectories')
-        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "feature", "--save-images", "--last-frame", "200"])
-        # displaytrajectories2.makeTrajectories()
-        self.move_feature_images_to_project_dir()
+        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "feature", "--save-images", "-f", str(frame1), "--last-frame", str(frame1+nframes)])
 
-        self.feature_tracking_video_player.loadFrames(os.path.join(ac.CURRENT_PROJECT_PATH, "feature_images"))
+        self.move_images_to_project_dir_folder(images_folder)
 
-    def delete_feature_images(self):
-        feature_images_dir = os.path.join(ac.CURRENT_PROJECT_PATH, "feature_images")
+        self.feature_tracking_video_player.loadFrames(os.path.join(ac.CURRENT_PROJECT_PATH, images_folder), fps)
+
+    def test_object(self):
+        tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object", "object_tracking.cfg")
+        obj_db_path = os.path.join(ac.CURRENT_PROJECT_PATH,".temp", "test", "test_object", "test1.sqlite")
+        feat_db_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "test1.sqlite")
+        if os.path.exists(obj_db_path):
+            os.remove(obj_db_path)
+        shutil.copyfile(feat_db_path, obj_db_path)
+
+        images_folder = "object_images"
+
+        self.delete_images(images_folder)
+
+        # Get the frame information for the test
+        configuration = self.configGui_object.getConfig_objects()
+        frame1 = int(configuration["frame1"])
+        nframes = int(configuration["nframes"])
+        fps = float(configuration["video-fps"])
+
+        call(["feature-based-tracking",tracking_path,"--gf","--database-filename",obj_db_path])
+        call(["classify-objects.py", "--cfg", tracking_path, "-d", obj_db_path])  # Classify road users
+        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH,"-d", obj_db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object", "--save-images", "-f", str(frame1), "--last-frame", str(frame1+nframes)])
+        
+        self.move_images_to_project_dir_folder(images_folder)
+
+        self.roadusers_tracking_video_player.loadFrames(os.path.join(ac.CURRENT_PROJECT_PATH, images_folder), fps)
+
+    def delete_images(self, folder):
+        feature_images_dir = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
         if os.path.exists(feature_images_dir):
             for file in os.listdir(feature_images_dir):
                 print(file)
@@ -150,26 +185,13 @@ class MainGUI(QtGui.QMainWindow):
             if file[0:6] == 'image-' and file[-4:] == '.png':
                 os.remove(os.path.join(os.getcwd(), file))
 
-    def move_feature_images_to_project_dir(self):
-        feature_images_dir = os.path.join(ac.CURRENT_PROJECT_PATH, "feature_images")
+    def move_images_to_project_dir_folder(self, folder):
+        feature_images_dir = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
         if not os.path.exists(feature_images_dir):
             os.makedirs(feature_images_dir)
         for file in os.listdir(os.getcwd()):
             if file[0:6] == 'image-' and file[-4:] == '.png':
                 os.rename(file, os.path.join(feature_images_dir, file))
-
-    def test_object(self):
-        tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object", "object_tracking.cfg")
-        obj_db_path = os.path.join(ac.CURRENT_PROJECT_PATH,".temp", "test", "test_object", "test1.sqlite")
-        feat_db_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "test1.sqlite")
-        if os.path.exists(obj_db_path):
-            os.remove(obj_db_path)
-        shutil.copyfile(feat_db_path, obj_db_path)
-        # call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg","--tf","--database-filename", obj_db_path])
-        call(["feature-based-tracking",tracking_path,"--gf","--database-filename", obj_db_path])
-        call(["classify-objects.py", "--cfg", tracking_path, "-d", obj_db_path])  # Classify road users
-        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH,"-d", obj_db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object"])
-
 
 # for the run button
     def run(self):
@@ -540,6 +562,34 @@ class configGui_features(QtGui.QWidget):
                     f.write(line)
             f.close()
 
+    def getConfig_features(self):
+        """
+        Gets the features configuration file and returns the data as a dictionary.
+        """
+        path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_feature/feature_tracking.cfg")
+
+        f = open(path, "r")
+        lines = f.readlines()
+        f.close()
+
+        final_dict = {}
+        for line in lines:
+            line = line.strip()
+
+            # If it's a comment, ignore it
+            if len(line) > 0 and line[0] == '#':
+                continue
+
+            arr = line.split(' = ')
+
+            # Protect against things that aren't in "this = that" format
+            if len(arr) != 2:
+                continue
+
+            final_dict[arr[0]] = arr[1]
+
+        return final_dict
+
 
 ##########################################################################################################################
 
@@ -658,6 +708,34 @@ class configGui_object(QtGui.QWidget):
                 # removes the section header
                 if line != "[added]\n":
                     wf.write(line)
+
+    def getConfig_objects(self):
+        """
+        Gets the features configuration file and returns the data as a dictionary.
+        """
+        path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_feature/feature_tracking.cfg")
+
+        f = open(path, "r")
+        lines = f.readlines()
+        f.close()
+
+        final_dict = {}
+        for line in lines:
+            line = line.strip()
+
+            # If it's a comment, ignore it
+            if len(line) > 0 and line[0] == '#':
+                continue
+
+            arr = line.split(' = ')
+
+            # Protect against things that aren't in "this = that" format
+            if len(arr) != 2:
+                continue
+
+            final_dict[arr[0]] = arr[1]
+
+        return final_dict
 
 ##########################################################################################################################
 
