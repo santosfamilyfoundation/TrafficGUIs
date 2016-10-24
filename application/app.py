@@ -175,23 +175,31 @@ class MainGUI(QtGui.QMainWindow):
         self.roadusers_tracking_video_player.loadFrames(os.path.join(ac.CURRENT_PROJECT_PATH, images_folder), fps)
 
     def delete_images(self, folder):
-        feature_images_dir = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
-        if os.path.exists(feature_images_dir):
-            for file in os.listdir(feature_images_dir):
-                print(file)
+        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        if os.path.exists(images_folder):
+            for file in os.listdir(images_folder):
                 if file[0:6] == 'image-' and file[-4:] == '.png':
-                    os.remove(os.path.join(feature_images_dir, file))
+                    os.remove(os.path.join(images_folder, file))
         for file in os.listdir(os.getcwd()):
             if file[0:6] == 'image-' and file[-4:] == '.png':
                 os.remove(os.path.join(os.getcwd(), file))
 
     def move_images_to_project_dir_folder(self, folder):
-        feature_images_dir = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
-        if not os.path.exists(feature_images_dir):
-            os.makedirs(feature_images_dir)
+        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        if not os.path.exists(images_folder):
+            os.makedirs(images_folder)
         for file in os.listdir(os.getcwd()):
             if file[0:6] == 'image-' and file[-4:] == '.png':
-                os.rename(file, os.path.join(feature_images_dir, file))
+                os.rename(file, os.path.join(images_folder, file))
+
+    def images_exist(self, folder):
+        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        if os.path.exists(images_folder):
+            for file in os.listdir(images_folder):
+                if file[0:6] == 'image-' and file[-4:] == '.png':
+                    return True
+        return False
+
 
 # for the run button
     def run(self):
@@ -238,7 +246,103 @@ class MainGUI(QtGui.QMainWindow):
 
         db_make_objtraj(db_path)  # Make our object_trajectories db table
 
-        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object"])
+        self.create_video()
+
+    def get_number_of_frames(self):
+        return 5000
+
+    def create_video(self):
+        count = 0
+        num_frames_per_vid = 30
+        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, "final_images")
+        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, "final_videos")
+        db_path = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")
+        self.delete_videos("final_videos")
+
+        while True:
+            # Delete old images, and recreate them in the right place
+            self.delete_images(images_folder)
+            call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH,"-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object", "--save-images", "-f", str(count*num_frames_per_vid), "--last-frame", str((count + 1)*num_frames_per_vid - 1)])
+            self.move_images_to_project_dir_folder(images_folder)
+            
+            # If we got to the end of the video, break
+            if not self.images_exist(images_folder):
+                print 'No more images'
+                break
+
+            # Get the frames, and create a short video out of them
+            self.renumber_frames(images_folder, count*num_frames_per_vid)
+            self.convert_frames_to_video(images_folder, videos_folder, "video-"+str(count)+".mp4")
+
+            count += 1
+
+        #self.move_videos_to_folder("final_videos")
+        self.combine_videos(videos_folder, "final_videos")
+
+    def renumber_frames(self, folder, frame):
+        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+
+        # Rename them all to 'new-image-x' in order to not interfere with the current 'image-x'
+        for file in os.listdir(images_folder):
+            if file[0:6] == 'image-' and file[-4:] == '.png':
+                number = file[6:-4]
+                new_number = int(number) - frame
+                new_file = 'new-image-'+str(new_number)+'.png'
+                os.rename(os.path.join(images_folder, file), os.path.join(images_folder, new_file))
+
+        # Rename the 'new-image-x' to 'image-x'
+        for file in os.listdir(images_folder):
+            if file[0:10] == 'new-image-' and file[-4:] == '.png':
+                new_file = file[4:]
+                os.rename(os.path.join(images_folder, file), os.path.join(images_folder, new_file))
+
+    def convert_frames_to_video(self, images_folder, videos_folder, filename):
+        call(["ffmpeg", "-framerate", "30", "-i", os.path.join(images_folder, "image-%d.png"), "-c:v", "libx264", "-pix_fmt", "yuv420p", os.path.join(videos_folder, filename)])
+
+    def delete_videos(self, folder):
+        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        if os.path.exists(videos_folder):
+            for file in os.listdir(videos_folder):
+                if file[0:6] == 'video-' and file[-4:] == '.mp4':
+                    os.remove(os.path.join(videos_folder, file))
+        for file in os.listdir(os.getcwd()):
+            if file[0:6] == 'video-' and file[-4:] == '.mp4':
+                os.remove(os.path.join(os.getcwd(), file))
+
+    def move_videos_to_folder(self, folder):
+        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        if not os.path.exists(videos_folder):
+            os.makedirs(videos_folder)
+        for file in os.listdir(os.getcwd()):
+            if file[0:6] == 'video-' and file[-4:] == '.mp4':
+                os.rename(file, os.path.join(videos_folder, file))
+
+    def combine_videos(self, folder, filename):
+        print 'combining video'
+        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        #call(["ffmpeg", "-f", "concat", "-i", os.path.join(videos_folder, "videos.txt"), "-c", "copy", os.path.join(videos_folder, filename)])
+        call(['cat']+self.get_videos(videos_folder)+['|', 'ffmpeg', '-f', 'mpeg', '-i', '-', '-qscale', '0', '-vcodec', 'mpeg4', 'output.mp4'])
+
+    def convert_to_mpeg(self, folder):
+        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        count = 0
+        videos = []
+
+        while os.path.exists(os.path.join(videos_folder, "video-"+str(count)+".mp4")):
+            print('Converting video video-'+str(count)+'.mp4')
+            call(['ffmpeg', '-i', os.path.join(videos_folder, 'video-'+str(count)+'.mp4'), '-qscale', '0', str(count)+'.mpg'])
+            count += 1
+
+    def get_videos(self, folder):
+        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        count = 0
+        videos = []
+
+        while os.path.exists(os.path.join(videos_folder, "video-"+str(count)+".mpg")):
+            videos.append(os.path.join(videos_folder, "video-"+str(count)+".mpg"))
+            count += 1
+
+        return videos
 
 ################################################################################################
     def homography_load_aerial_image(self):
@@ -310,7 +414,7 @@ class MainGUI(QtGui.QMainWindow):
         if qi:
             self.ui.homography_aerialview.load_image(qi)
 
-    def open_image_fd(self, dialog_text="Open Image", default_dir=""):
+    def open_image_fd(self, dialog_text="Open Image", default_folder=""):
         """Opens a file dialog, allowing user to select an image file.
 
         Creates a QImage object from the filename selected by the user in the
@@ -319,14 +423,14 @@ class MainGUI(QtGui.QMainWindow):
         Args:
             dialog_text [Optional(str.)]: Text to prompt user with in open file
                 dialog. Defaults to "Open Image".
-            default_dir [Optional(str.)]: Path of the default directory to open
+            default_folder [Optional(str.)]: Path of the default directory to open
                 the file dialog box to. Defaults to "".
 
         Returns:
             QImage: Image object created from selected image file.
             None: Returns None if no file was selected in the dialog box.
         """
-        fname = QtGui.QFileDialog.getOpenFileName(self, dialog_text, default_dir)  # TODO: Filter to show only image files
+        fname = QtGui.QFileDialog.getOpenFileName(self, dialog_text, default_folder)  # TODO: Filter to show only image files
         if fname:
             image = QtGui.QImage(fname)
         else:
@@ -489,7 +593,7 @@ class configGui_features(QtGui.QWidget):
         # global path1
         path1= str(path)
 
-        # path1 = "../project_dir/test1"
+        # path1 = "../project_folder/test1"
 
     def createConfig_features(self, path):
         """
@@ -658,13 +762,13 @@ class configGui_object(QtGui.QWidget):
         Create a config file
         """
         config = ConfigParser.ConfigParser()
-        object_dir = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object")
+        object_folder = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object")
         feature_cfg = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "feature_tracking.cfg")
-        object_cfg = os.path.join(object_dir, "object_tracking.cfg")
+        object_cfg = os.path.join(object_folder, "object_tracking.cfg")
 
         # create test folder
-        if not os.path.exists(object_dir):
-            os.mkdir(object_dir)
+        if not os.path.exists(object_folder):
+            os.mkdir(object_folder)
 
         # removes object tracking.cfg
         if os.path.exists(object_cfg):

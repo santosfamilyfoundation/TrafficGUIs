@@ -11,7 +11,6 @@ class VideoFramePlayer(QtGui.QWidget):
             QtGui.QSizePolicy.Preferred)
 
         self.label = QtGui.QLabel(self)
-        self.setImage("custom/image.png")
 
         self.pause = QtGui.QPushButton('Play/Pause',self)
         self.pause.clicked.connect(self.playPause)
@@ -24,7 +23,7 @@ class VideoFramePlayer(QtGui.QWidget):
             QtCore.Qt.AlignVCenter)
 
         # Sets the image frames for this player to display
-        self.max_frame_rate = 10.0
+        self.max_frame_rate = 5.0
         self.currentFrame = 0
         self.frames = []
         self.timer = None
@@ -50,28 +49,32 @@ class VideoFramePlayer(QtGui.QWidget):
             # Calling the timer function stops the timer.
             self.timer()
             self.timer = None
-            print(self.timer)
             return
+
+        # If no timer was set, we were paused. Now, we should check if we're already at the end
+        # and restart from the beginning
+        if self.currentFrame >= len(self.frames):
+            self.currentFrame = 0
 
         event = threading.Event()
 
         def stepForward():
             while not event.wait(1/self.max_frame_rate):
-                print(time.time())
                 self.currentFrame += int(self.frame_rate/self.max_frame_rate)
-                print(self.timer)
+
                 if self.currentFrame >= len(self.frames):
                     self.timer()
                     self.timer = None
                     return
-                print(self.currentFrame)
+
+                sliderPosition = int(self.currentFrame / float(len(self.frames)) * 100)
+                self.slider.setValue(sliderPosition)
+
+                # We have to use a signal to redraw so that the redraw happens on the main thread
                 self.redraw_signal.emit()
 
         threading.Thread(target=stepForward).start()    
         self.timer = event.set
-        print("set timer")
-        print(self.timer)
-
 
     def updateImage(self):
         if len(self.frames) > 0 and self.currentFrame < len(self.frames):
@@ -83,8 +86,6 @@ class VideoFramePlayer(QtGui.QWidget):
         '''
         size = self.slider.value()
         frame = int(size/99.0*(len(self.frames)-1))
-        print(size)
-        print(frame)
         self.currentFrame = frame
         self.updateImage()
 
