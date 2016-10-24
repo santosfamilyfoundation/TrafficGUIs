@@ -2,12 +2,10 @@
 import sys
 import shutil
 import cv2
-from custom.videoplayer import VideoPlayer
 from custom.video_frame_player import VideoFramePlayer
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 import subprocess
-from subprocess import call
 
 from plotting.make_object_trajectories import main as db_make_objtraj
 
@@ -133,7 +131,6 @@ class MainGUI(QtGui.QMainWindow):
             os.remove(db_path)
 
         images_folder = "feature_images"
-
         self.delete_images(images_folder)
 
         # Get the frame information for the test
@@ -142,8 +139,8 @@ class MainGUI(QtGui.QMainWindow):
         nframes = int(configuration["nframes"])
         fps = float(configuration["video-fps"])
 
-        call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
-        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "feature", "--save-images", "-f", str(frame1), "--last-frame", str(frame1+nframes)])
+        subprocess.call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
+        subprocess.call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "feature", "--save-images", "-f", str(frame1), "--last-frame", str(frame1+nframes)])
 
         self.move_images_to_project_dir_folder(images_folder)
 
@@ -158,7 +155,6 @@ class MainGUI(QtGui.QMainWindow):
         shutil.copyfile(feat_db_path, obj_db_path)
 
         images_folder = "object_images"
-
         self.delete_images(images_folder)
 
         # Get the frame information for the test
@@ -167,9 +163,9 @@ class MainGUI(QtGui.QMainWindow):
         nframes = int(configuration["nframes"])
         fps = float(configuration["video-fps"])
 
-        call(["feature-based-tracking",tracking_path,"--gf","--database-filename",obj_db_path])
-        call(["classify-objects.py", "--cfg", tracking_path, "-d", obj_db_path])  # Classify road users
-        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH,"-d", obj_db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object", "--save-images", "-f", str(frame1), "--last-frame", str(frame1+nframes)])
+        subprocess.call(["feature-based-tracking",tracking_path,"--gf","--database-filename",obj_db_path])
+        subprocess.call(["classify-objects.py", "--cfg", tracking_path, "-d", obj_db_path])  # Classify road users
+        subprocess.call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH,"-d", obj_db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object", "--save-images", "-f", str(frame1), "--last-frame", str(frame1+nframes)])
         
         self.move_images_to_project_dir_folder(images_folder)
 
@@ -240,21 +236,18 @@ class MainGUI(QtGui.QMainWindow):
 
         if os.path.exists(db_path):  # If results database already exists,
             os.remove(db_path)  # then remove it--it'll be recreated.
-        call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
-        call(["feature-based-tracking", tracking_path, "--gf", "--database-filename", db_path])
+        subprocess.call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
+        subprocess.call(["feature-based-tracking", tracking_path, "--gf", "--database-filename", db_path])
 
-        call(["classify-objects.py", "--cfg", tracking_path, "-d", db_path])  # Classify road users
+        subprocess.call(["classify-objects.py", "--cfg", tracking_path, "-d", db_path])  # Classify road users
 
         db_make_objtraj(db_path)  # Make our object_trajectories db table
 
         self.create_video()
 
-    def get_number_of_frames(self):
-        return 5000
-
     def create_video(self):
         count = 0
-        num_frames_per_vid = 30
+        num_frames_per_vid = 60
         images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, "final_images")
         videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, "final_videos")
 
@@ -268,7 +261,7 @@ class MainGUI(QtGui.QMainWindow):
         while True:
             # Delete old images, and recreate them in the right place
             self.delete_images(images_folder)
-            call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH,"-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object", "--save-images", "-f", str(count*num_frames_per_vid), "--last-frame", str((count + 1)*num_frames_per_vid - 1)])
+            subprocess.call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH,"-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object", "--save-images", "-f", str(count*num_frames_per_vid), "--last-frame", str((count + 1)*num_frames_per_vid - 1)])
             self.move_images_to_project_dir_folder(images_folder)
             
             # If we got to the end of the video, break
@@ -282,7 +275,6 @@ class MainGUI(QtGui.QMainWindow):
 
             count += 1
 
-        #self.move_videos_to_folder("final_videos")
         self.combine_videos(videos_folder, "final_videos")
 
     def renumber_frames(self, folder, frame):
@@ -303,7 +295,7 @@ class MainGUI(QtGui.QMainWindow):
                 os.rename(os.path.join(images_folder, file), os.path.join(images_folder, new_file))
 
     def convert_frames_to_video(self, images_folder, videos_folder, filename):
-        call(["ffmpeg", "-framerate", "30", "-i", os.path.join(images_folder, "image-%d.png"), "-c:v", "libx264", "-pix_fmt", "yuv420p", os.path.join(videos_folder, filename)])
+        subprocess.call(["ffmpeg", "-framerate", "30", "-i", os.path.join(images_folder, "image-%d.png"), "-c:v", "libx264", "-pix_fmt", "yuv420p", os.path.join(videos_folder, filename)])
 
     def delete_videos(self, folder):
         videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
@@ -327,8 +319,12 @@ class MainGUI(QtGui.QMainWindow):
                 os.rename(file, os.path.join(videos_folder, file))
 
     def combine_videos(self, folder, filename):
+        # The only way I could find to join videos was to convert the videos to .mpg format, and then join them.
+        # This seems to be the only way to keep ffmpeg happy.
         videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
         self.convert_to_mpeg(videos_folder)
+
+        # Using Popen seems to be necessary in order to pipe the output of one into the other
         p1 = subprocess.Popen(['cat']+self.get_videos(videos_folder), stdout=subprocess.PIPE)
         p2 = subprocess.Popen(['ffmpeg', '-f', 'mpeg', '-i', '-', '-qscale', '0', '-vcodec', 'mpeg4', os.path.join(videos_folder, 'output.mp4')], stdin=p1.stdout, stdout=subprocess.PIPE)
         p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
@@ -338,7 +334,7 @@ class MainGUI(QtGui.QMainWindow):
         count = 0
 
         while os.path.exists(os.path.join(videos_folder, "video-"+str(count)+".mp4")):
-            call(['ffmpeg', '-i', os.path.join(videos_folder, 'video-'+str(count)+'.mp4'), '-qscale', '0', os.path.join(folder, "video-"+str(count)+".mpg")])
+            subprocess.call(['ffmpeg', '-i', os.path.join(videos_folder, 'video-'+str(count)+'.mp4'), '-qscale', '0', os.path.join(folder, "video-"+str(count)+".mpg")])
             count += 1
 
     def get_videos(self, folder):
@@ -601,7 +597,7 @@ class configGui_features(QtGui.QWidget):
         # global path1
         path1= str(path)
 
-        # path1 = "../project_folder/test1"
+        # path1 = "../project_dir/test1"
 
     def createConfig_features(self, path):
         """
