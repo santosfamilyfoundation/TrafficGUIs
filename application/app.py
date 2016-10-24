@@ -6,6 +6,7 @@ from custom.videoplayer import VideoPlayer
 from custom.video_frame_player import VideoFramePlayer
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
+import subprocess
 from subprocess import call
 
 from plotting.make_object_trajectories import main as db_make_objtraj
@@ -256,6 +257,11 @@ class MainGUI(QtGui.QMainWindow):
         num_frames_per_vid = 30
         images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, "final_images")
         videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, "final_videos")
+
+        # Make the videos folder if it doesn't exists 
+        # (images_folder will be created by move_images_to_project_dir_folder)
+        if not os.path.exists(videos_folder):
+            os.makedirs(videos_folder)
         db_path = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")
         self.delete_videos("final_videos")
 
@@ -301,13 +307,16 @@ class MainGUI(QtGui.QMainWindow):
 
     def delete_videos(self, folder):
         videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
-        if os.path.exists(videos_folder):
-            for file in os.listdir(videos_folder):
-                if file[0:6] == 'video-' and file[-4:] == '.mp4':
-                    os.remove(os.path.join(videos_folder, file))
-        for file in os.listdir(os.getcwd()):
-            if file[0:6] == 'video-' and file[-4:] == '.mp4':
-                os.remove(os.path.join(os.getcwd(), file))
+        file_extensions = ['.mp4', '.mpg']
+
+        for extension in file_extensions:
+            if os.path.exists(videos_folder):
+                for file in os.listdir(videos_folder):
+                    if file[0:6] == 'video-' and file[-4:] == extension:
+                        os.remove(os.path.join(videos_folder, file))
+            for file in os.listdir(os.getcwd()):
+                if file[0:6] == 'video-' and file[-4:] == extension:
+                    os.remove(os.path.join(os.getcwd(), file))
 
     def move_videos_to_folder(self, folder):
         videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
@@ -318,19 +327,18 @@ class MainGUI(QtGui.QMainWindow):
                 os.rename(file, os.path.join(videos_folder, file))
 
     def combine_videos(self, folder, filename):
-        print 'combining video'
         videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
-        #call(["ffmpeg", "-f", "concat", "-i", os.path.join(videos_folder, "videos.txt"), "-c", "copy", os.path.join(videos_folder, filename)])
-        call(['cat']+self.get_videos(videos_folder)+['|', 'ffmpeg', '-f', 'mpeg', '-i', '-', '-qscale', '0', '-vcodec', 'mpeg4', 'output.mp4'])
+        self.convert_to_mpeg(videos_folder)
+        p1 = subprocess.Popen(['cat']+self.get_videos(videos_folder), stdout=subprocess.PIPE)
+        p2 = subprocess.Popen(['ffmpeg', '-f', 'mpeg', '-i', '-', '-qscale', '0', '-vcodec', 'mpeg4', os.path.join(videos_folder, 'output.mp4')], stdin=p1.stdout, stdout=subprocess.PIPE)
+        p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
 
     def convert_to_mpeg(self, folder):
         videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
         count = 0
-        videos = []
 
         while os.path.exists(os.path.join(videos_folder, "video-"+str(count)+".mp4")):
-            print('Converting video video-'+str(count)+'.mp4')
-            call(['ffmpeg', '-i', os.path.join(videos_folder, 'video-'+str(count)+'.mp4'), '-qscale', '0', str(count)+'.mpg'])
+            call(['ffmpeg', '-i', os.path.join(videos_folder, 'video-'+str(count)+'.mp4'), '-qscale', '0', os.path.join(folder, "video-"+str(count)+".mpg")])
             count += 1
 
     def get_videos(self, folder):
