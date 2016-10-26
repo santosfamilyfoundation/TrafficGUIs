@@ -116,6 +116,18 @@ class ProjectWizard(QtGui.QWizard):
             progress_msg.setText("Writing configuration files...")
             self._write_to_project_config()
             copy("default/tracking.cfg", os.path.join(pr_path, "tracking.cfg"))
+	    copy("default/classifier.cfg", os.path.join(pr_path, "classifier.cfg"))
+	    with open(os.path.join(pr_path, 'tracking.cfg') ,'r+') as trkcfg:
+                old = trkcfg.read()
+                trkcfg.seek(0)
+		newline = 'classifier-filename = ../project_dir/{}/classifier.cfg'.format(self.project_name)
+                trkcfg.write(newline+old)
+	    with open(os.path.join(pr_path, 'classifier.cfg'),'r+') as newcfg:
+	        old = newcfg.read()
+                newcfg.seek(0)
+ 		nline1 = 'pbv-svm-filename = ../project_dir/{}/modelPBV.xml\n'.format(self.project_name)
+		nline2 = 'bv-svm-filename = ../project_dir/{}/modelBV.xml\n'.format(self.project_name)
+		newcfg.write(nline1+nline2+old)
 
             progress_msg.setText("Copying object classification files...")
             svms = ["modelBV.xml", "modelPB.xml", "modelPBV.xml", "modelPV.xml"]
