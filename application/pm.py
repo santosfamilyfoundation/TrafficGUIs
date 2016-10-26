@@ -186,8 +186,6 @@ def load_project(folder_path, main_window):
     config_parser.read(project_cfg)  # Read project config file.
     ac.CURRENT_PROJECT_VIDEO_PATH = os.path.join(ac.CURRENT_PROJECT_PATH, config_parser.get("video", "name"))
     load_homography(main_window)
-    load_feature_tracking(main_window)
-    load_roadusers_tracking(main_window)
     load_results(main_window)
 
 
@@ -237,24 +235,6 @@ def load_homography(main_window):
         gui.homography_results.load_image_from_path(goodness_path)
     else:
         print ("{} does not exist. No points loaded.".format(corr_path))
-
-
-
-
-
-def load_feature_tracking(main_window):
-    """
-    Loads feature_tracking information into the specified main window.
-    """
-    main_window.feature_tracking_video_player.loadVideo(ac.CURRENT_PROJECT_VIDEO_PATH)
-
-
-def load_roadusers_tracking(main_window):
-    """
-    Loads road user tracking information into the specified main window.
-    """
-    main_window.roadusers_tracking_video_player.loadVideo(ac.CURRENT_PROJECT_VIDEO_PATH)
-
 
 def load_results(main_window):
     if os.path.exists(os.path.join(ac.CURRENT_PROJECT_PATH, "homography", "homography.txt")):

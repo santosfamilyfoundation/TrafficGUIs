@@ -2,20 +2,20 @@
 import sys
 import shutil
 import cv2
-from custom.videoplayer import VideoPlayer
+from custom.video_frame_player import VideoFramePlayer
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
-from subprocess import call 
+import subprocess
 
 from plotting.make_object_trajectories import main as db_make_objtraj
 
 ##############################################3
-# testing feature objects 
+# testing feature objects
 # import display-trajectories
 
 ###############################################
 
-import os 
+import os
 from PyQt4.phonon import Phonon
 import ConfigParser
 from PyQt4.QtGui import *
@@ -76,7 +76,7 @@ class MainGUI(QtGui.QMainWindow):
 
         # Track features page
 
-        self.feature_tracking_video_player = VideoPlayer()
+        self.feature_tracking_video_player = VideoFramePlayer()
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer.openVideo)
         self.ui.feature_tracking_video_layout.addWidget(self.feature_tracking_video_player)
 
@@ -93,7 +93,7 @@ class MainGUI(QtGui.QMainWindow):
         # roadusers page
 
         # video play
-        self.roadusers_tracking_video_player = VideoPlayer()
+        self.roadusers_tracking_video_player = VideoFramePlayer()
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer3.openVideo)
         self.ui.roadusers_tracking_video_layout.addWidget(self.roadusers_tracking_video_player)
 
@@ -105,9 +105,9 @@ class MainGUI(QtGui.QMainWindow):
         # test button
         self.ui.button_roadusers_tracking_test.clicked.connect(self.test_object)
 
-        # run button 
+        # run button
         self.ui.button_roadusers_tracking_run.clicked.connect(self.run)
-       
+
 
         qt_plot.plot_results(self)
 ###########################################################################################################################################
@@ -129,9 +129,22 @@ class MainGUI(QtGui.QMainWindow):
         db_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "test1.sqlite")
         if os.path.exists(db_path):
             os.remove(db_path)
-        call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
-        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "feature"])
-        # displaytrajectories2.makeTrajectories()
+
+        images_folder = "feature_images"
+        self.delete_images(images_folder)
+
+        # Get the frame information for the test
+        configuration = self.configGui_features.getConfig_features()
+        frame1 = int(configuration["frame1"])
+        nframes = int(configuration["nframes"])
+        fps = float(configuration["video-fps"])
+
+        subprocess.call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
+        subprocess.call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "feature", "--save-images", "-f", str(frame1), "--last-frame", str(frame1+nframes)])
+
+        self.move_images_to_project_dir_folder(images_folder)
+
+        self.feature_tracking_video_player.loadFrames(os.path.join(ac.CURRENT_PROJECT_PATH, images_folder), fps)
 
     def test_object(self):
         tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object", "object_tracking.cfg")
@@ -140,10 +153,49 @@ class MainGUI(QtGui.QMainWindow):
         if os.path.exists(obj_db_path):
             os.remove(obj_db_path)
         shutil.copyfile(feat_db_path, obj_db_path)
-        # call(["feature-based-tracking",ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg","--tf","--database-filename", obj_db_path])
-        call(["feature-based-tracking",tracking_path,"--gf","--database-filename", obj_db_path])
-        call(["classify-objects.py", "--cfg", tracking_path, "-d", obj_db_path])  # Classify road users
-        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH,"-d", obj_db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object"])
+
+        images_folder = "object_images"
+        self.delete_images(images_folder)
+
+        # Get the frame information for the test
+        configuration = self.configGui_object.getConfig_objects()
+        frame1 = int(configuration["frame1"])
+        nframes = int(configuration["nframes"])
+        fps = float(configuration["video-fps"])
+
+        subprocess.call(["feature-based-tracking",tracking_path,"--gf","--database-filename",obj_db_path])
+        subprocess.call(["classify-objects.py", "--cfg", tracking_path, "-d", obj_db_path])  # Classify road users
+        subprocess.call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH,"-d", obj_db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object", "--save-images", "-f", str(frame1), "--last-frame", str(frame1+nframes)])
+        
+        self.move_images_to_project_dir_folder(images_folder)
+
+        self.roadusers_tracking_video_player.loadFrames(os.path.join(ac.CURRENT_PROJECT_PATH, images_folder), fps)
+
+    def delete_images(self, folder):
+        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        if os.path.exists(images_folder):
+            for file in os.listdir(images_folder):
+                if file[0:6] == 'image-' and file[-4:] == '.png':
+                    os.remove(os.path.join(images_folder, file))
+        for file in os.listdir(os.getcwd()):
+            if file[0:6] == 'image-' and file[-4:] == '.png':
+                os.remove(os.path.join(os.getcwd(), file))
+
+    def move_images_to_project_dir_folder(self, folder):
+        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        if not os.path.exists(images_folder):
+            os.makedirs(images_folder)
+        for file in os.listdir(os.getcwd()):
+            if file[0:6] == 'image-' and file[-4:] == '.png':
+                os.rename(file, os.path.join(images_folder, file))
+
+    def images_exist(self, folder):
+        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        if os.path.exists(images_folder):
+            for file in os.listdir(images_folder):
+                if file[0:6] == 'image-' and file[-4:] == '.png':
+                    return True
+        return False
 
 
 # for the run button
@@ -151,7 +203,7 @@ class MainGUI(QtGui.QMainWindow):
         """
         Runs TrafficIntelligence trackers and support scripts.
         """
-        # create test folder 
+        # create test folder
         if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/run"):
             os.mkdir(ac.CURRENT_PROJECT_PATH + "/run")
 
@@ -184,14 +236,117 @@ class MainGUI(QtGui.QMainWindow):
 
         if os.path.exists(db_path):  # If results database already exists,
             os.remove(db_path)  # then remove it--it'll be recreated.
-        call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
-        call(["feature-based-tracking", tracking_path, "--gf", "--database-filename", db_path])
+        subprocess.call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
+        subprocess.call(["feature-based-tracking", tracking_path, "--gf", "--database-filename", db_path])
 
-        call(["classify-objects.py", "--cfg", tracking_path, "-d", db_path])  # Classify road users
+        subprocess.call(["classify-objects.py", "--cfg", tracking_path, "-d", db_path])  # Classify road users
 
         db_make_objtraj(db_path)  # Make our object_trajectories db table
 
-        call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object"])
+        self.create_video()
+
+    def create_video(self):
+        count = 0
+        num_frames_per_vid = 60
+        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, "final_images")
+        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, "final_videos")
+
+        # Make the videos folder if it doesn't exists 
+        # (images_folder will be created by move_images_to_project_dir_folder)
+        if not os.path.exists(videos_folder):
+            os.makedirs(videos_folder)
+        db_path = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")
+        self.delete_videos("final_videos")
+
+        while True:
+            # Delete old images, and recreate them in the right place
+            self.delete_images(images_folder)
+            subprocess.call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH,"-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object", "--save-images", "-f", str(count*num_frames_per_vid), "--last-frame", str((count + 1)*num_frames_per_vid - 1)])
+            self.move_images_to_project_dir_folder(images_folder)
+            
+            # If we got to the end of the video, break
+            if not self.images_exist(images_folder):
+                print 'No more images'
+                break
+
+            # Get the frames, and create a short video out of them
+            self.renumber_frames(images_folder, count*num_frames_per_vid)
+            self.convert_frames_to_video(images_folder, videos_folder, "video-"+str(count)+".mp4")
+
+            count += 1
+
+        self.combine_videos(videos_folder, "final_videos")
+
+    def renumber_frames(self, folder, frame):
+        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+
+        # Rename them all to 'new-image-x' in order to not interfere with the current 'image-x'
+        for file in os.listdir(images_folder):
+            if file[0:6] == 'image-' and file[-4:] == '.png':
+                number = file[6:-4]
+                new_number = int(number) - frame
+                new_file = 'new-image-'+str(new_number)+'.png'
+                os.rename(os.path.join(images_folder, file), os.path.join(images_folder, new_file))
+
+        # Rename the 'new-image-x' to 'image-x'
+        for file in os.listdir(images_folder):
+            if file[0:10] == 'new-image-' and file[-4:] == '.png':
+                new_file = file[4:]
+                os.rename(os.path.join(images_folder, file), os.path.join(images_folder, new_file))
+
+    def convert_frames_to_video(self, images_folder, videos_folder, filename):
+        subprocess.call(["ffmpeg", "-framerate", "30", "-i", os.path.join(images_folder, "image-%d.png"), "-c:v", "libx264", "-pix_fmt", "yuv420p", os.path.join(videos_folder, filename)])
+
+    def delete_videos(self, folder):
+        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        file_extensions = ['.mp4', '.mpg']
+
+        for extension in file_extensions:
+            if os.path.exists(videos_folder):
+                for file in os.listdir(videos_folder):
+                    if file[0:6] == 'video-' and file[-4:] == extension:
+                        os.remove(os.path.join(videos_folder, file))
+            for file in os.listdir(os.getcwd()):
+                if file[0:6] == 'video-' and file[-4:] == extension:
+                    os.remove(os.path.join(os.getcwd(), file))
+
+    def move_videos_to_folder(self, folder):
+        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        if not os.path.exists(videos_folder):
+            os.makedirs(videos_folder)
+        for file in os.listdir(os.getcwd()):
+            if file[0:6] == 'video-' and file[-4:] == '.mp4':
+                os.rename(file, os.path.join(videos_folder, file))
+
+    def combine_videos(self, folder, filename):
+        # The only way I could find to join videos was to convert the videos to .mpg format, and then join them.
+        # This seems to be the only way to keep ffmpeg happy.
+        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        self.convert_to_mpeg(videos_folder)
+
+        # Using Popen seems to be necessary in order to pipe the output of one into the other
+        p1 = subprocess.Popen(['cat']+self.get_videos(videos_folder), stdout=subprocess.PIPE)
+        p2 = subprocess.Popen(['ffmpeg', '-f', 'mpeg', '-i', '-', '-qscale', '0', '-vcodec', 'mpeg4', os.path.join(videos_folder, 'output.mp4')], stdin=p1.stdout, stdout=subprocess.PIPE)
+        p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
+
+    def convert_to_mpeg(self, folder):
+        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        count = 0
+
+        while os.path.exists(os.path.join(videos_folder, "video-"+str(count)+".mp4")):
+            subprocess.call(['ffmpeg', '-i', os.path.join(videos_folder, 'video-'+str(count)+'.mp4'), '-qscale', '0', os.path.join(folder, "video-"+str(count)+".mpg")])
+            count += 1
+
+    def get_videos(self, folder):
+        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
+        count = 0
+        videos = []
+
+        while os.path.exists(os.path.join(videos_folder, "video-"+str(count)+".mpg")):
+            videos.append(os.path.join(videos_folder, "video-"+str(count)+".mpg"))
+            count += 1
+
+        return videos
 
 ################################################################################################
     def homography_load_aerial_image(self):
@@ -202,7 +357,7 @@ class MainGUI(QtGui.QMainWindow):
         new_i = curr_i + 1
         self.ui.main_tab_widget.setCurrentIndex(new_i)
         if new_i is 3:  # If we are moving to the plots page
-           qt_plot.plot_results(self) 
+           qt_plot.plot_results(self)
 
 
     def show_prev_tab(self):
@@ -263,7 +418,7 @@ class MainGUI(QtGui.QMainWindow):
         if qi:
             self.ui.homography_aerialview.load_image(qi)
 
-    def open_image_fd(self, dialog_text="Open Image", default_dir=""):
+    def open_image_fd(self, dialog_text="Open Image", default_folder=""):
         """Opens a file dialog, allowing user to select an image file.
 
         Creates a QImage object from the filename selected by the user in the
@@ -272,14 +427,14 @@ class MainGUI(QtGui.QMainWindow):
         Args:
             dialog_text [Optional(str.)]: Text to prompt user with in open file
                 dialog. Defaults to "Open Image".
-            default_dir [Optional(str.)]: Path of the default directory to open
+            default_folder [Optional(str.)]: Path of the default directory to open
                 the file dialog box to. Defaults to "".
 
         Returns:
             QImage: Image object created from selected image file.
             None: Returns None if no file was selected in the dialog box.
         """
-        fname = QtGui.QFileDialog.getOpenFileName(self, dialog_text, default_dir)  # TODO: Filter to show only image files
+        fname = QtGui.QFileDialog.getOpenFileName(self, dialog_text, default_folder)  # TODO: Filter to show only image files
         if fname:
             image = QtGui.QImage(fname)
         else:
@@ -438,7 +593,7 @@ class configGui_features(QtGui.QWidget):
         # opens a cofig file
     def openConfig(self):
 
-        # path = QFileDialog.getOpenFileName(self, 'Open File', '/') 
+        # path = QFileDialog.getOpenFileName(self, 'Open File', '/')
         # global path1
         path1= str(path)
 
@@ -454,14 +609,14 @@ class configGui_features(QtGui.QWidget):
 
         # update test1 name with file chose
 
-        
-        
+
+
         config = ConfigParser.ConfigParser()
 
         if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test"):
             os.mkdir(ac.CURRENT_PROJECT_PATH + "/.temp/test")
 
-        # create test folder 
+        # create test folder
         if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature"):
             os.mkdir(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature")
 
@@ -469,7 +624,7 @@ class configGui_features(QtGui.QWidget):
         if os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg"):
             os.remove(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg")
 
-        # creates new config file 
+        # creates new config file
         proj_tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, "tracking.cfg")
         shutil.copyfile(proj_tracking_path, ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg")
 
@@ -515,6 +670,34 @@ class configGui_features(QtGui.QWidget):
                     f.write(line)
             f.close()
 
+    def getConfig_features(self):
+        """
+        Gets the features configuration file and returns the data as a dictionary.
+        """
+        path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_feature/feature_tracking.cfg")
+
+        f = open(path, "r")
+        lines = f.readlines()
+        f.close()
+
+        final_dict = {}
+        for line in lines:
+            line = line.strip()
+
+            # If it's a comment, ignore it
+            if len(line) > 0 and line[0] == '#':
+                continue
+
+            arr = line.split(' = ')
+
+            # Protect against things that aren't in "this = that" format
+            if len(arr) != 2:
+                continue
+
+            final_dict[arr[0]] = arr[1]
+
+        return final_dict
+
 
 ##########################################################################################################################
 
@@ -530,7 +713,7 @@ class configGui_object(QtGui.QWidget):
         self.btn = QtGui.QPushButton('Set Config', self)
         # self.btn.move(20, 20)
         self.btn.clicked.connect(self.createConfig_objects)
-        
+
 
         self.label1 = QtGui.QLabel("first frame to process")
         # input box
@@ -583,13 +766,13 @@ class configGui_object(QtGui.QWidget):
         Create a config file
         """
         config = ConfigParser.ConfigParser()
-        object_dir = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object")
+        object_folder = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object")
         feature_cfg = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "feature_tracking.cfg")
-        object_cfg = os.path.join(object_dir, "object_tracking.cfg")
+        object_cfg = os.path.join(object_folder, "object_tracking.cfg")
 
-        # create test folder 
-        if not os.path.exists(object_dir):
-            os.mkdir(object_dir)
+        # create test folder
+        if not os.path.exists(object_folder):
+            os.mkdir(object_folder)
 
         # removes object tracking.cfg
         if os.path.exists(object_cfg):
@@ -633,6 +816,34 @@ class configGui_object(QtGui.QWidget):
                 # removes the section header
                 if line != "[added]\n":
                     wf.write(line)
+
+    def getConfig_objects(self):
+        """
+        Gets the features configuration file and returns the data as a dictionary.
+        """
+        path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_feature/feature_tracking.cfg")
+
+        f = open(path, "r")
+        lines = f.readlines()
+        f.close()
+
+        final_dict = {}
+        for line in lines:
+            line = line.strip()
+
+            # If it's a comment, ignore it
+            if len(line) > 0 and line[0] == '#':
+                continue
+
+            arr = line.split(' = ')
+
+            # Protect against things that aren't in "this = that" format
+            if len(arr) != 2:
+                continue
+
+            final_dict[arr[0]] = arr[1]
+
+        return final_dict
 
 ##########################################################################################################################
 
