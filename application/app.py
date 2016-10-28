@@ -306,9 +306,13 @@ class MainGUI(QtGui.QMainWindow):
                 for file in os.listdir(videos_folder):
                     if file[0:6] == 'video-' and file[-4:] == extension:
                         os.remove(os.path.join(videos_folder, file))
+                    if file == 'output' + extension:
+                        os.remove(os.path.join(videos_folder, file))
             for file in os.listdir(os.getcwd()):
                 if file[0:6] == 'video-' and file[-4:] == extension:
                     os.remove(os.path.join(os.getcwd(), file))
+                if file == 'output' + extension:
+                    os.remove(os.path.join(videos_folder, file))
 
     def move_videos_to_folder(self, folder):
         videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
