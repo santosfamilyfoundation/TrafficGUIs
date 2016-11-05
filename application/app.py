@@ -22,6 +22,7 @@ from PyQt4.QtGui import *
 
 import random
 import os
+import requests
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
@@ -198,12 +199,37 @@ class MainGUI(QtGui.QMainWindow):
         return False
 
 
+    def upload(self):
+        project_name = ac.CURRENT_PROJECT_PATH.strip('/').split('/')[-1]
+        homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
+
+        video_extn = ac.CURRENT_PROJECT_VIDEO_PATH.split('.')[-1]
+
+        files = {
+            'homography/aerial.png': open(os.path.join(homography_path, "aerial.png"), 'rb'),
+            'homography/camera.png': open(os.path.join(homography_path, "camera.png"), 'rb'),
+            'homography/homography.txt': open(os.path.join(homography_path, "homography.txt"), 'rb'),
+            'project_name.cfg': open(os.path.join(ac.CURRENT_PROJECT_PATH, project_name  + ".cfg"), 'rb'),
+            'tracking.cfg': open(os.path.join(ac.CURRENT_PROJECT_PATH, "tracking.cfg"), 'rb'),
+            '.temp/test/test_object/object_tracking.cfg': open(os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_object/object_tracking.cfg"), 'rb'),
+            ".temp/test/test_feature/feature_tracking.cfg": open(os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_feature/feature_tracking.cfg"), 'rb'),
+            # TODO(rlouie): do video uploading request in a streaming way
+            'video.%s'%video_extn : open(ac.CURRENT_PROJECT_VIDEO_PATH, 'rb')
+        }
+        # TODO(rlouie): replace this raw post request with an api object which handles addressing
+        r = requests.post('http://localhost:8888/upload', files=files)
+
 # for the run button
     def run(self):
         """
         Runs TrafficIntelligence trackers and support scripts.
         """
-        # create test folder
+        self.upload()
+
+        # Just return after requesting to the server to upload the files
+        # TODO(rlouie):  Have better status communication between what is happening on the server.
+        return
+
         if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/run"):
             os.mkdir(ac.CURRENT_PROJECT_PATH + "/run")
 
