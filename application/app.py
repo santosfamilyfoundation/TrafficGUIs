@@ -31,7 +31,7 @@ import cvutils
 from app_config import AppConfig as ac
 import app_config as pm
 import pm
-#import cloud_api as capi
+import cloud_api as capi
 
 import qt_plot
 
@@ -48,7 +48,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
         self.newp = pm.ProjectWizard(self)
-        #self.api = capi.CloudWizard('server','192.168.1.1')
+        self.api = capi.CloudWizard('server','192.168.1.1')
 
         # Experimenting with organizational objects
         self.feature_tracking = Organizer()
