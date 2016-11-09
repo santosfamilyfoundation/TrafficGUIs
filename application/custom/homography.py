@@ -166,7 +166,7 @@ class HomographyScene(QtGui.QGraphicsScene):
         offset = 0
         for pt in need_update:
             pt.homography_index = index + offset
-            text_box = pt.childI tems()[0]
+            text_box = pt.childItems()[0]
             redraw_box = text_box.boundingRect()
             pt.childItems()[0].setText("{}".format(pt.homography_index + 1))
             self.update(redraw_box)  # Get rid of text artifacts. These can occur when changing from 10 to 9, for example.
