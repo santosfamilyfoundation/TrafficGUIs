@@ -251,10 +251,11 @@ class MainGUI(QtGui.QMainWindow):
         images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, "final_images")
         videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, "final_videos")
 
-        # Make the videos folder if it doesn't exists 
-        # (images_folder will be created by move_images_to_project_dir_folder)
+        # Make the videos and images folder if it doesn't exists 
         if not os.path.exists(videos_folder):
             os.makedirs(videos_folder)
+        if not os.path.exists(images_folder):
+            os.makedirs(images_folder)
         db_path = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")
         self.delete_videos("final_videos")
 
@@ -455,6 +456,21 @@ class MainGUI(QtGui.QMainWindow):
         if len(self.worldPts) >= 4:
             if len(self.worldPts) == len(self.videoPts):
                 self.homography, self.mask = cv2.findHomography(self.videoPts, self.worldPts)
+            else:
+                error = QtGui.QErrorMessage()
+                error.showMessage('''\
+                To compute the homography, please make sure you choose the same
+                number of points on each image.''')
+                error.exec_()
+                return
+
+        else:
+            error = QtGui.QErrorMessage()
+            error.showMessage('''\
+            To compute the homography, please choose at least 4 points on 
+            each image.''')
+            error.exec_()
+            return
 
         if self.homography is None:
             return
