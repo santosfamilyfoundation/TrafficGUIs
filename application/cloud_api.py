@@ -2,25 +2,23 @@
 import os
 import pickle
 import uuid
+import requests
 
-def CloudWizard(api_type,project_path,*arg):
-    print arg
-    if api_type == 'server':
-        print "SERVER"
-        return TrafficCloud_Server(project_path,arg[0])
-    if api_type == 'local':
-        print "LOCAL"
-        return TrafficCloud_Local(project_path)
-
-class TrafficCloud_Abstract:
-
-    def __init__(self,project_path):
+def CloudWizard(ip_addr,*arg):
+        return TrafficCloud(ip_addr)
+class TrafficCloud:
+    def __init__(self,ip_addr):
         #TODO: Needs to be done in sync with server
         #   not a uuid creation
-        self._ids = self.readIds()
-        self.project_path = project_path
-        self._ids[self.project_path] = uuid.uuid4()
-        self._writeIds()
+        #self._ids = self.readIds()
+        #self.project_path = project_path
+        #self._ids[self.project_path] = uuid.uuid4()
+        #self._writeIds()
+        if ip_addr == 'localhost':
+            self.server_ip = '127.0.0.1'
+        else:
+            self.server_ip = ip_addr
+
 
     def _initializeIds(self):
         with open('.IDdict','wb') as blank_dict_file:
@@ -44,7 +42,32 @@ class TrafficCloud_Abstract:
             return self._initializeIds()
 
     def uploadFiles(self, types, paths, callback):
-        raise NotImplementedError("uploadFiles not yet implemented")
+        project_name = ac.CURRENT_PROJECT_PATH.strip('/').split('/')[-1]
+        homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
+
+        video_extn = ac.CURRENT_PROJECT_VIDEO_PATH.split('.')[-1]
+
+        with open(os.path.join(homography_path, "aerial.png"), 'rb') as hg_aerial,\
+             open(os.path.join(homography_path, "camera.png"), 'rb') as hg_camera,\
+             open(os.path.join(homography_path, "homography.txt"), 'rb') as hg_txt,\
+             open(os.path.join(ac.CURRENT_PROJECT_PATH, project_name  + ".cfg"), 'rb') as cfg_prname,\
+             open(os.path.join(ac.CURRENT_PROJECT_PATH, "tracking.cfg"), 'rb') as cfg_track,\
+             open(os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_object/object_tracking.cfg"), 'rb') as test_obj,\
+             open(os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_feature/feature_tracking.cfg"), 'rb') as test_track,\
+             open(ac.CURRENT_PROJECT_VIDEO_PATH, 'rb') as video:
+
+            files = {
+                'homography/aerial.png': hg_aerial,
+                'homography/camera.png': hg_camera,
+                'homography/homography.txt': hg_txt,
+                'project_name.cfg': cfg_prname,
+                'tracking.cfg': cfg_track,
+                '.temp/test/test_object/object_tracking.cfg': test_obj,
+                ".temp/test/test_feature/feature_tracking.cfg": test_track,
+                'video.%s'%video_extn : video
+            }
+            r = requests.post("http://" + self.server_ip + '/upload',files = files)
+            print r.text;
 
     def testFeatureAnalysis(self, config, frames, callback):
         raise NotImplementedError("testFeatureAnalysis not yet implemented")
@@ -70,27 +93,12 @@ class TrafficCloud_Abstract:
     def generateDefaultConfig(self, callback):
         raise NotImplementedError("generateDefaultConfig not yet implemented")
 
-class TrafficCloud_Local(TrafficCloud_Abstract):
-    def __init__(self,project_path):
-        TrafficCloud_Abstract.__init__(self, project_path)
-
-
-class TrafficCloud_Server(TrafficCloud_Abstract):
-    def __init__(self,project_path,s_ip):
-        TrafficCloud_Abstract.__init__(self, project_path)
-        if s_ip == 'localhost':
-            self.server_ip = '127.0.0.1'
-        else:
-            self.server_ip = s_ip
-
 #FOR TESTING PURPOSES ONLY
 if __name__ == '__main__':
-    server = CloudWizard('server',"/project/path/server",'192.168.1.1')
-    local_server = CloudWizard('server',"/project/path/local_server",'localhost')
-    local = CloudWizard('local',"/project/path/local")
+    remote = CloudWizard('10.7.90.25')
+    local = CloudWizard('localhost')
     #server = TrafficCloud_Server("/project/path/goes/ahere","localhost")
-    print server.server_ip
-    print server.readIds()
-    print local_server.server_ip
-    print local_server.readIds()
+    print remote.server_ip
+    print remote.readIds()
+    print local.server_ip
     print local.readIds()
