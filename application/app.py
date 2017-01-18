@@ -205,7 +205,7 @@ class MainGUI(QtGui.QMainWindow):
         Runs TrafficIntelligence trackers and support scripts.
         """
         # create test folder
-        self.api.upload()
+        self.api.uploadFiles()
 
         return
 
