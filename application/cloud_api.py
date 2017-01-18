@@ -7,6 +7,7 @@ from app_config import AppConfig as ac
 
 def CloudWizard(ip_addr,*arg):
         return TrafficCloud(ip_addr)
+
 class TrafficCloud:
     def __init__(self,ip_addr):
         #TODO: Needs to be done in sync with server
@@ -16,9 +17,9 @@ class TrafficCloud:
         #self._ids[self.project_path] = uuid.uuid4()
         #self._writeIds()
         if ip_addr == 'localhost':
-            self.server_ip = '127.0.0.1'
+            self.server_addr = 'http://127.0.0.1:8088/'
         else:
-            self.server_ip = ip_addr
+            self.server_addr = 'http://'+ip_addr+':8088/'
 
 
     def _initializeIds(self):
@@ -42,11 +43,12 @@ class TrafficCloud:
         else:
             return self._initializeIds()
 
-    def uploadFiles(self, types, paths, callback):
+    def createProject(self):
         project_name = ac.CURRENT_PROJECT_PATH.strip('/').split('/')[-1]
         homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
 
         video_extn = ac.CURRENT_PROJECT_VIDEO_PATH.split('.')[-1]
+	print ac.CURRENT_PROJECT_VIDEO_PATH
 
         with open(os.path.join(homography_path, "aerial.png"), 'rb') as hg_aerial,\
              open(os.path.join(homography_path, "camera.png"), 'rb') as hg_camera,\
@@ -64,10 +66,10 @@ class TrafficCloud:
                 'project_name.cfg': cfg_prname,
                 'tracking.cfg': cfg_track,
                 '.temp/test/test_object/object_tracking.cfg': test_obj,
-                ".temp/test/test_feature/feature_tracking.cfg": test_track,
+                '.temp/test/test_feature/feature_tracking.cfg': test_track,
                 'video.%s'%video_extn : video
             }
-            r = requests.post("http://" + self.server_ip + '/upload',files = files)
+            r = requests.post(self.server_addr+'upload',files = files)
             print r.text;
 
     def testFeatureAnalysis(self, config, frames, callback):
@@ -77,7 +79,7 @@ class TrafficCloud:
         raise NotImplementedError("testFeatureAnalysis not yet implemented")
 
     def runTrajectoryAnalysis(self, config, callback):
-        raise NotImplementedError("runTrajectoryAnalysis not yet implemented")
+	pass
 
     def runSafetyAnalysis(self, prediction, db, callback):
         raise NotImplementedError("runSafetyAnalysis  not yet implemented")

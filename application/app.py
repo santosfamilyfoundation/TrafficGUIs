@@ -35,11 +35,6 @@ import cloud_api as capi
 
 import qt_plot
 
-
-class Organizer(object):  # TODO: Phase out.
-    def __init__(self):
-        super(Organizer, self).__init__()
-
 class MainGUI(QtGui.QMainWindow):
 
     def __init__(self):
@@ -47,11 +42,8 @@ class MainGUI(QtGui.QMainWindow):
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
         self.newp = pm.ProjectWizard(self)
-        self.api = capi.CloudWizard('server',None,'192.168.1.1')
-
-        # Experimenting with organizational objects
-        self.feature_tracking = Organizer()
-        self.results = Organizer()
+        #self.api = capi.CloudWizard('10.7.27.225')
+	self.api = capi.CloudWizard('10.26.89.18')
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
@@ -205,7 +197,7 @@ class MainGUI(QtGui.QMainWindow):
         Runs TrafficIntelligence trackers and support scripts.
         """
         # create test folder
-        self.api.uploadFiles()
+        self.api.createProject()
 
         return
 
