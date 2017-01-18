@@ -1,5 +1,5 @@
 # app_config.py
-from ConfigParser import SafeConfigParser
+from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
 import os
 
 
