@@ -817,12 +817,12 @@
     <string>User's Guide</string>
    </property>
   </action>
-  <action name="actionFeedback">
+  <action name="actionAbout">
    <property name="text">
     <string>About</string>
    </property>
   </action>
-  <action name="actionAbout">
+  <action name="actionFeedback">
    <property name="text">
     <string>Send Feedback</string>
    </property>
