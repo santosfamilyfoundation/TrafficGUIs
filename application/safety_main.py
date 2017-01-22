@@ -391,6 +391,10 @@ class Ui_TransportationSafety(object):
         self.actionUser_s_Guide.setObjectName(_fromUtf8("actionUser_s_Guide"))
         self.actionAbout = QtGui.QAction(TransportationSafety)
         self.actionAbout.setObjectName(_fromUtf8("actionAbout"))
+
+        self.actionFeedback = QtGui.QAction(TransportationSafety)
+        self.actionFeedback.setObjectName(_fromUtf8("actionFeedback"))
+
         self.actionOpen_Video = QtGui.QAction(TransportationSafety)
         self.actionOpen_Video.setObjectName(_fromUtf8("actionOpen_Video"))
         self.actionOpen_Config = QtGui.QAction(TransportationSafety)
@@ -407,6 +411,7 @@ class Ui_TransportationSafety(object):
         self.menuProject.addAction(self.menuHomography_2.menuAction())
         self.menuHelp.addAction(self.actionUser_s_Guide)
         self.menuHelp.addAction(self.actionAbout)
+        self.menuHelp.addAction(self.actionFeedback)
         self.menuBar.addAction(self.menuTraffic_Analysis.menuAction())
         self.menuBar.addAction(self.menuProject.menuAction())
         self.menuBar.addAction(self.menuHelp.menuAction())
@@ -460,6 +465,8 @@ class Ui_TransportationSafety(object):
         self.actionOpen_Config.setText(_translate("TransportationSafety", "Open Config ", None))
         self.actionNew_Project.setText(_translate("TransportationSafety", "New Project", None))
         self.actionNew_Project.setShortcut(_translate("TransportationSafety", "Ctrl+N", None))
+        self.actionFeedback.setText(_translate("TransportationSafety", "Send Feeback", None))
+        self.actionFeedback.setShortcut(_translate("TransportationSafety", "Ctrl+H", None))
 
 from custom.homography import HomographyResultView, HomographyView
 from qt_plot import MatplotlibWidget
