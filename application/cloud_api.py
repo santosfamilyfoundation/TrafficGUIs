@@ -192,6 +192,89 @@ class TrafficCloud:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
+###############################################################################
+# Results Functions
+###############################################################################
+
+    def highlightVideo(self, identifier, ttc_threshold = None, vehicle_only = None):
+        print "highlightVideo called with identifier = {}, ttc_threshold = {} and vehicle_only = {}"\
+                .format(identifier, ttc_threshold, vehicle_only)
+
+        payload = {
+            'identifier': identifier,
+        }
+
+        if not (ttc_threshold == None):
+            payload['ttc_threshold'] = ttc_threshold
+        if not (vehicle_only == None):
+            payload['vehicle_only'] = vehicle_only
+
+        r = requests.post("http://"+self.server_ip + '/highlightVideo', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
+    def makeReport(self, identifier):
+        print "makeReport called with identifier = {}".format(identifier)
+
+        payload = {
+            'identifier': identifier,
+        }
+
+        r = requests.post("http://"+self.server_ip + '/makeReport', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
+    def retrieveResults(self, identifier):
+        print "retrieveResults called with identifier = {}".format(identifier)
+
+        payload = {
+            'identifier': identifier,
+        }
+
+        r = requests.get("http://"+self.server_ip + '/retrieveResults', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
+    #Helper Method for Downloading Files from URL
+    def download_file(url):
+        local_filename = url.split('/')[-1]
+        r = requests.get(url, stream=True)
+        with open(local_filename, 'wb') as f:
+            print('Dumping "{0}"...'.format(local_filename))
+            for chunk in r.iter_content(chunk_size=1024): 
+                if chunk:
+                    f.write(chunk)
+        return local_filename
+            
+
+    def roadUserCounts(self, identifier):
+        print "roadUserCounts called with identifier = {}".format(identifier)
+
+        payload = {
+            'identifier': identifier,
+        }
+
+        r = requests.post("http://"+self.server_ip + '/roadUserCounts', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
+    def speedCDF(self, identifier, ttc_threshold = None, vehicle_only = None):
+        print "speedCDF called with identifier = {}, ttc_threshold = {} and vehicle_only = {}"\
+                .format(identifier, ttc_threshold, vehicle_only)
+
+        payload = {
+            'identifier': identifier,
+        }
+
+        if not (ttc_threshold == None):
+            payload['ttc_threshold'] = ttc_threshold
+        if not (vehicle_only == None):
+            payload['vehicle_only'] = vehicle_only
+
+        r = requests.post("http://"+self.server_ip + '/speedCDF', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
 
 #FOR TESTING PURPOSES ONLY
 if __name__ == '__main__':
