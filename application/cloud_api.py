@@ -22,6 +22,9 @@ class TrafficCloud:
         else:
             self.server_ip = ip_addr
 
+###############################################################################
+# ID Storage Functions
+###############################################################################
 
     def _initializeIds(self):
         with open('.IDdict','wb') as blank_dict_file:
@@ -153,36 +156,50 @@ class TrafficCloud:
 # Analysis Functions
 ###############################################################################
 
-    def testFeatureAnalysis(self, config, frames, callback):
-        raise NotImplementedError("testFeatureAnalysis not yet implemented")
+    def analysis(self, identifier, email):
+        print "analysis called with identifier = {} and email = {}".format(identifier, email)
 
-    def testObjectAnalysis(self, config, frames, callback):
-        raise NotImplementedError("testFeatureAnalysis not yet implemented")
+        payload = {
+            'identifier': identifier,
+            'email': email
+        }
 
-    def runTrajectoryAnalysis(self, config, callback):
-        raise NotImplementedError("runTrajectoryAnalysis not yet implemented")
+        r = requests.post("http://"+self.server_ip + '/analysis', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
 
-    def runSafetyAnalysis(self, prediction, db, callback):
-        raise NotImplementedError("runSafetyAnalysis  not yet implemented")
+    def objectTracking(self, identifier, email):
+        print "objectTracking called with identifier = {} and email = {}".format(identifier, email)
 
-    def runVisualization(self, db, callback):
-        raise NotImplementedError("runVisualization not yet implemented")
+        payload = {
+            'identifier': identifier,
+            'email': email
+        }
 
-    def getDB(self, callback):
-        raise NotImplementedError("getDB not yet implemented")
+        r = requests.post("http://"+self.server_ip + '/objectTracking', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
 
-    def getStatus(self, callback):
-        raise NotImplementedError("getStatus not yet implemented")
+    def safetyAnalysis(self, identifier, email):
+        print "safetyAnalysis called with identifier = {} and email = {}".format(identifier, email)
 
-    def generateDefaultConfig(self, callback):
-        raise NotImplementedError("generateDefaultConfig not yet implemented")
+        payload = {
+            'identifier': identifier,
+            'email': email
+        }
+
+        r = requests.post("http://"+self.server_ip + '/safetyAnalysis', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
 
 #FOR TESTING PURPOSES ONLY
 if __name__ == '__main__':
-    remote = CloudWizard('10.7.90.25')
-    local = CloudWizard('localhost')
+    print "Syntax looks fine!"
+    #remote = CloudWizard('10.7.90.25')
+    #local = CloudWizard('localhost')
     #server = TrafficCloud_Server("/project/path/goes/ahere","localhost")
-    print remote.server_ip
-    print remote.readIds()
-    print local.server_ip
-    print local.readIds()
+    #print remote.server_ip
+    #print remote.readIds()
+    #print local.server_ip
+    #print local.readIds()
