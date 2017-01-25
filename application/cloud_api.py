@@ -145,7 +145,7 @@ class TrafficCloud:
             'filename': filename
         }
 
-        r = requests.post("self.server_addr + 'config', data = payload)
+        r = requests.post(self.server_addr + 'config', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
