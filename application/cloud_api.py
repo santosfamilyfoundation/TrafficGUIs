@@ -5,6 +5,8 @@ import uuid
 import requests
 from app_config import AppConfig as ac
 
+from pprint import pprint
+
 def CloudWizard(ip_addr,*arg):
         return TrafficCloud(ip_addr)
 class TrafficCloud:
@@ -43,13 +45,17 @@ class TrafficCloud:
             return self._initializeIds()
 
 
+###############################################################################
+# Upload Functions
+###############################################################################
+
     def uploadVideo(self, identifier=None):
 
         print "uploadVideo called with identifier = {}".format(identifier)
         with open(ac.CURRENT_PROJECT_VIDEO_PATH, 'rb') as video:
             payload = {
                 'video.%s'%video_extn : video,
-                'identifier': identifier,
+                'identifier': identifier
             }
             r = requests.post("http://"+self.server_ip + '/uploadVideo', data = payload)
         print "Status Code: {}".format(r.status_code)
@@ -77,7 +83,9 @@ class TrafficCloud:
         print "Response Text: {}".format(r.text)
 
 
-    def uploadFiles(self, types, paths, callback):
+    def uploadFiles(self):
+
+        print "uploadFiles called"
         project_name = ac.CURRENT_PROJECT_PATH.strip('/').split('/')[-1]
         homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
 
@@ -104,6 +112,46 @@ class TrafficCloud:
             }
             r = requests.post("http://" + self.server_ip + '/upload',files = files)
             print r.text;
+
+###############################################################################
+# Configuration Functions
+###############################################################################
+
+    def configFiles(self, identifier, filename, config_data):
+        print "testConfig called with identifier = {} and filename = {}"\
+                .format(identifier,filename)
+
+        print "config_data is as follows:"
+        pprint(config_data)
+
+        payload = {
+            'identifier': identifier,
+            'filename': filename
+        }
+
+        r = requests.post("http://"+self.server_ip + '/config', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
+    def testConfig(self, test_flag, identifier, frame_start = 0, num_frames = 100):
+        print "testConfig called with identifier = {}, test_flag = {}, frame_start = {}, and num_frames = {}"\
+                .format(identifier,test_flag,frame_start,num_frames)
+
+        payload = {
+            'test_flag': test_flag,
+            'identifier': identifier,
+            'frame_start': frame_start,
+            'num_frames': num_frames
+        }
+
+        r = requests.post("http://"+self.server_ip + '/testConfig', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+        
+
+###############################################################################
+# Analysis Functions
+###############################################################################
 
     def testFeatureAnalysis(self, config, frames, callback):
         raise NotImplementedError("testFeatureAnalysis not yet implemented")
