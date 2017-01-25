@@ -51,15 +51,30 @@ class TrafficCloud:
 ###############################################################################
 # Upload Functions
 ###############################################################################
+	
+    def _local_uploadVideo(self,  video_path,identifier = None,):
+	print "uploadVideo called with identifier = {}".format(identifier)
+	with open(video_path, 'rb') as video:
+            payload = {
+                'video.avi' : video,
+                'identifier': identifier
+            }
+            r = requests.post(self.server_addr + 'uploadVideo', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
 
     def uploadVideo(self, identifier=None):
         print "uploadVideo called with identifier = {}".format(identifier)
-        with open(ac.CURRENT_PROJECT_VIDEO_PATH, 'rb') as video:
+
+        video_extn = ac.CURRENT_PROJECT_VIDEO_PATH.split('.')[-1]
+
+	with open('~/Documents/stmarc_video.avi', 'rb') as video:
+	#with open(ac.CURRENT_PROJECT_VIDEO_PATH, 'rb') as video:
             payload = {
                 'video.%s'%video_extn : video,
                 'identifier': identifier
             }
-            r = requests.post("http://"+self.server_ip + '/uploadVideo', data = payload)
+            r = requests.post(self.server_addr + 'uploadVideo', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         #TO-DO: Add returned identifier to internal storage
@@ -73,12 +88,12 @@ class TrafficCloud:
              open(os.path.join(homography_path, "camera.png"), 'rb') as hg_camera,\
              open(os.path.join(homography_path, "homography.txt"), 'rb') as hg_txt:
 
-            files = {
+            payload = {
                 'homography/aerial.png': hg_aerial,
                 'homography/camera.png': hg_camera,
                 'homography/homography.txt': hg_txt
             }
-            r = requests.post("http://" + self.server_ip + '/uploadHomography',files = files)
+            r = requests.post(self.server_addr + 'uploadHomography', data = payload)
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
@@ -130,7 +145,7 @@ class TrafficCloud:
             'filename': filename
         }
 
-        r = requests.post("http://"+self.server_ip + '/config', data = payload)
+        r = requests.post(self.server_addr + 'config', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
@@ -145,7 +160,7 @@ class TrafficCloud:
             'num_frames': num_frames
         }
 
-        r = requests.post("http://"+self.server_ip + '/testConfig', data = payload)
+        r = requests.post(self.server_addr + 'testConfig', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         
@@ -162,7 +177,7 @@ class TrafficCloud:
             'email': email
         }
 
-        r = requests.post("http://"+self.server_ip + '/analysis', data = payload)
+        r = requests.post(self.server_addr + 'analysis', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
@@ -174,7 +189,7 @@ class TrafficCloud:
             'email': email
         }
 
-        r = requests.post("http://"+self.server_ip + '/objectTracking', data = payload)
+        r = requests.post(self.server_addr + 'objectTracking', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
@@ -186,7 +201,7 @@ class TrafficCloud:
             'email': email
         }
 
-        r = requests.post("http://"+self.server_ip + '/safetyAnalysis', data = payload)
+        r = requests.post(self.server_addr + 'safetyAnalysis', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
@@ -207,7 +222,7 @@ class TrafficCloud:
         if not (vehicle_only == None):
             payload['vehicle_only'] = vehicle_only
 
-        r = requests.post("http://"+self.server_ip + '/highlightVideo', data = payload)
+        r = requests.post(self.server_addr + 'highlightVideo', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
@@ -218,7 +233,7 @@ class TrafficCloud:
             'identifier': identifier,
         }
 
-        r = requests.post("http://"+self.server_ip + '/makeReport', data = payload)
+        r = requests.post(self.server_addr + 'makeReport', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
@@ -229,7 +244,7 @@ class TrafficCloud:
             'identifier': identifier,
         }
 
-        r = requests.get("http://"+self.server_ip + '/retrieveResults', data = payload)
+        r = requests.get(self.server_addr + 'retrieveResults', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
@@ -252,7 +267,7 @@ class TrafficCloud:
             'identifier': identifier,
         }
 
-        r = requests.post("http://"+self.server_ip + '/roadUserCounts', data = payload)
+        r = requests.post(self.server_addr + 'roadUserCounts', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
@@ -269,7 +284,7 @@ class TrafficCloud:
         if not (vehicle_only == None):
             payload['vehicle_only'] = vehicle_only
 
-        r = requests.post("http://"+self.server_ip + '/speedCDF', data = payload)
+        r = requests.post(self.server_addr + 'speedCDF', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
@@ -277,6 +292,8 @@ class TrafficCloud:
 #FOR TESTING PURPOSES ONLY
 if __name__ == '__main__':
     print "Syntax looks fine!"
+    remote = CloudWizard('10.7.24.40')
+    remote._local_uploadVideo('/home/user/Documents/stmarc_video.avi')
     #remote = CloudWizard('10.7.90.25')
     #local = CloudWizard('localhost')
     #server = TrafficCloud_Server("/project/path/goes/ahere","localhost")
