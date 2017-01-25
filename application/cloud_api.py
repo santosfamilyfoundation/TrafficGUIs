@@ -42,6 +42,41 @@ class TrafficCloud:
         else:
             return self._initializeIds()
 
+
+    def uploadVideo(self, identifier=None):
+
+        print "uploadVideo called with identifier = {}".format(identifier)
+        with open(ac.CURRENT_PROJECT_VIDEO_PATH, 'rb') as video:
+            payload = {
+                'video.%s'%video_extn : video,
+                'identifier': identifier,
+            }
+            r = requests.post("http://"+self.server_ip + '/uploadVideo', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+        #TO-DO: Add returned identifier to internal storage
+
+
+    def uploadHomography(self, identifier):
+
+        print "uploadHomography called with identifier = {}".format(identifier)
+        homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
+
+        with open(os.path.join(homography_path, "aerial.png"), 'rb') as hg_aerial,\
+             open(os.path.join(homography_path, "camera.png"), 'rb') as hg_camera,\
+             open(os.path.join(homography_path, "homography.txt"), 'rb') as hg_txt:
+
+            files = {
+                'homography/aerial.png': hg_aerial,
+                'homography/camera.png': hg_camera,
+                'homography/homography.txt': hg_txt
+            }
+            r = requests.post("http://" + self.server_ip + '/uploadHomography',files = files)
+
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
+
     def uploadFiles(self, types, paths, callback):
         project_name = ac.CURRENT_PROJECT_PATH.strip('/').split('/')[-1]
         homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
