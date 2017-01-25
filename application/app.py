@@ -35,11 +35,6 @@ import cloud_api as capi
 
 import qt_plot
 
-
-class Organizer(object):  # TODO: Phase out.
-    def __init__(self):
-        super(Organizer, self).__init__()
-
 class MainGUI(QtGui.QMainWindow):
 
     def __init__(self):
@@ -47,15 +42,13 @@ class MainGUI(QtGui.QMainWindow):
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
         self.newp = pm.ProjectWizard(self)
-        self.api = capi.CloudWizard('server',None,'192.168.1.1')
-
-        # Experimenting with organizational objects
-        self.feature_tracking = Organizer()
-        self.results = Organizer()
+        #self.api = capi.CloudWizard('10.7.27.225')
+        self.api = capi.CloudWizard('10.26.89.18')
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
         self.ui.actionNew_Project.triggered.connect(self.create_new_project)
+        self.ui.actionFeedback.triggered.connect(self.open_feedback)
         self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_aerial)  # TODO: New method. Check which tab is open. Move to homography tab if not already there. Then call open_image_aerial.
         self.ui.actionAdd_Replace_Aerial_Image.triggered.connect(self.homography_open_image_camera)
         self.ui.main_tab_widget.setCurrentIndex(0)  # Start on the first tab
@@ -405,6 +398,11 @@ class MainGUI(QtGui.QMainWindow):
             pm.load_project(fname, self)
         else:
             pass  # If no folder selected, don't load anything.
+
+    def open_feedback(self):
+        url = QtCore.QUrl('https://docs.google.com/forms/d/e/1FAIpQLSeTRwZlMUwNrbv9Nw-BddsOBGrCQjR5YXHbloPirRzB3-QoFA/viewform')
+        if not QtGui.QDesktopServices.openUrl(url):
+            QtGui.QMessageBox.warning(self, 'Connecting to Feedback', 'Could not open feedback form')
 
     def create_new_project(self):
         self.newp.restart()
