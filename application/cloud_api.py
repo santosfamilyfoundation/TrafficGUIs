@@ -7,11 +7,11 @@ from app_config import AppConfig as ac
 
 from pprint import pprint
 
-def CloudWizard(ip_addr,*arg):
-        return TrafficCloud(ip_addr)
+def CloudWizard(ip_addr, port=8088):
+    return TrafficCloud(ip_addr, port)
 
 class TrafficCloud:
-    def __init__(self,ip_addr):
+    def __init__(self, ip_addr, port):
         #TODO: Needs to be done in sync with server
         #   not a uuid creation
         #self._ids = self.readIds()
@@ -19,9 +19,9 @@ class TrafficCloud:
         #self._ids[self.project_path] = uuid.uuid4()
         #self._writeIds()
         if ip_addr == 'localhost':
-            self.server_addr = 'http://127.0.0.1:8088/'
+            self.server_addr = 'http://127.0.0.1:{}/'.format(port)
         else:
-            self.server_addr = 'http://'+ip_addr+':8088/'
+            self.server_addr = 'http://{}:{}/'.format(ip_addr, port)
 
 ###############################################################################
 # ID Storage Functions
