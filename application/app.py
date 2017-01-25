@@ -43,7 +43,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.newp = pm.ProjectWizard(self)
         #self.api = capi.CloudWizard('10.7.27.225')
-        self.api = capi.CloudWizard('10.26.89.18')
+        self.api = capi.CloudWizard('10.7.24.40')
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
