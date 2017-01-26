@@ -55,11 +55,12 @@ class TrafficCloud:
     def _local_uploadVideo(self,  video_path,identifier = None,):
 	print "uploadVideo called with identifier = {}".format(identifier)
 	with open(video_path, 'rb') as video:
-            payload = {
-                'video.avi' : video,
-                'identifier': identifier
-            }
-            r = requests.post(self.server_addr + 'uploadVideo', data = payload)
+            files = {'video.avi' : video}
+            if not (identifier == None):
+                r = requests.post(self.server_addr + 'uploadVideo',\
+			data = {'identifier':identifier}, files = files, stream = True)
+	    else:
+                r = requests.post(self.server_addr + 'uploadVideo', files = files, stream = True)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
@@ -69,12 +70,13 @@ class TrafficCloud:
         video_extn = ac.CURRENT_PROJECT_VIDEO_PATH.split('.')[-1]
 
 	with open('~/Documents/stmarc_video.avi', 'rb') as video:
-	#with open(ac.CURRENT_PROJECT_VIDEO_PATH, 'rb') as video:
             payload = {
-                'video.%s'%video_extn : video,
-                'identifier': identifier
+                'video.avi' : video
             }
-            r = requests.post(self.server_addr + 'uploadVideo', data = payload)
+            if not (identifier == None):
+                payload['identifier'] = identifier
+	    pprint(payload)
+            r = requests.post(self.server_addr + 'uploadVideo', data = payload, stream = True)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         #TO-DO: Add returned identifier to internal storage
@@ -93,7 +95,7 @@ class TrafficCloud:
                 'homography/camera.png': hg_camera,
                 'homography/homography.txt': hg_txt
             }
-            r = requests.post(self.server_addr + 'uploadHomography', data = payload)
+            r = requests.post(self.server_addr + 'uploadHomography', data = payload, stream = True)
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
@@ -292,9 +294,13 @@ class TrafficCloud:
 #FOR TESTING PURPOSES ONLY
 if __name__ == '__main__':
     print "Syntax looks fine!"
-    remote = CloudWizard('10.7.24.40')
-    remote._local_uploadVideo('/home/user/Documents/stmarc_video.avi')
-    #remote = CloudWizard('10.7.90.25')
+    #remote = CloudWizard('10.7.24.40')
+    remote = CloudWizard('10.7.88.67')
+    #remote._local_uploadVideo('/home/user/Documents/stmarc_video.avi')
+    #remote._local_uploadVideo('/home/user/Documents/Harvey_30min_day.mp4')
+    remote._local_uploadVideo('/home/user/Documents/output.mp4')
+    #remote.configFiles('id','filename',{'k1': 'v1', 'k2':'v2'})
+	#remote = CloudWizard('10.7.90.25')
     #local = CloudWizard('localhost')
     #server = TrafficCloud_Server("/project/path/goes/ahere","localhost")
     #print remote.server_ip
