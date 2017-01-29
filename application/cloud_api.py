@@ -221,9 +221,9 @@ class TrafficCloud:
             'identifier': identifier,
         }
 
-        if not (ttc_threshold == None):
+        if ttc_threshold is not None:
             payload['ttc_threshold'] = ttc_threshold
-        if not (vehicle_only == None):
+        if vehicle_only is not None:
             payload['vehicle_only'] = vehicle_only
 
         r = requests.post(self.server_addr + 'highlightVideo', data = payload)
@@ -275,17 +275,17 @@ class TrafficCloud:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def speedCDF(self, identifier, ttc_threshold = None, vehicle_only = None):
-        print "speedCDF called with identifier = {}, ttc_threshold = {} and vehicle_only = {}"\
-                .format(identifier, ttc_threshold, vehicle_only)
+    def speedCDF(self, identifier, speed_limit = None, vehicle_only = None):
+        print "speedCDF called with identifier = {}, speed_limit = {} and vehicle_only = {}"\
+                .format(identifier, speed_limit, vehicle_only)
 
         payload = {     
             'identifier': identifier,
         }
 
-        if not (ttc_threshold == None):
-            payload['ttc_threshold'] = ttc_threshold
-        if not (vehicle_only == None):
+        if speed_limit is not None:
+            payload['speed_limit'] = speed_limit
+        if vehicle_only is not None:
             payload['vehicle_only'] = vehicle_only
 
         r = requests.post(self.server_addr + 'speedCDF', data = payload)
