@@ -4,6 +4,7 @@ import pickle
 import uuid
 import requests
 from app_config import AppConfig as ac
+import json
 
 from pprint import pprint
 
@@ -52,50 +53,51 @@ class TrafficCloud:
 # Upload Functions
 ###############################################################################
 	
-    def _local_uploadVideo(self,  video_path,identifier = None,):
-	print "uploadVideo called with identifier = {}".format(identifier)
-	with open(video_path, 'rb') as video:
-            files = {'video.avi' : video}
-            if not (identifier == None):
-                r = requests.post(self.server_addr + 'uploadVideo',\
-			data = {'identifier':identifier}, files = files, stream = True)
-	    else:
-                r = requests.post(self.server_addr + 'uploadVideo', files = files, stream = True)
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
-
-    def uploadVideo(self, identifier=None):
+    def uploadVideo(self,  video_path, identifier = None,):
         print "uploadVideo called with identifier = {}".format(identifier)
-
-        video_extn = ac.CURRENT_PROJECT_VIDEO_PATH.split('.')[-1]
-
-	with open('~/Documents/stmarc_video.avi', 'rb') as video:
-            payload = {
-                'video.avi' : video
-            }
-            if not (identifier == None):
-                payload['identifier'] = identifier
-	    pprint(payload)
-            r = requests.post(self.server_addr + 'uploadVideo', data = payload, stream = True)
+        with open(video_path, 'rb') as video:
+            files = {'video' : video}
+            payload = {'identifier': identifier}
+            r = requests.post(\
+                self.server_addr + 'uploadVideo',\
+                data = payload, files = files, stream = True)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
+        print "Response JSON: {}".format(r.json())
+        return r.json()
         #TO-DO: Add returned identifier to internal storage
 
+    def _local_uploadHomography(self,  homography_path, identifier=None, up_ratio = 0.05):
+        files = {
+            'aerial': open(os.path.join(homography_path, "aerial.png"), 'rb'),
+            'camera': open(os.path.join(homography_path, "camera.png"), 'rb'),
+            'homography': open(os.path.join(homography_path, "homography.txt"), 'rb')
+        }
+        payload = {'identifier': identifier,
+                    'unit_pixel_ratio':up_ratio}
+        aerial = [(695.7036743164062, 406.8148193359375), (819.7777709960938, 240.1481475830078), (856.8148193359375, 553.111083984375), (830.888916015625, 390.1481628417969), (932.74072265625, 397.5555419921875)]
+        camera = [(614.2222290039062, 703.111083984375), (936.4444580078125, 419.77777099609375), (197.55555725097656, 630.888916015625), (519.7777709960938, 330.8888854980469), (558.6666870117188, 536.4444580078125)]
+        payload['aerial_pts'] = json.dumps(aerial)        
+        payload['camera_pts'] = json.dumps(camera)
+        print payload
+        r = requests.post(\
+            self.server_addr + 'uploadHomography',\
+            data = payload, files = files)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
 
     def uploadHomography(self, identifier):
         print "uploadHomography called with identifier = {}".format(identifier)
         homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
-
-        with open(os.path.join(homography_path, "aerial.png"), 'rb') as hg_aerial,\
-             open(os.path.join(homography_path, "camera.png"), 'rb') as hg_camera,\
-             open(os.path.join(homography_path, "homography.txt"), 'rb') as hg_txt:
-
-            payload = {
-                'homography/aerial.png': hg_aerial,
-                'homography/camera.png': hg_camera,
-                'homography/homography.txt': hg_txt
-            }
-            r = requests.post(self.server_addr + 'uploadHomography', data = payload, stream = True)
+        files = {
+            'homography/aerialpng': open(os.path.join(homography_path, "aerial.png"), 'rb'),
+            'homography/camerapng': open(os.path.join(homography_path, "camera.png"), 'rb'),
+            'homography/homography.txt': open(os.path.join(homography_path, "homography.txt"), 'rb')
+        }
+        payload = {'identifier':identifier}
+        r = requests.post(\
+            self.server_addr + 'uploadHomography',\
+            data = payload, files = files)
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
@@ -277,7 +279,7 @@ class TrafficCloud:
         print "speedCDF called with identifier = {}, ttc_threshold = {} and vehicle_only = {}"\
                 .format(identifier, ttc_threshold, vehicle_only)
 
-        payload = {
+        payload = {     
             'identifier': identifier,
         }
 
@@ -294,11 +296,16 @@ class TrafficCloud:
 #FOR TESTING PURPOSES ONLY
 if __name__ == '__main__':
     print "Syntax looks fine!"
-    #remote = CloudWizard('10.7.24.40')
-    remote = CloudWizard('10.7.88.67')
+    #remote = CloudWizard('10.7.88.26')
+    #remote = CloudWizard('10.26.89.15')
+    remote = CloudWizard('10.7.24.20')
+    id = remote.uploadVideo('/home/user/Documents/output.mp4')['identifier']
+    print id
+    remote._local_uploadHomography('/home/user/Documents/TrafficGUIs/project_dir/TestClassification/homography/',id)
+    remote.analysis(id,'jacob.riedel@students.olin.edu')
     #remote._local_uploadVideo('/home/user/Documents/stmarc_video.avi')
     #remote._local_uploadVideo('/home/user/Documents/Harvey_30min_day.mp4')
-    remote._local_uploadVideo('/home/user/Documents/output.mp4')
+    
     #remote.configFiles('id','filename',{'k1': 'v1', 'k2':'v2'})
 	#remote = CloudWizard('10.7.90.25')
     #local = CloudWizard('localhost')
