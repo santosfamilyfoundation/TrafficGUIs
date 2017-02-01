@@ -67,7 +67,9 @@ class TrafficCloud:
         return r.json()
         #TO-DO: Add returned identifier to internal storage
 
-    def _local_uploadHomography(self, homography_path,\
+    def _local_uploadHomography(self,
+                                aerial_path,\
+                                camera_path,\
                                 identifier,\
                                 up_ratio,\
                                 aerial_pts,\
@@ -273,7 +275,7 @@ class TrafficCloud:
         r = requests.get(url, stream=True)
         with open(local_filename, 'wb') as f:
             print('Dumping "{0}"...'.format(local_filename))
-            for chunk in r.iter_content(chunk_size=1024): 
+            for chunk in r.iter_content(chunk_size=2048): 
                 if chunk:
                     f.write(chunk)
         return local_filename
@@ -313,13 +315,13 @@ if __name__ == '__main__':
     ###########################################################################
     #remote = CloudWizard('10.7.88.26')
     #remote = CloudWizard('10.26.89.15')
-    remote = CloudWizard('10.7.24.20')
+    remote = CloudWizard('10.7.24.68')
 
     ###########################################################################
     # Upload Video
     ###########################################################################
-    video_path = '/home/user/Documents/output.mp4'
-    #video_path = '/home/user/Documents/stmarc_video.avi'
+    #video_path = '/home/user/Documents/output.mp4'
+    video_path = '/home/user/Documents/stmarc_video.avi'
     #video_path = '/home/user/Documents/Harvey_30min_day.mp4'
     id = remote.uploadVideo(video_path)['identifier']
 
@@ -327,18 +329,20 @@ if __name__ == '__main__':
     # Upload Homography
     ###########################################################################
     print id
-    aerial = [\
-            (695.7036743164062, 406.8148193359375),\
-            (819.7777709960938, 240.1481475830078),\
-            (856.8148193359375, 553.111083984375),\
-            (830.888916015625, 390.1481628417969),\
+    aerial = [
+            (695.7036743164062, 406.8148193359375),
+            (819.7777709960938, 240.1481475830078),
+            (856.8148193359375, 553.111083984375),
+            (830.888916015625, 390.1481628417969),
             (932.74072265625, 397.5555419921875)]
-    camera = [\
-            (614.2222290039062, 703.111083984375),\
-            (936.4444580078125, 419.77777099609375),\
-            (197.55555725097656, 630.888916015625),\
-            (519.7777709960938, 330.8888854980469),\
+    camera = [
+            (614.2222290039062, 703.111083984375),
+            (936.4444580078125, 419.77777099609375),
+            (197.55555725097656, 630.888916015625),
+            (519.7777709960938, 330.8888854980469),
             (558.6666870117188, 536.4444580078125)]
+    aerial_path = '/home/user/Documents/TrafficGUIs/project_dir/TestClassification/homography/aerial.png'
+    camera_path = '/home/user/Documents/TrafficGUIs/project_dir/TestClassification/homography/camera.png'
     remote._local_uploadHomography(\
             '/home/user/Documents/TrafficGUIs/project_dir/TestClassification/homography/',\
             id, 0.05, aerial, camera)
@@ -346,9 +350,9 @@ if __name__ == '__main__':
     ###########################################################################
     # Run Analysis Route
     ###########################################################################
-    #remote.analysis(id,'phillip.seger@students.olin.edu')
-    remote.objectTracking(id,'phillip.seger@students.olin.edu')
-    remote.safetyAnalysis(id,'phillip.seger@students.olin.edu')
+    #remote.analysis(id,'philip.seger@students.olin.edu')
+    remote.objectTracking(id,'philip.seger@students.olin.edu')
+    remote.safetyAnalysis(id,'philip.seger@students.olin.edu')
 
 
 
