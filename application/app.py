@@ -118,10 +118,12 @@ class MainGUI(QtGui.QMainWindow):
 
     def test_feature(self):
         # TODO: Call the right route
+        raise NotImplementedError("test_feature is not implemented")
         pass
 
     def test_object(self):
         # TODO: Call the right route
+        raise NotImplementedError("test_object is not implemented")
         pass
 
 # for the run button
@@ -130,6 +132,7 @@ class MainGUI(QtGui.QMainWindow):
         Runs TrafficIntelligence trackers and support scripts.
         """
         # TODO: Call the right route
+        raise NotImplementedError("run is not implemented")
         pass
 
 ################################################################################################
