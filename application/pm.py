@@ -166,7 +166,6 @@ class ProjectWizard(QtGui.QWizard):
         load_project(ac.CURRENT_PROJECT_NAME, self.parent())
 
 def load_project(project_name, main_window):
-    print(project_name)
     ac.CURRENT_PROJECT_NAME = project_name
 
     load_homography(main_window)
