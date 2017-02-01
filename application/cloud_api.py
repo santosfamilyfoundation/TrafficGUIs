@@ -52,7 +52,7 @@ class TrafficCloud:
 ###############################################################################
 # Upload Functions
 ###############################################################################
-	
+
     def uploadVideo(self,  video_path, identifier = None,):
         print "uploadVideo called with identifier = {}".format(identifier)
         with open(video_path, 'rb') as video:
@@ -185,7 +185,7 @@ class TrafficCloud:
         r = requests.post(self.server_addr + 'testConfig', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-        
+
 
 ###############################################################################
 # Analysis Functions
@@ -273,11 +273,11 @@ class TrafficCloud:
         r = requests.get(url, stream=True)
         with open(local_filename, 'wb') as f:
             print('Dumping "{0}"...'.format(local_filename))
-            for chunk in r.iter_content(chunk_size=1024): 
+            for chunk in r.iter_content(chunk_size=1024):
                 if chunk:
                     f.write(chunk)
         return local_filename
-            
+
     def roadUserCounts(self, identifier):
         print "roadUserCounts called with identifier = {}".format(identifier)
 
@@ -293,7 +293,7 @@ class TrafficCloud:
         print "speedCDF called with identifier = {}, speed_limit = {} and vehicle_only = {}"\
                 .format(identifier, speed_limit, vehicle_only)
 
-        payload = {     
+        payload = {
             'identifier': identifier,
             'speed_limit': speed_limit,
             'vehicle_only': vehicle_only
