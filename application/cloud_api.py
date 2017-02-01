@@ -262,10 +262,10 @@ class TrafficCloud:
         payload = {
             'identifier': identifier,
         }
-
-        r = requests.get(self.server_addr + 'retrieveResults', data = payload)
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
+        file_path = download_file(self.server_addr + 'retrieveResults', data = payload)
+        print file_path
+        #print "Status Code: {}".format(r.status_code)
+        #print "Response Text: {}".format(r.text)
 
     #Helper Method for Downloading Files from URL
     def download_file(url):
@@ -347,8 +347,8 @@ if __name__ == '__main__':
     # Run Analysis Route
     ###########################################################################
     #remote.analysis(id,'phillip.seger@students.olin.edu')
-    remote.objectTracking(id,'phillip.seger@students.olin.edu')
-    remote.safetyAnalysis(id,'phillip.seger@students.olin.edu')
+    remote.objectTracking(id,'jacob.riedel@students.olin.edu')
+    remote.safetyAnalysis(id,'jacob.riedel@students.olin.edu')
 
 
 
