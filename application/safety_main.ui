@@ -832,11 +832,6 @@
     <string>Open Video</string>
    </property>
   </action>
-  <action name="actionOpen_Config">
-   <property name="text">
-    <string>Open Config </string>
-   </property>
-  </action>
   <action name="actionNew_Project">
    <property name="text">
     <string>New Project</string>

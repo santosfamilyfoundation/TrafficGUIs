@@ -28,8 +28,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import numpy as np
 import cvutils
-from app_config import AppConfig as ac
-import app_config as pm
+from app_config import get_base_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path
 import pm
 import cloud_api as capi
 
@@ -77,7 +76,6 @@ class MainGUI(QtGui.QMainWindow):
 
         # config
         self.configGui_features = configGui_features()
-        self.ui.actionOpen_Config.triggered.connect(self.configGui_features.openConfig)
         self.ui.feature_tracking_parameter_layout.addWidget(self.configGui_features)
 
         # test button
@@ -94,7 +92,6 @@ class MainGUI(QtGui.QMainWindow):
 
         # config
         self.configGui_object = configGui_object()
-        self.ui.actionOpen_Config.triggered.connect(self.configGui_object.openConfig)
         self.ui.roadusers_tracking_parameter_layout.addWidget(self.configGui_object)
 
         # test button
@@ -120,242 +117,25 @@ class MainGUI(QtGui.QMainWindow):
 ######################################################################################################
 
     def test_feature(self):
-        tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "feature_tracking.cfg")
-        db_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "test1.sqlite")
-        if os.path.exists(db_path):
-            os.remove(db_path)
-
-        images_folder = "feature_images"
-        self.delete_images(images_folder)
-
-        # Get the frame information for the test
-        configuration = self.configGui_features.getConfig_features()
-        frame1 = int(configuration["frame1"])
-        nframes = int(configuration["nframes"])
-        fps = float(configuration["video-fps"])
-
-        subprocess.call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
-        subprocess.call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH, "-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "feature", "--save-images", "-f", str(frame1), "--last-frame", str(frame1+nframes)])
-
-        self.move_images_to_project_dir_folder(images_folder)
-
-        self.feature_tracking_video_player.loadFrames(os.path.join(ac.CURRENT_PROJECT_PATH, images_folder), fps)
+        # TODO: Call the right route
+        raise NotImplementedError("test_feature is not implemented")
+        pass
 
     def test_object(self):
-        tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object", "object_tracking.cfg")
-        obj_db_path = os.path.join(ac.CURRENT_PROJECT_PATH,".temp", "test", "test_object", "test1.sqlite")
-        feat_db_path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "test1.sqlite")
-        if os.path.exists(obj_db_path):
-            os.remove(obj_db_path)
-        shutil.copyfile(feat_db_path, obj_db_path)
-
-        images_folder = "object_images"
-        self.delete_images(images_folder)
-
-        # Get the frame information for the test
-        configuration = self.configGui_object.getConfig_objects()
-        frame1 = int(configuration["frame1"])
-        nframes = int(configuration["nframes"])
-        fps = float(configuration["video-fps"])
-
-        subprocess.call(["feature-based-tracking",tracking_path,"--gf","--database-filename",obj_db_path])
-        subprocess.call(["classify-objects.py", "--cfg", tracking_path, "-d", obj_db_path])  # Classify road users
-        subprocess.call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH,"-d", obj_db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object", "--save-images", "-f", str(frame1), "--last-frame", str(frame1+nframes)])
-        
-        self.move_images_to_project_dir_folder(images_folder)
-
-        self.roadusers_tracking_video_player.loadFrames(os.path.join(ac.CURRENT_PROJECT_PATH, images_folder), fps)
-
-    def delete_images(self, folder):
-        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
-        if os.path.exists(images_folder):
-            for file in os.listdir(images_folder):
-                if file[0:6] == 'image-' and file[-4:] == '.png':
-                    os.remove(os.path.join(images_folder, file))
-        for file in os.listdir(os.getcwd()):
-            if file[0:6] == 'image-' and file[-4:] == '.png':
-                os.remove(os.path.join(os.getcwd(), file))
-
-    def move_images_to_project_dir_folder(self, folder):
-        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
-        if not os.path.exists(images_folder):
-            os.makedirs(images_folder)
-        for file in os.listdir(os.getcwd()):
-            if file[0:6] == 'image-' and file[-4:] == '.png':
-                os.rename(file, os.path.join(images_folder, file))
-
-    def images_exist(self, folder):
-        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
-        if os.path.exists(images_folder):
-            for file in os.listdir(images_folder):
-                if file[0:6] == 'image-' and file[-4:] == '.png':
-                    return True
-        return False
+        # TODO: Call the right route
+        raise NotImplementedError("test_object is not implemented")
+        pass
 
 # for the run button
     def run(self):
         """
         Runs TrafficIntelligence trackers and support scripts.
         """
-        # create test folder
-        self.api.uploadFiles()
-
-        return
-
-        i = raw_input("")
-
-        if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/run"):
-            os.mkdir(ac.CURRENT_PROJECT_PATH + "/run")
-
-        # removes object tracking.cfg
-        if os.path.exists(ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg"):
-            os.remove(ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg")
-
-        # creates new config file
-        shutil.copyfile(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_object/object_tracking.cfg", ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg")
-
-        path1 = ac.CURRENT_PROJECT_PATH + "/run/run_tracking.cfg"
-
-        f = open(path1, 'r')
-        lines = f.readlines()
-        f.close()
-        with open(path1, "w") as wf:
-            for line in lines:
-                line_param = line.split('=')[0].strip()
-                if "frame1" == line_param:  # Replace parameter "frame1"
-                    wf.write("frame1 = 0\n")
-                elif "nframes" == line_param:  # Remove parameter "nframes"
-                    wf.write("nframes = 0\n")
-                elif "database-filename" == line_param:
-                    wf.write("database-filename = results.sqlite\n")
-                else:
-                    wf.write(line)
-
-        db_path = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")
-        tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "run_tracking.cfg")
-
-        if os.path.exists(db_path):  # If results database already exists,
-            os.remove(db_path)  # then remove it--it'll be recreated.
-        subprocess.call(["feature-based-tracking", tracking_path, "--tf", "--database-filename", db_path])
-        subprocess.call(["feature-based-tracking", tracking_path, "--gf", "--database-filename", db_path])
-
-        subprocess.call(["classify-objects.py", "--cfg", tracking_path, "-d", db_path])  # Classify road users
-
-        db_make_objtraj(db_path)  # Make our object_trajectories db table
-
-        self.create_video()
-
-    def create_video(self):
-        count = 0
-        num_frames_per_vid = 60
-        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, "final_images")
-        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, "final_videos")
-
-        # Make the videos and images folder if it doesn't exists 
-        if not os.path.exists(videos_folder):
-            os.makedirs(videos_folder)
-        if not os.path.exists(images_folder):
-            os.makedirs(images_folder)
-        db_path = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")
-        self.delete_videos("final_videos")
-
-        while True:
-            # Delete old images, and recreate them in the right place
-            self.delete_images(images_folder)
-            subprocess.call(["display-trajectories.py", "-i", ac.CURRENT_PROJECT_VIDEO_PATH,"-d", db_path, "-o", ac.CURRENT_PROJECT_PATH + "/homography/homography.txt", "-t", "object", "--save-images", "-f", str(count*num_frames_per_vid), "--last-frame", str((count + 1)*num_frames_per_vid - 1)])
-            self.move_images_to_project_dir_folder(images_folder)
-            
-            # If we got to the end of the video, break
-            if not self.images_exist(images_folder):
-                print 'No more images'
-                break
-
-            # Get the frames, and create a short video out of them
-            self.renumber_frames(images_folder, count*num_frames_per_vid)
-            self.convert_frames_to_video(images_folder, videos_folder, "video-"+str(count)+".mp4")
-
-            count += 1
-
-        self.combine_videos(videos_folder, "final_videos")
-
-    def renumber_frames(self, folder, frame):
-        images_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
-
-        # Rename them all to 'new-image-x' in order to not interfere with the current 'image-x'
-        for file in os.listdir(images_folder):
-            if file[0:6] == 'image-' and file[-4:] == '.png':
-                number = file[6:-4]
-                new_number = int(number) - frame
-                new_file = 'new-image-'+str(new_number)+'.png'
-                os.rename(os.path.join(images_folder, file), os.path.join(images_folder, new_file))
-
-        # Rename the 'new-image-x' to 'image-x'
-        for file in os.listdir(images_folder):
-            if file[0:10] == 'new-image-' and file[-4:] == '.png':
-                new_file = file[4:]
-                os.rename(os.path.join(images_folder, file), os.path.join(images_folder, new_file))
-
-    def convert_frames_to_video(self, images_folder, videos_folder, filename):
-        subprocess.call(["ffmpeg", "-framerate", "30", "-i", os.path.join(images_folder, "image-%d.png"), "-c:v", "libx264", "-pix_fmt", "yuv420p", os.path.join(videos_folder, filename)])
-
-    def delete_videos(self, folder):
-        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
-        file_extensions = ['.mp4', '.mpg']
-
-        for extension in file_extensions:
-            if os.path.exists(videos_folder):
-                for file in os.listdir(videos_folder):
-                    if file[0:6] == 'video-' and file[-4:] == extension:
-                        os.remove(os.path.join(videos_folder, file))
-                    if file == 'output' + extension:
-                        os.remove(os.path.join(videos_folder, file))
-            for file in os.listdir(os.getcwd()):
-                if file[0:6] == 'video-' and file[-4:] == extension:
-                    os.remove(os.path.join(os.getcwd(), file))
-                if file == 'output' + extension:
-                    os.remove(os.path.join(videos_folder, file))
-
-    def move_videos_to_folder(self, folder):
-        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
-        if not os.path.exists(videos_folder):
-            os.makedirs(videos_folder)
-        for file in os.listdir(os.getcwd()):
-            if file[0:6] == 'video-' and file[-4:] == '.mp4':
-                os.rename(file, os.path.join(videos_folder, file))
-
-    def combine_videos(self, folder, filename):
-        # The only way I could find to join videos was to convert the videos to .mpg format, and then join them.
-        # This seems to be the only way to keep ffmpeg happy.
-        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
-        self.convert_to_mpeg(videos_folder)
-
-        # Using Popen seems to be necessary in order to pipe the output of one into the other
-        p1 = subprocess.Popen(['cat']+self.get_videos(videos_folder), stdout=subprocess.PIPE)
-        p2 = subprocess.Popen(['ffmpeg', '-f', 'mpeg', '-i', '-', '-qscale', '0', '-vcodec', 'mpeg4', os.path.join(videos_folder, 'output.mp4')], stdin=p1.stdout, stdout=subprocess.PIPE)
-        p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
-
-    def convert_to_mpeg(self, folder):
-        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
-        count = 0
-
-        while os.path.exists(os.path.join(videos_folder, "video-"+str(count)+".mp4")):
-            subprocess.call(['ffmpeg', '-i', os.path.join(videos_folder, 'video-'+str(count)+'.mp4'), '-qscale', '0', os.path.join(folder, "video-"+str(count)+".mpg")])
-            count += 1
-
-    def get_videos(self, folder):
-        videos_folder = os.path.join(ac.CURRENT_PROJECT_PATH, folder)
-        count = 0
-        videos = []
-
-        while os.path.exists(os.path.join(videos_folder, "video-"+str(count)+".mpg")):
-            videos.append(os.path.join(videos_folder, "video-"+str(count)+".mpg"))
-            count += 1
-
-        return videos
+        # TODO: Call the right route
+        raise NotImplementedError("run is not implemented")
+        pass
 
 ################################################################################################
-    def homography_load_aerial_image(self):
-        pass
 
     def show_next_tab(self):
         curr_i = self.ui.main_tab_widget.currentIndex()
@@ -369,33 +149,12 @@ class MainGUI(QtGui.QMainWindow):
         curr_i = self.ui.main_tab_widget.currentIndex()
         self.ui.main_tab_widget.setCurrentIndex(curr_i - 1)
 
-    def results_plot_plot1(self):
-        data = [random.random() for i in range(10)]
-        # create an axis
-        ax = self.figure1.add_subplot(111)
-        # discards the old graph
-        ax.hold(False)
-        # plot data
-        ax.plot(data, '*-')
-        # refresh canvas
-        self.canvas1.draw()
-
-    def results_plot_plot2(self):
-        data1 = [random.random() for i in range(50)]
-        # create an axis
-        ax = self.figure2.add_subplot(111)
-        # discards the old graph
-        ax.hold(False)
-        # plot data
-        ax.plot(data1, '*-')
-        # refresh canvas
-        self.canvas2.draw()
-
     def open_project(self):
-        fname = str(QtGui.QFileDialog.getExistingDirectory(self, "Open Existing Project Folder...", ac.PROJECT_DIR))
+        fname = str(QtGui.QFileDialog.getExistingDirectory(self, "Open Existing Project Folder...", get_base_project_dir()))
         # TODO: Instead of select folder, perhaps select config file?
         if fname:
-            pm.load_project(fname, self)
+            project_name = os.path.basename(fname)
+            pm.load_project(project_name, self)
         else:
             pass  # If no folder selected, don't load anything.
 
@@ -472,7 +231,7 @@ class MainGUI(QtGui.QMainWindow):
         else:
             error = QtGui.QErrorMessage()
             error.showMessage('''\
-            To compute the homography, please choose at least 4 points on 
+            To compute the homography, please choose at least 4 points on
             each image.''')
             error.exec_()
             return
@@ -480,9 +239,8 @@ class MainGUI(QtGui.QMainWindow):
         if self.homography is None:
             return
 
-        pm.update_project_cfg("homography", "unitpixelratio", str(self
-            .unitPixRatio))
-        homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
+        update_config_with_sections(get_config_path(), "homography", "unitpixelratio", str(self.unitPixRatio))
+        homography_path = os.path.join(get_project_path(), "homography")
 
         if self.homography.size > 0:
             txt_path = os.path.join(homography_path, "homography.txt")
@@ -503,7 +261,7 @@ class MainGUI(QtGui.QMainWindow):
         self.homography_display_results()
 
     def homography_display_results(self):
-        homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
+        homography_path = os.path.join(get_project_path(), "homography")
         worldImg = cv2.imread(os.path.join(homography_path, "aerial.png"))
         videoImg = cv2.imread(os.path.join(homography_path, "camera.png"))
 
@@ -543,7 +301,7 @@ class configGui_features(QtGui.QWidget):
 
         self.btn = QtGui.QPushButton('Set Config', self)
         # self.btn.move(20, 20)
-        self.btn.clicked.connect(self.createConfig_features)
+        self.btn.clicked.connect(self.saveConfig_features)
 
         self.label1 = QtGui.QLabel("first frame to process")
         # input box
@@ -577,6 +335,8 @@ class configGui_features(QtGui.QWidget):
 
         self.label10 = QtGui.QLabel("a feature for grouping")
         self.input10 = QtGui.QLineEdit()
+
+        self.loadConfig_features()
 
         grid = QtGui.QGridLayout()
         grid.setSpacing(10)
@@ -615,113 +375,67 @@ class configGui_features(QtGui.QWidget):
         self.setWindowTitle('Input config')
         # self.show()
 
-        # opens a cofig file
-    def openConfig(self):
-
-        # path = QFileDialog.getOpenFileName(self, 'Open File', '/')
-        # global path1
-        path1= str(path)
-
-        # path1 = "../project_dir/test1"
-
-    def createConfig_features(self, path):
+    def saveConfig_features(self):
         """
-        Create a config file
+        Save configuration
         """
+        config_path = get_config_path()
 
-        # global path1
-        # path1= str(path)
+        frame1 = str(self.input1.text())
+        if frame1 != "":
+            update_config_with_sections(config_path, "config", "frame1", frame1)
 
-        # update test1 name with file chose
+        nframes = str(self.input2.text())
+        if nframes != "":
+            update_config_with_sections(config_path, "config", "nframes", nframes)
 
+        max_nfeatures = str(self.input3.text())
+        if max_nfeatures != "":
+            update_config_with_sections(config_path, "config", "max-nfeatures", max_nfeatures)
 
+        ndisplacements = str(self.input5.text())
+        if ndisplacements != "":
+            update_config_with_sections(config_path, "config", "ndisplacements", ndisplacements)
 
-        config = ConfigParser.ConfigParser()
+        min_feature_displacement = str(self.input6.text())
+        if min_feature_displacement != "":
+            update_config_with_sections(config_path, "config", "min-feature-displacement", min_feature_displacement)
 
-        if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test"):
-            os.mkdir(ac.CURRENT_PROJECT_PATH + "/.temp/test")
+        max_number_iterations = str(self.input8.text())
+        if max_number_iterations != "":
+            update_config_with_sections(config_path, "config", "max-number-iterations", max_number_iterations)
 
-        # create test folder
-        if not os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature"):
-            os.mkdir(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature")
+        min_feature_time = str(self.input10.text())
+        if min_feature_time != "":
+            update_config_with_sections(config_path, "config", "min-feature-time", min_feature_time)
 
-        # removes feature_tracking.cfg
-        if os.path.exists(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg"):
-            os.remove(ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg")
+        # TODO: upload config now?
 
-        # creates new config file
-        proj_tracking_path = os.path.join(ac.CURRENT_PROJECT_PATH, "tracking.cfg")
-        shutil.copyfile(proj_tracking_path, ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg")
+    def loadConfig_features(self):
+        config_path = get_config_path()
 
-        path1 = ac.CURRENT_PROJECT_PATH + "/.temp/test/test_feature/feature_tracking.cfg"
+        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
+        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
+        exists, max_nfeatures = get_config_with_sections(config_path, "config", "max-nfeatures")
+        exists, ndisplacements = get_config_with_sections(config_path, "config", "ndisplacements")
+        exists, min_feature_displacement = get_config_with_sections(config_path, "config", "min-feature-displacement")
+        exists, max_number_iterations = get_config_with_sections(config_path, "config", "max-number-iterations")
+        exists, min_feature_time = get_config_with_sections(config_path, "config", "min-feature-time")
 
-
-        # add new content to config file
-        config.add_section("added")
-        config.set("added", "video-filename",ac.CURRENT_PROJECT_VIDEO_PATH)
-        config.set("added", "homography-filename",ac.CURRENT_PROJECT_PATH + "/homography/homography.txt")
-        config.set("added", "frame1", self.input1.text())
-        config.set("added", "nframes", self.input2.text())
-        config.set("added", "max-nfeatures", self.input3.text())
-        config.set("added", "ndisplacements", self.input5.text())
-        config.set("added", "min-feature-displacement", self.input6.text())
-        config.set("added", "max-number-iterations", self.input8.text())
-        config.set("added", "min-feature-time", self.input10.text())
-
-        try:
-            path1
-        except NameError:
-            # self.player.load(Phonon.MediaSource(""))
-            error = QtGui.QErrorMessage()
-            error.showMessage('''\
-            no config files chosen''')
-            error.exec_()
-            print "no config chosen"
-        else:
-            with open(path1, "a") as config_file:
-                config.write(config_file)
-
-            # to remove the section header from config file
-
-            # opens the file to read
-            f = open(path1, "r")
-            lines = f.readlines()
-            f.close()
-            # opens the file to write
-            f = open(path1, "w")
-            for line in lines:
-                # removes the section header
-                if line != "[added]"+"\n":
-                    f.write(line)
-            f.close()
-
-    def getConfig_features(self):
-        """
-        Gets the features configuration file and returns the data as a dictionary.
-        """
-        path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_feature/feature_tracking.cfg")
-
-        f = open(path, "r")
-        lines = f.readlines()
-        f.close()
-
-        final_dict = {}
-        for line in lines:
-            line = line.strip()
-
-            # If it's a comment, ignore it
-            if len(line) > 0 and line[0] == '#':
-                continue
-
-            arr = line.split(' = ')
-
-            # Protect against things that aren't in "this = that" format
-            if len(arr) != 2:
-                continue
-
-            final_dict[arr[0]] = arr[1]
-
-        return final_dict
+        if frame1 != None:
+            self.input1.setText(frame1)
+        if nframes != None:
+            self.input2.setText(nframes)
+        if max_nfeatures != None:
+            self.input3.setText(max_nfeatures)
+        if ndisplacements != None:
+            self.input5.setText(ndisplacements)
+        if min_feature_displacement != None:
+            self.input6.setText(min_feature_displacement)
+        if max_number_iterations != None:
+            self.input8.setText(max_number_iterations)
+        if min_feature_time != None:
+            self.input10.setText(min_feature_time)
 
 
 ##########################################################################################################################
@@ -737,7 +451,7 @@ class configGui_object(QtGui.QWidget):
 
         self.btn = QtGui.QPushButton('Set Config', self)
         # self.btn.move(20, 20)
-        self.btn.clicked.connect(self.createConfig_objects)
+        self.btn.clicked.connect(self.saveConfig_objects)
 
 
         self.label1 = QtGui.QLabel("first frame to process")
@@ -755,6 +469,8 @@ class configGui_object(QtGui.QWidget):
 
         self.label4 = QtGui.QLabel("maximum segmentation-distance")
         self.input4 = QtGui.QLineEdit()
+
+        self.loadConfig_objects()
 
         grid = QtGui.QGridLayout()
         grid.setSpacing(10)
@@ -780,95 +496,46 @@ class configGui_object(QtGui.QWidget):
         self.setWindowTitle('Input config')
         # self.show()
 
-        # opens a config file
-    def openConfig(self):
-        path = QFileDialog.getOpenFileName(self, 'Open File', '/')
-        # global path1
-        path1 = str(path)
-
-    def createConfig_objects(self, path):
+    def saveConfig_objects(self):
         """
-        Create a config file
+        Save configuration
         """
-        config = ConfigParser.ConfigParser()
-        object_folder = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_object")
-        feature_cfg = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp", "test", "test_feature", "feature_tracking.cfg")
-        object_cfg = os.path.join(object_folder, "object_tracking.cfg")
+        config_path = get_config_path()
 
-        # create test folder
-        if not os.path.exists(object_folder):
-            os.mkdir(object_folder)
+        frame1 = str(self.input1.text())
+        if frame1 != "":
+            update_config_with_sections(config_path, "config", "frame1", frame1)
 
-        # removes object tracking.cfg
-        if os.path.exists(object_cfg):
-            os.remove(object_cfg)
+        nframes = str(self.input2.text())
+        if nframes != "":
+            update_config_with_sections(config_path, "config", "nframes", nframes)
 
-        # creates new config file
-        shutil.copyfile(feature_cfg, object_cfg)
+        mm_connection_distance = str(self.input3.text())
+        if mm_connection_distance != "":
+            update_config_with_sections(config_path, "config", "mm-connection-distance", mm_connection_distance)
 
-        with open(object_cfg, 'r') as rf:
-            lines = rf.readlines()
+        mm_segmentation_distance = str(self.input4.text())
+        if mm_segmentation_distance != "":
+            update_config_with_sections(config_path, "config", "mm-segmentation-distance", mm_segmentation_distance)
 
-        with open(object_cfg, 'w') as wf:
-            for line in lines:
-                line_param = line.split('=')[0].strip()
-                if "frame1" == line_param:  # Remove parameter "frame1"
-                    pass
-                elif "nframes" == line_param:  # Remove parameter "nframes"
-                    pass
-                else:
-                    wf.write(line)
+        # TODO: upload config now?
 
-        # add new content to config file
+    def loadConfig_objects(self):
+        config_path = get_config_path()
 
-        config.add_section("added")
-        config.set("added", "frame1", self.input1.text())
-        config.set("added", "nframes", self.input2.text())
-        config.set("added", "mm-connection-distance", self.input3.text())
-        config.set("added", "mm-segmentation-distance", self.input4.text())
+        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
+        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
+        exists, mm_connection_distance = get_config_with_sections(config_path, "config", "mm-connection-distance")
+        exists, mm_segmentation_distance = get_config_with_sections(config_path, "config", "mm-segmentation-distance")
 
-        with open(object_cfg, "a") as config_file:
-            config.write(config_file)
-
-        # to remove the section header from config file
-
-        # opens the file to read
-        with open(object_cfg, "r") as f:
-            lines = f.readlines()
-        # opens the file to write
-        with open(object_cfg, 'w') as wf:
-            for line in lines:
-                # removes the section header
-                if line != "[added]\n":
-                    wf.write(line)
-
-    def getConfig_objects(self):
-        """
-        Gets the features configuration file and returns the data as a dictionary.
-        """
-        path = os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_feature/feature_tracking.cfg")
-
-        f = open(path, "r")
-        lines = f.readlines()
-        f.close()
-
-        final_dict = {}
-        for line in lines:
-            line = line.strip()
-
-            # If it's a comment, ignore it
-            if len(line) > 0 and line[0] == '#':
-                continue
-
-            arr = line.split(' = ')
-
-            # Protect against things that aren't in "this = that" format
-            if len(arr) != 2:
-                continue
-
-            final_dict[arr[0]] = arr[1]
-
-        return final_dict
+        if frame1 != None:
+            self.input1.setText(frame1)
+        if nframes != None:
+            self.input2.setText(nframes)
+        if mm_connection_distance != None:
+            self.input3.setText(mm_connection_distance)
+        if mm_segmentation_distance != None:
+            self.input4.setText(mm_segmentation_distance)
 
 ##########################################################################################################################
 
@@ -876,7 +543,6 @@ def main():
     app.exec_()
 
 if __name__ == '__main__':
-    ac.load_application_config()
     app = QtGui.QApplication(sys.argv)
     ex = MainGUI()
     sys.exit(main())
