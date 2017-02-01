@@ -4,6 +4,7 @@ import pickle
 import uuid
 import requests
 from app_config import AppConfig as ac
+import json
 
 from pprint import pprint
 
@@ -52,48 +53,53 @@ class TrafficCloud:
 # Upload Functions
 ###############################################################################
 
-    def _local_uploadVideo(self,  video_path,identifier = None,):
-	print "uploadVideo called with identifier = {}".format(identifier)
-	with open(video_path, 'rb') as video:
-            payload = {
-                'video.avi' : video,
-                'identifier': identifier
-            }
-            r = requests.post(self.server_addr + 'uploadVideo', data = payload)
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
-
-    def uploadVideo(self, identifier=None):
+    def uploadVideo(self,  video_path, identifier = None,):
         print "uploadVideo called with identifier = {}".format(identifier)
-
-        video_extn = ac.CURRENT_PROJECT_VIDEO_PATH.split('.')[-1]
-
-	with open('~/Documents/stmarc_video.avi', 'rb') as video:
-	#with open(ac.CURRENT_PROJECT_VIDEO_PATH, 'rb') as video:
-            payload = {
-                'video.%s'%video_extn : video,
-                'identifier': identifier
-            }
-            r = requests.post(self.server_addr + 'uploadVideo', data = payload)
+        with open(video_path, 'rb') as video:
+            files = {'video' : video}
+            payload = {'identifier': identifier}
+            r = requests.post(\
+                self.server_addr + 'uploadVideo',\
+                data = payload, files = files, stream = True)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
+        print "Response JSON: {}".format(r.json())
+        return r.json()
         #TO-DO: Add returned identifier to internal storage
 
+    def _local_uploadHomography(self, homography_path,\
+                                identifier,\
+                                up_ratio,\
+                                aerial_pts,\
+                                camera_pts):
+        files = {
+            'aerial': open(os.path.join(homography_path, "aerial.png"), 'rb'),
+            'camera': open(os.path.join(homography_path, "camera.png"), 'rb'),
+        }
+        payload = {
+            'identifier': identifier,
+            'unit_pixel_ratio': up_ratio,
+            'aerial_pts': json.dumps(aerial_pts),
+            'camera_pts': json.dumps(camera_pts)
+        }
+
+        r = requests.post(\
+            self.server_addr + 'uploadHomography',\
+            data = payload, files = files)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
 
     def uploadHomography(self, identifier):
         print "uploadHomography called with identifier = {}".format(identifier)
         homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
-
-        with open(os.path.join(homography_path, "aerial.png"), 'rb') as hg_aerial,\
-             open(os.path.join(homography_path, "camera.png"), 'rb') as hg_camera,\
-             open(os.path.join(homography_path, "homography.txt"), 'rb') as hg_txt:
-
-            payload = {
-                'homography/aerial.png': hg_aerial,
-                'homography/camera.png': hg_camera,
-                'homography/homography.txt': hg_txt
-            }
-            r = requests.post(self.server_addr + 'uploadHomography', data = payload)
+        files = {
+            'aerial': open(os.path.join(homography_path, "aerial.png"), 'rb'),
+            'camera': open(os.path.join(homography_path, "camera.png"), 'rb'),
+        }
+        payload = {'identifier':identifier}
+        r = requests.post(\
+            self.server_addr + 'uploadHomography',\
+            data = payload, files = files)
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
@@ -105,7 +111,7 @@ class TrafficCloud:
         homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
 
         video_extn = ac.CURRENT_PROJECT_VIDEO_PATH.split('.')[-1]
-	print ac.CURRENT_PROJECT_VIDEO_PATH
+        print ac.CURRENT_PROJECT_VIDEO_PATH
 
         with open(os.path.join(homography_path, "aerial.png"), 'rb') as hg_aerial,\
              open(os.path.join(homography_path, "camera.png"), 'rb') as hg_camera,\
@@ -133,24 +139,40 @@ class TrafficCloud:
 # Configuration Functions
 ###############################################################################
 
-    def configFiles(self, identifier, filename, config_data):
-        print "testConfig called with identifier = {} and filename = {}"\
-                .format(identifier,filename)
+    def configFiles(self, identifier,
+                    max_feature_per_frame = None,\
+                    num_displacement_frames = None,\
+                    min_feature_displacement = None,\
+                    max_iterations_to_persist = None,\
+                    min_feature_frames = None,\
+                    max_connection_distance = None,\
+                    max_segmentation_distance = None):
 
-        print "config_data is as follows:"
-        pprint(config_data)
+        print "testConfig called with identifier = {}"\
+                .format(identifier,filename)
 
         payload = {
             'identifier': identifier,
-            'filename': filename
+            'max_feature_per_frame': max_feature_per_frame,
+            'num_displacement_frames': num_displacement_frames,
+            'min_feature_displacement': min_feature_displacement,
+            'max_iterations_to_persist': max_iterations_to_persist,
+            'min_feature_frames': min_feature_frames,
+            'max_connection_distance': max_connection_distance,
+            'max_segmentation_distance': max_segmentation_distance
         }
+        print "config_data is as follows:"
+        pprint(payload)
 
         r = requests.post(self.server_addr + 'config', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def testConfig(self, test_flag, identifier, frame_start = 0, num_frames = 100):
-        print "testConfig called with identifier = {}, test_flag = {}, frame_start = {}, and num_frames = {}"\
+    def testConfig(self, test_flag, identifier,
+                   frame_start = None,\
+                   num_frames = None):
+        print "testConfig called with identifier = {},\
+                test_flag = {}, frame_start = {}, and num_frames = {}"\
                 .format(identifier,test_flag,frame_start,num_frames)
 
         payload = {
@@ -215,12 +237,9 @@ class TrafficCloud:
 
         payload = {
             'identifier': identifier,
+            'ttc_threshold': ttc_threshold,
+            'vehicle_only': vehicle_only
         }
-
-        if not (ttc_threshold == None):
-            payload['ttc_threshold'] = ttc_threshold
-        if not (vehicle_only == None):
-            payload['vehicle_only'] = vehicle_only
 
         r = requests.post(self.server_addr + 'highlightVideo', data = payload)
         print "Status Code: {}".format(r.status_code)
@@ -259,7 +278,6 @@ class TrafficCloud:
                     f.write(chunk)
         return local_filename
 
-
     def roadUserCounts(self, identifier):
         print "roadUserCounts called with identifier = {}".format(identifier)
 
@@ -271,18 +289,15 @@ class TrafficCloud:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def speedCDF(self, identifier, ttc_threshold = None, vehicle_only = None):
-        print "speedCDF called with identifier = {}, ttc_threshold = {} and vehicle_only = {}"\
-                .format(identifier, ttc_threshold, vehicle_only)
+    def speedCDF(self, identifier, speed_limit = None, vehicle_only = None):
+        print "speedCDF called with identifier = {}, speed_limit = {} and vehicle_only = {}"\
+                .format(identifier, speed_limit, vehicle_only)
 
         payload = {
             'identifier': identifier,
+            'speed_limit': speed_limit,
+            'vehicle_only': vehicle_only
         }
-
-        if not (ttc_threshold == None):
-            payload['ttc_threshold'] = ttc_threshold
-        if not (vehicle_only == None):
-            payload['vehicle_only'] = vehicle_only
 
         r = requests.post(self.server_addr + 'speedCDF', data = payload)
         print "Status Code: {}".format(r.status_code)
@@ -292,12 +307,49 @@ class TrafficCloud:
 #FOR TESTING PURPOSES ONLY
 if __name__ == '__main__':
     print "Syntax looks fine!"
-    remote = CloudWizard('10.7.24.40')
-    remote._local_uploadVideo('/home/user/Documents/stmarc_video.avi')
-    #remote = CloudWizard('10.7.90.25')
-    #local = CloudWizard('localhost')
-    #server = TrafficCloud_Server("/project/path/goes/ahere","localhost")
-    #print remote.server_ip
-    #print remote.readIds()
-    #print local.server_ip
-    #print local.readIds()
+
+    ###########################################################################
+    # Setup CloudWizard
+    ###########################################################################
+    #remote = CloudWizard('10.7.88.26')
+    #remote = CloudWizard('10.26.89.15')
+    remote = CloudWizard('10.7.24.20')
+
+    ###########################################################################
+    # Upload Video
+    ###########################################################################
+    video_path = '/home/user/Documents/output.mp4'
+    #video_path = '/home/user/Documents/stmarc_video.avi'
+    #video_path = '/home/user/Documents/Harvey_30min_day.mp4'
+    id = remote.uploadVideo(video_path)['identifier']
+
+    ###########################################################################
+    # Upload Homography
+    ###########################################################################
+    print id
+    aerial = [\
+            (695.7036743164062, 406.8148193359375),\
+            (819.7777709960938, 240.1481475830078),\
+            (856.8148193359375, 553.111083984375),\
+            (830.888916015625, 390.1481628417969),\
+            (932.74072265625, 397.5555419921875)]
+    camera = [\
+            (614.2222290039062, 703.111083984375),\
+            (936.4444580078125, 419.77777099609375),\
+            (197.55555725097656, 630.888916015625),\
+            (519.7777709960938, 330.8888854980469),\
+            (558.6666870117188, 536.4444580078125)]
+    remote._local_uploadHomography(\
+            '/home/user/Documents/TrafficGUIs/project_dir/TestClassification/homography/',\
+            id, 0.05, aerial, camera)
+
+    ###########################################################################
+    # Run Analysis Route
+    ###########################################################################
+    #remote.analysis(id,'phillip.seger@students.olin.edu')
+    remote.objectTracking(id,'phillip.seger@students.olin.edu')
+    remote.safetyAnalysis(id,'phillip.seger@students.olin.edu')
+
+
+
+
