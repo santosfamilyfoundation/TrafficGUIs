@@ -193,7 +193,7 @@ class TrafficCloud:
 # Analysis Functions
 ###############################################################################
 
-    def analysis(self, identifier, email):
+    def analysis(self, identifier, email=None):
         print "analysis called with identifier = {} and email = {}".format(identifier, email)
 
         payload = {
@@ -205,7 +205,7 @@ class TrafficCloud:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def objectTracking(self, identifier, email):
+    def objectTracking(self, identifier, email=None):
         print "objectTracking called with identifier = {} and email = {}".format(identifier, email)
 
         payload = {
@@ -217,7 +217,7 @@ class TrafficCloud:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def safetyAnalysis(self, identifier, email):
+    def safetyAnalysis(self, identifier, email=None):
         print "safetyAnalysis called with identifier = {} and email = {}".format(identifier, email)
 
         payload = {
