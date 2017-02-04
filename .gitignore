@@ -68,3 +68,4 @@ target/
 # Project directory
 project_dir/*
 *.IDdict
+application/test_app.py

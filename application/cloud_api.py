@@ -35,7 +35,7 @@ class TrafficCloud:
 
     def readIds(self):
         if os.path.isfile('.IDdict'):
-            with open('.Iddict','rb') as dict_file:
+            with open('.IDdict','rb') as dict_file:
                 ids = pickle.loads(dict_file.read())
             return ids
         else:
@@ -177,7 +177,7 @@ class TrafficCloud:
 # Analysis Functions
 ###############################################################################
 
-    def analysis(self, identifier, email):
+    def analysis(self, identifier, email=None):
         print "analysis called with identifier = {} and email = {}".format(identifier, email)
 
         payload = {
@@ -189,7 +189,7 @@ class TrafficCloud:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def objectTracking(self, identifier, email):
+    def objectTracking(self, identifier, email=None):
         print "objectTracking called with identifier = {} and email = {}".format(identifier, email)
 
         payload = {
@@ -201,7 +201,7 @@ class TrafficCloud:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def safetyAnalysis(self, identifier, email):
+    def safetyAnalysis(self, identifier, email=None):
         print "safetyAnalysis called with identifier = {} and email = {}".format(identifier, email)
 
         payload = {
@@ -248,21 +248,15 @@ class TrafficCloud:
         payload = {
             'identifier': identifier,
         }
-        file_path = download_file(self.server_addr + 'retrieveResults', data = payload)
-        print file_path
-        #print "Status Code: {}".format(r.status_code)
-        #print "Response Text: {}".format(r.text)
-
-    #Helper Method for Downloading Files from URL
-    def download_file(url):
-        local_filename = url.split('/')[-1]
-        r = requests.get(url, stream=True)
+        local_filename = 'highlight_video.mp4'
+        r = requests.get(self.server_addr + 'retrieveResults', data = payload, stream=True)
         with open(local_filename, 'wb') as f:
             print('Dumping "{0}"...'.format(local_filename))
             for chunk in r.iter_content(chunk_size=2048):
                 if chunk:
                     f.write(chunk)
-        return local_filename
+        print file_path
+        print "Status Code: {}".format(r.status_code)
 
     def roadUserCounts(self, identifier):
         print "roadUserCounts called with identifier = {}".format(identifier)
