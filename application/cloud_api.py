@@ -191,11 +191,10 @@ class CloudWizard:
             return
         elif avaliable:
 
-                payload = {
+            payload = {
                 'identifier': identifier,
                 'email': email
             }
-
             r = requests.post(self.server_addr + 'objectTracking', data = payload)
             print "Status Code: {}".format(r.status_code)
             print "Response Text: {}".format(r.text)
@@ -235,13 +234,14 @@ class CloudWizard:
         }
 
         r = requests.post(self.server_addr + 'status', data = payload)
-        status_dict = r.content
+        status_dict = json.loads(r.content)
+        print status_dict
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         succeed = 1
         error = []
         incomplete = []
-        for key, val in statusDict.iteritems():
+        for key, val in status_dict.iteritems():
             if int(val) == -1:
                 print "The {} has failed. Try again or check server for error.".format(key)
                 error.append(key)
