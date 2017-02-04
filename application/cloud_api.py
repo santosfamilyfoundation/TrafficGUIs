@@ -134,16 +134,22 @@ class CloudWizard:
                 test_flag = {}, frame_start = {}, and num_frames = {}"\
                 .format(identifier,test_flag,frame_start,num_frames)
 
-        payload = {
-            'test_flag': test_flag,
-            'identifier': identifier,
-            'frame_start': frame_start,
-            'num_frames': num_frames
-        }
+        avaliable, error, incomplete = self.getProjectStatus(identifier)
+        if "upload_homography" in error or "upload_homography" in incomplete:
+            print "Check your homography and upload (again)."
+            return
+        elif avaliable:
 
-        r = requests.post(self.server_addr + 'testConfig', data = payload)
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
+            payload = {
+                'test_flag': test_flag,
+                'identifier': identifier,
+                'frame_start': frame_start,
+                'num_frames': num_frames
+            }
+
+            r = requests.post(self.server_addr + 'testConfig', data = payload)
+            print "Status Code: {}".format(r.status_code)
+            print "Response Text: {}".format(r.text)
 
     def defaultConfig(self):
         r = requests.get(self.server_addr + 'defaultConfig')
@@ -156,38 +162,95 @@ class CloudWizard:
     def analysis(self, identifier, email=None):
         print "analysis called with identifier = {} and email = {}".format(identifier, email)
 
-        payload = {
-            'identifier': identifier,
-            'email': email
-        }
+        avaliable, error, incomplete = self.getProjectStatus(identifier)
+        if "upload_homography" in error or "upload_homography" in incomplete:
+            print "Check your homography and upload (again)."
+            return
+        elif "configuration_test" in error:
+            print "Check configuration and re-run."
+            return
+        elif avaliable:
+            payload = {
+                'identifier': identifier,
+                'email': email
+            }
 
-        r = requests.post(self.server_addr + 'analysis', data = payload)
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
+            r = requests.post(self.server_addr + 'analysis', data = payload)
+            print "Status Code: {}".format(r.status_code)
+            print "Response Text: {}".format(r.text)
 
     def objectTracking(self, identifier, email=None):
         print "objectTracking called with identifier = {} and email = {}".format(identifier, email)
 
-        payload = {
-            'identifier': identifier,
-            'email': email
-        }
+        avaliable, error, incomplete = self.getProjectStatus(identifier)
+        if "upload_homography" in error or "upload_homography" in incomplete:
+            print "Check your homography and upload (again)."
+            return
+        elif "configuration_test" in error:
+            print "Check configuration and re-run."
+            return
+        elif avaliable:
 
-        r = requests.post(self.server_addr + 'objectTracking', data = payload)
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
+                payload = {
+                'identifier': identifier,
+                'email': email
+            }
+
+            r = requests.post(self.server_addr + 'objectTracking', data = payload)
+            print "Status Code: {}".format(r.status_code)
+            print "Response Text: {}".format(r.text)
 
     def safetyAnalysis(self, identifier, email=None):
         print "safetyAnalysis called with identifier = {} and email = {}".format(identifier, email)
 
+        avaliable, error, incomplete = self.getProjectStatus(identifier)
+        if "upload_homography" in error or "upload_homography" in incomplete:
+            print "Check your homography and upload (again)."
+            return
+        elif "configuration_test" in error:
+            print "Check configuration and re-run."
+            return
+        elif "object_tracking" in error or "object_tracking" in incomplete:
+            print "Check object tracking and run (again)."
+            return
+        elif avaliable:
+
+            payload = {
+                'identifier': identifier,
+                'email': email
+            }
+
+            r = requests.post(self.server_addr + 'safetyAnalysis', data = payload)
+            print "Status Code: {}".format(r.status_code)
+            print "Response Text: {}".format(r.text)
+
+###############################################################################
+# Status Checking Functions
+###############################################################################
+
+    def getProjectStatus(self, identifier):
+
         payload = {
             'identifier': identifier,
-            'email': email
         }
 
-        r = requests.post(self.server_addr + 'safetyAnalysis', data = payload)
+        r = requests.post(self.server_addr + 'status', data = payload)
+        status_dict = r.content
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
+        succeed = 1
+        error = []
+        incomplete = []
+        for key, val in statusDict.iteritems():
+            if int(val) == -1:
+                print "The {} has failed. Try again or check server for error.".format(key)
+                error.append(key)
+            elif int(val) == 1:
+                print "The {} is still in progress. Check later for update.".format(key)
+                succeed = 0
+            elif int(val) == 0:
+                incomplete.append(key)
+        return (succeed, error, incomplete)
 
 ###############################################################################
 # Results Functions
@@ -197,15 +260,26 @@ class CloudWizard:
         print "highlightVideo called with identifier = {}, ttc_threshold = {} and vehicle_only = {}"\
                 .format(identifier, ttc_threshold, vehicle_only)
 
-        payload = {
-            'identifier': identifier,
-            'ttc_threshold': ttc_threshold,
-            'vehicle_only': vehicle_only
-        }
+        avaliable, error, incomplete = self.getProjectStatus(identifier)
+        if "upload_homography" in error or "upload_homography" in incomplete:
+            print "Check your homography and upload (again)."
+            return
+        elif "configuration_test" in error:
+            print "Check configuration and re-run."
+            return
+        elif "object_tracking" in error or "object_tracking" in incomplete:
+            print "Check object tracking and run (again)."
+        elif avaliable:
 
-        r = requests.post(self.server_addr + 'highlightVideo', data = payload)
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
+            payload = {
+                'identifier': identifier,
+                'ttc_threshold': ttc_threshold,
+                'vehicle_only': vehicle_only
+            }
+
+            r = requests.post(self.server_addr + 'highlightVideo', data = payload)
+            print "Status Code: {}".format(r.status_code)
+            print "Response Text: {}".format(r.text)
 
     def makeReport(self, identifier):
         print "makeReport called with identifier = {}".format(identifier)
