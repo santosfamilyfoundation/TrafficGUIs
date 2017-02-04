@@ -119,22 +119,21 @@ class MainGUI(QtGui.QMainWindow):
 
     def test_feature(self):
         # TODO: Call the right route
-        raise NotImplementedError("test_feature is not implemented")
-        pass
+        self.api.testConfig('feature',\
+                            get_config_with_sections(get_config_path(), 'info', 'identifier'))
 
     def test_object(self):
         # TODO: Call the right route
-        raise NotImplementedError("test_object is not implemented")
-        pass
+        self.api.testConfig('object',\
+                            get_config_with_sections(get_config_path(), 'info', 'identifier'))
 
-# for the run button
+    # for the run button
     def run(self):
         """
         Runs TrafficIntelligence trackers and support scripts.
         """
-        # TODO: Call the right route
-        raise NotImplementedError("run is not implemented")
-        pass
+        #TODO: Make email some internal parameter.
+        remote.analysis(get_config_with_sections(get_config_path(), 'info', 'identifier'))
 
 ################################################################################################
 

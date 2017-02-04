@@ -339,7 +339,6 @@ if __name__ == '__main__':
                 max_connection_distance = 0.99,\
                 max_segmentation_distance = 0.69)
     remote.testConfig('object', id)
-    exit()
     remote.testConfig('feature', id)
 
     ###########################################################################
