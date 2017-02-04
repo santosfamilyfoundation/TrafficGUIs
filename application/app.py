@@ -119,13 +119,21 @@ class MainGUI(QtGui.QMainWindow):
 
     def test_feature(self):
         # TODO: Call the right route
+        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
+        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
         self.api.testConfig('feature',\
-                            get_config_with_sections(get_config_path(), 'info', 'identifier'))
+                            get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+                            frame_start = frame1,\
+                            num_frames = nframes)
 
     def test_object(self):
         # TODO: Call the right route
+        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
+        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
         self.api.testConfig('object',\
-                            get_config_with_sections(get_config_path(), 'info', 'identifier'))
+                            get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+                            frame_strat = frame1,\
+                            num_frames = nframes)
 
     # for the run button
     def run(self):
@@ -403,24 +411,34 @@ class configGui_features(QtGui.QWidget):
         max_nfeatures = str(self.input3.text())
         if max_nfeatures != "":
             update_config_with_sections(config_path, "config", "max-nfeatures", max_nfeatures)
+        else: max_nfeatures = None
 
         ndisplacements = str(self.input5.text())
         if ndisplacements != "":
             update_config_with_sections(config_path, "config", "ndisplacements", ndisplacements)
+        else: ndisplacements = None
 
         min_feature_displacement = str(self.input6.text())
         if min_feature_displacement != "":
             update_config_with_sections(config_path, "config", "min-feature-displacement", min_feature_displacement)
+        else: min_feature_displacement = None
 
         max_number_iterations = str(self.input8.text())
         if max_number_iterations != "":
             update_config_with_sections(config_path, "config", "max-number-iterations", max_number_iterations)
+        else: max_number_iterations = None
 
         min_feature_time = str(self.input10.text())
         if min_feature_time != "":
             update_config_with_sections(config_path, "config", "min-feature-time", min_feature_time)
+        else: min_feature_time = None
 
-        # TODO: upload config now?
+        configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+                    max_features_per_frame = max_nfeatures,\
+                    num_displacement_frames = ndisplacements,\
+                    min_feature_displacement = min_feature_displacement,\
+                    max_iterations_to_persist = max_number_iterations,\
+                    min_feature_frames = min_feature_time):
 
     def loadConfig_features(self):
         config_path = get_config_path()
@@ -524,11 +542,16 @@ class configGui_object(QtGui.QWidget):
         mm_connection_distance = str(self.input3.text())
         if mm_connection_distance != "":
             update_config_with_sections(config_path, "config", "mm-connection-distance", mm_connection_distance)
+        else: mm_connection_distance = None
 
         mm_segmentation_distance = str(self.input4.text())
         if mm_segmentation_distance != "":
             update_config_with_sections(config_path, "config", "mm-segmentation-distance", mm_segmentation_distance)
-        # TODO: upload config now?
+        else: mm_segmentation_distance = None
+
+        configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+                    max_connection_distance = mm_connection_distance,\
+                    max_segmentation_distance = mm_segmentation_distance):
 
     def loadConfig_objects(self):
         config_path = get_config_path()
