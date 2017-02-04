@@ -40,9 +40,10 @@ class MainGUI(QtGui.QMainWindow):
         super(MainGUI, self).__init__()
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
+        self.api = capi.CloudWizard('10.7.24.11')
         self.newp = pm.ProjectWizard(self)
         #self.api = capi.CloudWizard('10.7.27.225')
-        self.api = capi.CloudWizard('10.7.24.40')
+
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
@@ -214,9 +215,20 @@ class MainGUI(QtGui.QMainWindow):
         #TODO: display error message if points are < 4
         px_text = self.ui.unit_px_input.text()
         self.unitPixRatio = float(unicode(px_text))
+
+        homography_path = os.path.join(get_project_path(), "homography")
+        self.api.uploadHomography(\
+            os.path.join(homography_path, "aerial.png"),\
+            os.path.join(homography_path, "camera.png"),\
+            get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+            self.unitPixRatio,\
+            self.ui.homography_aerialview.list_points(),\
+            self.ui.homography_cameraview.list_points())
+
         self.unscaled_world_pts = (np.array(self.ui.homography_aerialview.list_points()))
         self.worldPts = self.unitPixRatio * self.unscaled_world_pts
         self.videoPts = np.array(self.ui.homography_cameraview.list_points())
+
         if len(self.worldPts) >= 4:
             if len(self.worldPts) == len(self.videoPts):
                 self.homography, self.mask = cv2.findHomography(self.videoPts, self.worldPts)
@@ -517,7 +529,6 @@ class configGui_object(QtGui.QWidget):
         mm_segmentation_distance = str(self.input4.text())
         if mm_segmentation_distance != "":
             update_config_with_sections(config_path, "config", "mm-segmentation-distance", mm_segmentation_distance)
-
         # TODO: upload config now?
 
     def loadConfig_objects(self):

@@ -67,16 +67,16 @@ class TrafficCloud:
         return r.json()
         #TO-DO: Add returned identifier to internal storage
 
-    def _local_uploadHomography(self,
-                                aerial_path,\
-                                camera_path,\
-                                identifier,\
-                                up_ratio,\
-                                aerial_pts,\
-                                camera_pts):
+    def uploadHomography(self,
+                            aerial_path,\
+                            camera_path,\
+                            identifier,\
+                            up_ratio,\
+                            aerial_pts,\
+                            camera_pts):
         files = {
-            'aerial': open(os.path.join(homography_path, "aerial.png"), 'rb'),
-            'camera': open(os.path.join(homography_path, "camera.png"), 'rb'),
+            'aerial': open(aerial_path, 'rb'),
+            'camera': open(camera_path, 'rb'),
         }
         payload = {
             'identifier': identifier,
@@ -90,22 +90,6 @@ class TrafficCloud:
             data = payload, files = files)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-
-    def uploadHomography(self, identifier):
-        print "uploadHomography called with identifier = {}".format(identifier)
-        homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
-        files = {
-            'aerial': open(os.path.join(homography_path, "aerial.png"), 'rb'),
-            'camera': open(os.path.join(homography_path, "camera.png"), 'rb'),
-        }
-        payload = {'identifier':identifier}
-        r = requests.post(\
-            self.server_addr + 'uploadHomography',\
-            data = payload, files = files)
-
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
-
 
     def uploadFiles(self):
         print "uploadFiles called"
@@ -142,7 +126,7 @@ class TrafficCloud:
 ###############################################################################
 
     def configFiles(self, identifier,
-                    max_feature_per_frame = None,\
+                    max_features_per_frame = None,\
                     num_displacement_frames = None,\
                     min_feature_displacement = None,\
                     max_iterations_to_persist = None,\
@@ -150,12 +134,12 @@ class TrafficCloud:
                     max_connection_distance = None,\
                     max_segmentation_distance = None):
 
-        print "testConfig called with identifier = {}"\
-                .format(identifier,filename)
+        print "configFiles called with identifier = {}"\
+                .format(identifier)
 
         payload = {
             'identifier': identifier,
-            'max_feature_per_frame': max_feature_per_frame,
+            'max_features_per_frame': max_features_per_frame,
             'num_displacement_frames': num_displacement_frames,
             'min_feature_displacement': min_feature_displacement,
             'max_iterations_to_persist': max_iterations_to_persist,
@@ -315,7 +299,7 @@ if __name__ == '__main__':
     ###########################################################################
     #remote = CloudWizard('10.7.88.26')
     #remote = CloudWizard('10.26.89.15')
-    remote = CloudWizard('10.7.24.68')
+    remote = CloudWizard('10.7.24.11')
 
     ###########################################################################
     # Upload Video
@@ -343,16 +327,33 @@ if __name__ == '__main__':
             (558.6666870117188, 536.4444580078125)]
     aerial_path = '/home/user/Documents/TrafficGUIs/project_dir/TestClassification/homography/aerial.png'
     camera_path = '/home/user/Documents/TrafficGUIs/project_dir/TestClassification/homography/camera.png'
-    remote._local_uploadHomography(\
-            '/home/user/Documents/TrafficGUIs/project_dir/TestClassification/homography/',\
+    remote.uploadHomography(\
+            aerial_path, camera_path,\
             id, 0.05, aerial, camera)
+
+
+    ###########################################################################
+    # Test Configs
+    ###########################################################################
+ 
+    remote.configFiles(id,\
+                max_features_per_frame = 1001,\
+                num_displacement_frames = 11,\
+                min_feature_displacement = 0.000099,\
+                max_iterations_to_persist = 201,\
+                min_feature_frames = 14,\
+                max_connection_distance = 0.99,\
+                max_segmentation_distance = 0.69)
+    remote.testConfig('object', id)
+    exit()
+    remote.testConfig('feature', id)
 
     ###########################################################################
     # Run Analysis Route
     ###########################################################################
-    #remote.analysis(id,'phillip.seger@students.olin.edu')
-    remote.objectTracking(id,'jacob.riedel@students.olin.edu')
-    remote.safetyAnalysis(id,'jacob.riedel@students.olin.edu')
+    remote.analysis(id,'philip.seger@students.olin.edu')
+    #remote.objectTracking(id,'philip.seger@students.olin.edu')
+    #remote.safetyAnalysis(id,'philip.seger@students.olin.edu')
 
 
 
