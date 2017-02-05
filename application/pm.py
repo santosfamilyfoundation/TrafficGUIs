@@ -18,7 +18,7 @@ import cvutils
 import numpy as np
 
 from app_config import AppConfig as ac
-from app_config import check_project_cfg_option, update_project_cfg, check_project_cfg_section
+from app_config import get_project_path, get_config_path, config_section_exists, get_config_with_sections, update_config_with_sections
 from qt_plot import plot_results
 
 
@@ -32,9 +32,7 @@ class ProjectWizard(QtGui.QWizard):
         self.ui.newp_video_browse.clicked.connect(self.open_video)
         self.aerial_image_selected = False
         self.video_selected = False
-
-        # self.DEFAULT_PROJECT_DIR = os.path.join(os.getcwd(), os.pardir, "project_dir")
-        self.DEFAULT_PROJECT_DIR = ac.PROJECT_DIR
+        self.api = parent.api
 
         self.ui.newp_start_creation.clicked.connect(self.start_create_project)
         self.config_parser = SafeConfigParser()
@@ -100,13 +98,12 @@ class ProjectWizard(QtGui.QWizard):
             self.create_project_dir()
 
     def create_project_dir(self):
-        self.project_name = str(self.ui.newp_projectname_input.text())
+        ac.CURRENT_PROJECT_NAME = str(self.ui.newp_projectname_input.text())
         progress_bar = self.ui.newp_creation_progress
         progress_msg = self.ui.newp_creation_status
-        directory_names = ["homography", ".temp", "run", "results"]
-        pr_path = os.path.join(self.DEFAULT_PROJECT_DIR, self.project_name)
+        directory_names = ["homography", "results"]
+        pr_path = get_project_path()
         if not os.path.exists(pr_path):
-            self.PROJECT_PATH = pr_path
             progress_msg.setText("Creating project directories...")
             for new_dir in directory_names:
                 progress_bar.setValue(progress_bar.value() + 5)
@@ -115,29 +112,15 @@ class ProjectWizard(QtGui.QWizard):
             progress_bar.setValue(progress_bar.value() + 5)
             progress_msg.setText("Writing configuration files...")
             self._write_to_project_config()
-            copy("default/tracking.cfg", os.path.join(pr_path, "tracking.cfg"))
-	    copy("default/classifier.cfg", os.path.join(pr_path, "classifier.cfg"))
-	    with open(os.path.join(pr_path, 'tracking.cfg') ,'r+') as trkcfg:
-                old = trkcfg.read()
-                trkcfg.seek(0)
-		newline = 'classifier-filename = ../project_dir/{}/classifier.cfg'.format(self.project_name)
-                trkcfg.write(newline+old)
-	    with open(os.path.join(pr_path, 'classifier.cfg'),'r+') as newcfg:
-	        old = newcfg.read()
-                newcfg.seek(0)
- 		nline1 = 'pbv-svm-filename = ../project_dir/{}/modelPBV.xml\n'.format(self.project_name)
-		nline2 = 'bv-svm-filename = ../project_dir/{}/modelBV.xml\n'.format(self.project_name)
-		newcfg.write(nline1+nline2+old)
-
-            progress_msg.setText("Copying object classification files...")
-            svms = ["modelBV.xml", "modelPB.xml", "modelPBV.xml", "modelPV.xml"]
-            for svm in svms:
-                copy("default/{}".format(svm), os.path.join(pr_path, svm))
-                progress_bar.setValue(progress_bar.value() + 5)
 
             progress_msg.setText("Copying video file...")
-            video_dest = os.path.join(pr_path, os.path.basename(self.videopath))
+            video_extension = self.videopath.split('.')[-1]
+            video_dest = os.path.join(pr_path, 'video.' + video_extension)
             copy(self.videopath, video_dest)
+
+            progress_msg.setText("Uploading video file...")
+            identifier = self.api.uploadVideo(self.videopath)['identifier']
+            update_config_with_sections(get_config_path(), 'info', 'identifier', identifier)
             progress_bar.setValue(80)
 
             progress_msg.setText("Extracting camera image...")
@@ -158,7 +141,7 @@ class ProjectWizard(QtGui.QWizard):
             progress_bar.setValue(95)
             progress_msg.setText("Complete.")
 
-            progress_msg.setText("Opening {} project...".format(self.project_name))
+            progress_msg.setText("Opening {} project...".format(ac.CURRENT_PROJECT_NAME))
             self.load_new_project()
             progress_bar.setValue(100)
             progress_msg.setText("Complete.")
@@ -172,32 +155,26 @@ class ProjectWizard(QtGui.QWizard):
         timestamp = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y %H:%M:%S %Z')
         video_timestamp = vid_ts.strftime('%d-%m-%Y %H:%M:%S %Z')
         self.config_parser.add_section("info")
-        self.config_parser.set("info", "project_name", self.project_name)
+        self.config_parser.set("info", "project_name", ac.CURRENT_PROJECT_NAME)
         self.config_parser.set("info", "creation_date", timestamp)
         self.config_parser.add_section("video")
-        self.config_parser.set("video", "name", os.path.basename(self.videopath))
+        video_extension = self.videopath.split('.')[-1]
+        self.config_parser.set("video", "name", 'video.'+video_extension)
         self.config_parser.set("video", "source", self.videopath)
         self.config_parser.set("video", "framerate", str(self.ui.newp_video_fps_input.text()))
         self.config_parser.set("video", "start", video_timestamp)
 
-        with open(os.path.join(self.PROJECT_PATH, "{}.cfg".format(self.project_name)), 'wb') as configfile:
+        with open(os.path.join(get_config_path()), 'wb') as configfile:
             self.config_parser.write(configfile)
 
     def load_new_project(self):
-        load_project(self.PROJECT_PATH, self.parent())
+        load_project(ac.CURRENT_PROJECT_NAME, self.parent())
 
-
-def load_project(folder_path, main_window):
-    path = os.path.normpath(folder_path)  # Clean path. May not be necessary.
-    project_name = os.path.basename(path)
-    project_cfg = os.path.join(path, "{}.cfg".format(project_name))
-    ac.CURRENT_PROJECT_PATH = path  # Set application-level variables indicating the currently open project
+def load_project(project_name, main_window):
     ac.CURRENT_PROJECT_NAME = project_name
-    ac.CURRENT_PROJECT_CONFIG = project_cfg
-    config_parser = SafeConfigParser()
-    config_parser.read(project_cfg)  # Read project config file.
-    ac.CURRENT_PROJECT_VIDEO_PATH = os.path.join(ac.CURRENT_PROJECT_PATH, config_parser.get("video", "name"))
+
     load_homography(main_window)
+    load_config(main_window)
     load_results(main_window)
 
 
@@ -205,7 +182,7 @@ def load_homography(main_window):
     """
     Loads homography information into the specified main window.
     """
-    path = ac.CURRENT_PROJECT_PATH
+    path = get_project_path()
     aerial_path = os.path.join(path, "homography", "aerial.png")
     camera_path = os.path.join(path, "homography", "camera.png")
     # TODO: Handle if above two paths do not exist
@@ -226,9 +203,9 @@ def load_homography(main_window):
         corr_path = pt_corrs_path
 
     # Has a homography been previously computed?
-    if check_project_cfg_section("homography"):  # If we can load homography unit-pix ratio load it
+    if config_section_exists(get_config_path(), "homography"):  # If we can load homography unit-pix ratio load it
         # load unit-pixel ratio
-        upr_exists, upr = check_project_cfg_option("homography", "unitpixelratio")
+        upr_exists, upr = get_config_with_sections(get_config_path(), "homography", "unitpixelratio")
         if upr_exists:
             gui.unit_px_input.setText(upr)
     if os.path.exists(corr_path):  # If points have been previously selected
@@ -248,7 +225,11 @@ def load_homography(main_window):
     else:
         print ("{} does not exist. No points loaded.".format(corr_path))
 
+def load_config(main_window):
+    main_window.configGui_features.loadConfig_features()
+    main_window.configGui_object.loadConfig_objects()
+
 def load_results(main_window):
-    if os.path.exists(os.path.join(ac.CURRENT_PROJECT_PATH, "homography", "homography.txt")):
-        if os.path.exists(os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")):
+    if os.path.exists(os.path.join(get_project_path(), "homography", "homography.txt")):
+        if os.path.exists(os.path.join(get_project_path(), "results", "results.sqlite")):
             plot_results(main_window)

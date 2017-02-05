@@ -822,14 +822,14 @@
     <string>About</string>
    </property>
   </action>
+  <action name="actionFeedback">
+   <property name="text">
+    <string>Send Feedback</string>
+   </property>
+  </action>
   <action name="actionOpen_Video">
    <property name="text">
     <string>Open Video</string>
-   </property>
-  </action>
-  <action name="actionOpen_Config">
-   <property name="text">
-    <string>Open Config </string>
    </property>
   </action>
   <action name="actionNew_Project">

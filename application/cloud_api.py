@@ -3,11 +3,13 @@ import os
 import pickle
 import uuid
 import requests
+from app_config import AppConfig as ac
+import json
 
-def CloudWizard(ip_addr,*arg):
-        return TrafficCloud(ip_addr)
-class TrafficCloud:
-    def __init__(self,ip_addr):
+from pprint import pprint
+
+class CloudWizard:
+    def __init__(self, ip_addr, port=8088):
         #TODO: Needs to be done in sync with server
         #   not a uuid creation
         #self._ids = self.readIds()
@@ -15,10 +17,13 @@ class TrafficCloud:
         #self._ids[self.project_path] = uuid.uuid4()
         #self._writeIds()
         if ip_addr == 'localhost':
-            self.server_ip = '127.0.0.1'
+            self.server_addr = 'http://127.0.0.1:{}/'.format(port)
         else:
-            self.server_ip = ip_addr
+            self.server_addr = 'http://{}:{}/'.format(ip_addr, port)
 
+###############################################################################
+# ID Storage Functions
+###############################################################################
 
     def _initializeIds(self):
         with open('.IDdict','wb') as blank_dict_file:
@@ -27,7 +32,7 @@ class TrafficCloud:
 
     def readIds(self):
         if os.path.isfile('.IDdict'):
-            with open('.Iddict','rb') as dict_file:
+            with open('.IDdict','rb') as dict_file:
                 ids = pickle.loads(dict_file.read())
             return ids
         else:
@@ -41,11 +46,55 @@ class TrafficCloud:
         else:
             return self._initializeIds()
 
-    def uploadFiles(self, types, paths, callback):
+###############################################################################
+# Upload Functions
+###############################################################################
+
+    def uploadVideo(self,  video_path, identifier = None):
+        print "uploadVideo called with identifier = {}".format(identifier)
+        with open(video_path, 'rb') as video:
+            files = {'video' : video}
+            payload = {'identifier': identifier}
+            r = requests.post(\
+                self.server_addr + 'uploadVideo',\
+                data = payload, files = files, stream = True)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+        print "Response JSON: {}".format(r.json())
+        return r.json()
+        #TO-DO: Add returned identifier to internal storage
+
+    def uploadHomography(self,
+                            aerial_path,\
+                            camera_path,\
+                            identifier,\
+                            up_ratio,\
+                            aerial_pts,\
+                            camera_pts):
+        files = {
+            'aerial': open(aerial_path, 'rb'),
+            'camera': open(camera_path, 'rb'),
+        }
+        payload = {
+            'identifier': identifier,
+            'unit_pixel_ratio': up_ratio,
+            'aerial_pts': json.dumps(aerial_pts),
+            'camera_pts': json.dumps(camera_pts)
+        }
+
+        r = requests.post(\
+            self.server_addr + 'uploadHomography',\
+            data = payload, files = files)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
+    def uploadFiles(self):
+        print "uploadFiles called"
         project_name = ac.CURRENT_PROJECT_PATH.strip('/').split('/')[-1]
         homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
 
         video_extn = ac.CURRENT_PROJECT_VIDEO_PATH.split('.')[-1]
+        print ac.CURRENT_PROJECT_VIDEO_PATH
 
         with open(os.path.join(homography_path, "aerial.png"), 'rb') as hg_aerial,\
              open(os.path.join(homography_path, "camera.png"), 'rb') as hg_camera,\
@@ -63,42 +112,170 @@ class TrafficCloud:
                 'project_name.cfg': cfg_prname,
                 'tracking.cfg': cfg_track,
                 '.temp/test/test_object/object_tracking.cfg': test_obj,
-                ".temp/test/test_feature/feature_tracking.cfg": test_track,
+                '.temp/test/test_feature/feature_tracking.cfg': test_track,
                 'video.%s'%video_extn : video
             }
-            r = requests.post("http://" + self.server_ip + '/upload',files = files)
+            r = requests.post(self.server_addr+'upload',files = files)
             print r.text;
 
-    def testFeatureAnalysis(self, config, frames, callback):
-        raise NotImplementedError("testFeatureAnalysis not yet implemented")
+###############################################################################
+# Configuration Functions
+###############################################################################
 
-    def testObjectAnalysis(self, config, frames, callback):
-        raise NotImplementedError("testFeatureAnalysis not yet implemented")
+    def configFiles(self, identifier,
+                    max_features_per_frame = None,\
+                    num_displacement_frames = None,\
+                    min_feature_displacement = None,\
+                    max_iterations_to_persist = None,\
+                    min_feature_frames = None,\
+                    max_connection_distance = None,\
+                    max_segmentation_distance = None):
 
-    def runTrajectoryAnalysis(self, config, callback):
-        raise NotImplementedError("runTrajectoryAnalysis not yet implemented")
+        print "configFiles called with identifier = {}"\
+                .format(identifier)
 
-    def runSafetyAnalysis(self, prediction, db, callback):
-        raise NotImplementedError("runSafetyAnalysis  not yet implemented")
+        payload = {
+            'identifier': identifier,
+            'max_features_per_frame': max_features_per_frame,
+            'num_displacement_frames': num_displacement_frames,
+            'min_feature_displacement': min_feature_displacement,
+            'max_iterations_to_persist': max_iterations_to_persist,
+            'min_feature_frames': min_feature_frames,
+            'max_connection_distance': max_connection_distance,
+            'max_segmentation_distance': max_segmentation_distance
+        }
+        print "config_data is as follows:"
+        pprint(payload)
 
-    def runVisualization(self, db, callback):
-        raise NotImplementedError("runVisualization not yet implemented")
+        r = requests.post(self.server_addr + 'config', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
 
-    def getDB(self, callback):
-        raise NotImplementedError("getDB not yet implemented")
+    def testConfig(self, test_flag, identifier,
+                   frame_start = None,\
+                   num_frames = None):
+        print "testConfig called with identifier = {},\
+                test_flag = {}, frame_start = {}, and num_frames = {}"\
+                .format(identifier,test_flag,frame_start,num_frames)
 
-    def getStatus(self, callback):
-        raise NotImplementedError("getStatus not yet implemented")
+        payload = {
+            'test_flag': test_flag,
+            'identifier': identifier,
+            'frame_start': frame_start,
+            'num_frames': num_frames
+        }
 
-    def generateDefaultConfig(self, callback):
-        raise NotImplementedError("generateDefaultConfig not yet implemented")
+        r = requests.post(self.server_addr + 'testConfig', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
 
-#FOR TESTING PURPOSES ONLY
-if __name__ == '__main__':
-    remote = CloudWizard('10.7.90.25')
-    local = CloudWizard('localhost')
-    #server = TrafficCloud_Server("/project/path/goes/ahere","localhost")
-    print remote.server_ip
-    print remote.readIds()
-    print local.server_ip
-    print local.readIds()
+
+###############################################################################
+# Analysis Functions
+###############################################################################
+
+    def analysis(self, identifier, email=None):
+        print "analysis called with identifier = {} and email = {}".format(identifier, email)
+
+        payload = {
+            'identifier': identifier,
+            'email': email
+        }
+
+        r = requests.post(self.server_addr + 'analysis', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
+    def objectTracking(self, identifier, email=None):
+        print "objectTracking called with identifier = {} and email = {}".format(identifier, email)
+
+        payload = {
+            'identifier': identifier,
+            'email': email
+        }
+
+        r = requests.post(self.server_addr + 'objectTracking', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
+    def safetyAnalysis(self, identifier, email=None):
+        print "safetyAnalysis called with identifier = {} and email = {}".format(identifier, email)
+
+        payload = {
+            'identifier': identifier,
+            'email': email
+        }
+
+        r = requests.post(self.server_addr + 'safetyAnalysis', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
+###############################################################################
+# Results Functions
+###############################################################################
+
+    def highlightVideo(self, identifier, ttc_threshold = None, vehicle_only = None):
+        print "highlightVideo called with identifier = {}, ttc_threshold = {} and vehicle_only = {}"\
+                .format(identifier, ttc_threshold, vehicle_only)
+
+        payload = {
+            'identifier': identifier,
+            'ttc_threshold': ttc_threshold,
+            'vehicle_only': vehicle_only
+        }
+
+        r = requests.post(self.server_addr + 'highlightVideo', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
+    def makeReport(self, identifier):
+        print "makeReport called with identifier = {}".format(identifier)
+
+        payload = {
+            'identifier': identifier,
+        }
+
+        r = requests.post(self.server_addr + 'makeReport', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
+    def retrieveResults(self, identifier):
+        print "retrieveResults called with identifier = {}".format(identifier)
+
+        payload = {
+            'identifier': identifier,
+        }
+        local_filename = 'highlight_video.mp4'
+        r = requests.get(self.server_addr + 'retrieveResults', data = payload, stream=True)
+        with open(local_filename, 'wb') as f:
+            print('Dumping "{0}"...'.format(local_filename))
+            for chunk in r.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
+        print file_path
+        print "Status Code: {}".format(r.status_code)
+
+    def roadUserCounts(self, identifier):
+        print "roadUserCounts called with identifier = {}".format(identifier)
+
+        payload = {
+            'identifier': identifier,
+        }
+
+        r = requests.post(self.server_addr + 'roadUserCounts', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+
+    def speedCDF(self, identifier, speed_limit = None, vehicle_only = None):
+        print "speedCDF called with identifier = {}, speed_limit = {} and vehicle_only = {}"\
+                .format(identifier, speed_limit, vehicle_only)
+
+        payload = {
+            'identifier': identifier,
+            'speed_limit': speed_limit,
+            'vehicle_only': vehicle_only
+        }
+
+        r = requests.post(self.server_addr + 'speedCDF', data = payload)
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
