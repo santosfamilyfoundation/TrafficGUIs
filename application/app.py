@@ -118,7 +118,6 @@ class MainGUI(QtGui.QMainWindow):
 ######################################################################################################
 
     def test_feature(self):
-        # TODO: Call the right route
         exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
         exists, nframes = get_config_with_sections(config_path, "config", "nframes")
         self.api.testConfig('feature',\
@@ -127,7 +126,6 @@ class MainGUI(QtGui.QMainWindow):
                             num_frames = nframes)
 
     def test_object(self):
-        # TODO: Call the right route
         exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
         exists, nframes = get_config_with_sections(config_path, "config", "nframes")
         self.api.testConfig('object',\
