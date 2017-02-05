@@ -8,11 +8,8 @@ import json
 
 from pprint import pprint
 
-def CloudWizard(ip_addr, port=8088):
-    return TrafficCloud(ip_addr, port)
-
-class TrafficCloud:
-    def __init__(self, ip_addr, port):
+class CloudWizard:
+    def __init__(self, ip_addr, port=8088):
         #TODO: Needs to be done in sync with server
         #   not a uuid creation
         #self._ids = self.readIds()
