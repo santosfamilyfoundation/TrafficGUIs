@@ -132,7 +132,7 @@ class MainGUI(QtGui.QMainWindow):
         exists, nframes = get_config_with_sections(config_path, "config", "nframes")
         self.api.testConfig('object',\
                             get_config_with_sections(get_config_path(), 'info', 'identifier'),\
-                            frame_strat = frame1,\
+                            frame_start = frame1,\
                             num_frames = nframes)
 
     # for the run button
