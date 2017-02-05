@@ -50,7 +50,7 @@ class CloudWizard:
 # Upload Functions
 ###############################################################################
 
-    def uploadVideo(self,  video_path, identifier = None,):
+    def uploadVideo(self,  video_path, identifier = None):
         print "uploadVideo called with identifier = {}".format(identifier)
         with open(video_path, 'rb') as video:
             files = {'video' : video}
