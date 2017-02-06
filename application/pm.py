@@ -43,7 +43,6 @@ class ProjectWizard(QtGui.QWizard):
 
         self.ui.newp_p2.registerField("video_path*", self.ui.newp_video_input)
         self.ui.newp_p2.registerField("video_start_datetime", self.ui.newp_video_start_time_input)
-        self.ui.newp_p2.registerField("video_fps*", self.ui.newp_video_fps_input)
 
         self.ui.newp_p2.registerField("aerial_image*", self.ui.newp_aerial_image_input)
 
@@ -161,7 +160,6 @@ class ProjectWizard(QtGui.QWizard):
         video_extension = self.videopath.split('.')[-1]
         self.config_parser.set("video", "name", 'video.'+video_extension)
         self.config_parser.set("video", "source", self.videopath)
-        self.config_parser.set("video", "framerate", str(self.ui.newp_video_fps_input.text()))
         self.config_parser.set("video", "start", video_timestamp)
 
         with open(os.path.join(get_config_path()), 'wb') as configfile:

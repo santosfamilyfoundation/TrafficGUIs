@@ -96,7 +96,7 @@
     <item>
      <widget class="QLabel" name="newp_p2_add_vido_description">
       <property name="text">
-       <string>Browse and select a video file to analyze. Please also input the date and time when the video recording began as well as the framerate of the video in frames per second.</string>
+       <string>Browse and select a video file to analyze. Please also input the date and time when the video recording began</string>
       </property>
       <property name="wordWrap">
        <bool>true</bool>
@@ -138,16 +138,6 @@
       </item>
       <item row="1" column="1">
        <widget class="QDateTimeEdit" name="newp_video_start_time_input"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="newp_video_fps_label">
-        <property name="text">
-         <string>Video framerate</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="newp_video_fps_input"/>
       </item>
      </layout>
     </item>
