@@ -431,12 +431,14 @@ class configGui_features(QtGui.QWidget):
             update_config_with_sections(config_path, "config", "min-feature-time", min_feature_time)
         else: min_feature_time = None
 
-        configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
-                    max_features_per_frame = max_nfeatures,\
-                    num_displacement_frames = ndisplacements,\
-                    min_feature_displacement = min_feature_displacement,\
-                    max_iterations_to_persist = max_number_iterations,\
-                    min_feature_frames = min_feature_time):
+        
+        # TODO: cannot call self.api.configFiles here. So uncomment this when its possible
+        # configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+        #             max_features_per_frame = max_nfeatures,\
+        #             num_displacement_frames = ndisplacements,\
+        #             min_feature_displacement = min_feature_displacement,\
+        #             max_iterations_to_persist = max_number_iterations,\
+        #             min_feature_frames = min_feature_time)
 
     def loadConfig_features(self):
         config_path = get_config_path()
@@ -547,9 +549,10 @@ class configGui_object(QtGui.QWidget):
             update_config_with_sections(config_path, "config", "mm-segmentation-distance", mm_segmentation_distance)
         else: mm_segmentation_distance = None
 
-        configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
-                    max_connection_distance = mm_connection_distance,\
-                    max_segmentation_distance = mm_segmentation_distance):
+        # TODO: cannot call self.api.configFiles here. So uncomment this when its possible
+        # configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+        #             max_connection_distance = mm_connection_distance,\
+        #             max_segmentation_distance = mm_segmentation_distance)
 
     def loadConfig_objects(self):
         config_path = get_config_path()
