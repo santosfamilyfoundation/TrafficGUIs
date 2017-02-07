@@ -245,14 +245,14 @@ class CloudWizard:
         payload = {
             'identifier': identifier,
         }
-        local_filename = 'highlight_video.mp4'
+        # TODO will be a zip shortly
+        local_filename = 'results.mp4'
         r = requests.get(self.server_addr + 'retrieveResults', data = payload, stream=True)
         with open(local_filename, 'wb') as f:
             print('Dumping "{0}"...'.format(local_filename))
             for chunk in r.iter_content(chunk_size=2048):
                 if chunk:
                     f.write(chunk)
-        print file_path
         print "Status Code: {}".format(r.status_code)
 
     def roadUserCounts(self, identifier):
