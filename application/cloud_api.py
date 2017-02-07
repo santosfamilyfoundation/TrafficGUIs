@@ -246,7 +246,7 @@ class CloudWizard:
             'identifier': identifier,
         }
         # TODO will be a zip shortly
-        local_filename = 'results.mp4'
+        local_filename = 'results.zip'
         r = requests.get(self.server_addr + 'retrieveResults', data = payload, stream=True)
         with open(local_filename, 'wb') as f:
             print('Dumping "{0}"...'.format(local_filename))
