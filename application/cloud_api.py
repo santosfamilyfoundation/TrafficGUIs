@@ -245,7 +245,7 @@ class CloudWizard:
         payload = {
             'identifier': identifier,
         }
-        local_filename = 'highlight_video.mp4'
+        local_filename = 'results.zip'
         r = requests.get(self.server_addr + 'retrieveResults', data = payload, stream=True)
         with open(local_filename, 'wb') as f:
             print('Dumping "{0}"...'.format(local_filename))
