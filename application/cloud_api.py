@@ -252,7 +252,6 @@ class CloudWizard:
             for chunk in r.iter_content(chunk_size=2048):
                 if chunk:
                     f.write(chunk)
-        print file_path
         print "Status Code: {}".format(r.status_code)
 
     def roadUserCounts(self, identifier):
