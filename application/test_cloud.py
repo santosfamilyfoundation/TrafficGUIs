@@ -96,4 +96,4 @@ if __name__ == '__main__':
     raw_input('Generating Report, please wait...\n Press Enter to Continue')
 
     remote.retrieveResults(id)
-    raw_input('Running Analysis, please wait...\n Press Enter to Continue')
+    raw_input('Retrieving Results, please wait...\n Press Enter to Continue')
