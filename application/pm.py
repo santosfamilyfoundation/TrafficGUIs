@@ -18,7 +18,7 @@ import cvutils
 import numpy as np
 
 from app_config import AppConfig as ac
-from app_config import get_project_path, get_config_path, config_section_exists, get_config_with_sections
+from app_config import get_project_path, get_config_path, config_section_exists, get_config_with_sections, update_config_with_sections
 from qt_plot import plot_results
 
 
@@ -32,6 +32,7 @@ class ProjectWizard(QtGui.QWizard):
         self.ui.newp_video_browse.clicked.connect(self.open_video)
         self.aerial_image_selected = False
         self.video_selected = False
+        self.api = parent.api
 
         self.ui.newp_start_creation.clicked.connect(self.start_create_project)
         self.config_parser = SafeConfigParser()
@@ -42,7 +43,6 @@ class ProjectWizard(QtGui.QWizard):
 
         self.ui.newp_p2.registerField("video_path*", self.ui.newp_video_input)
         self.ui.newp_p2.registerField("video_start_datetime", self.ui.newp_video_start_time_input)
-        self.ui.newp_p2.registerField("video_fps*", self.ui.newp_video_fps_input)
 
         self.ui.newp_p2.registerField("aerial_image*", self.ui.newp_aerial_image_input)
 
@@ -116,6 +116,10 @@ class ProjectWizard(QtGui.QWizard):
             video_extension = self.videopath.split('.')[-1]
             video_dest = os.path.join(pr_path, 'video.' + video_extension)
             copy(self.videopath, video_dest)
+
+            progress_msg.setText("Uploading video file...")
+            identifier = self.api.uploadVideo(self.videopath)['identifier']
+            update_config_with_sections(get_config_path(), 'info', 'identifier', identifier)
             progress_bar.setValue(80)
 
             progress_msg.setText("Extracting camera image...")
@@ -156,7 +160,6 @@ class ProjectWizard(QtGui.QWizard):
         video_extension = self.videopath.split('.')[-1]
         self.config_parser.set("video", "name", 'video.'+video_extension)
         self.config_parser.set("video", "source", self.videopath)
-        self.config_parser.set("video", "framerate", str(self.ui.newp_video_fps_input.text()))
         self.config_parser.set("video", "start", video_timestamp)
 
         with open(os.path.join(get_config_path()), 'wb') as configfile:

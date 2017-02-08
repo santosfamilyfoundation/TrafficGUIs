@@ -40,9 +40,10 @@ class MainGUI(QtGui.QMainWindow):
         super(MainGUI, self).__init__()
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
+        self.api = capi.CloudWizard('10.7.24.11')
         self.newp = pm.ProjectWizard(self)
         #self.api = capi.CloudWizard('10.7.27.225')
-        self.api = capi.CloudWizard('10.7.24.40')
+
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
@@ -75,7 +76,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.feature_tracking_video_layout.addWidget(self.feature_tracking_video_player)
 
         # config
-        self.configGui_features = configGui_features()
+        self.configGui_features = configGui_features(self.api)
         self.ui.feature_tracking_parameter_layout.addWidget(self.configGui_features)
 
         # test button
@@ -91,7 +92,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.roadusers_tracking_video_layout.addWidget(self.roadusers_tracking_video_player)
 
         # config
-        self.configGui_object = configGui_object()
+        self.configGui_object = configGui_object(self.api)
         self.ui.roadusers_tracking_parameter_layout.addWidget(self.configGui_object)
 
         # test button
@@ -117,23 +118,28 @@ class MainGUI(QtGui.QMainWindow):
 ######################################################################################################
 
     def test_feature(self):
-        # TODO: Call the right route
-        raise NotImplementedError("test_feature is not implemented")
-        pass
+        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
+        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
+        self.api.testConfig('feature',\
+                            get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+                            frame_start = frame1,\
+                            num_frames = nframes)
 
     def test_object(self):
-        # TODO: Call the right route
-        raise NotImplementedError("test_object is not implemented")
-        pass
+        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
+        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
+        self.api.testConfig('object',\
+                            get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+                            frame_start = frame1,\
+                            num_frames = nframes)
 
-# for the run button
+    # for the run button
     def run(self):
         """
         Runs TrafficIntelligence trackers and support scripts.
         """
-        # TODO: Call the right route
-        raise NotImplementedError("run is not implemented")
-        pass
+        #TODO: Make email some internal parameter.
+        remote.analysis(get_config_with_sections(get_config_path(), 'info', 'identifier'))
 
 ################################################################################################
 
@@ -214,9 +220,20 @@ class MainGUI(QtGui.QMainWindow):
         #TODO: display error message if points are < 4
         px_text = self.ui.unit_px_input.text()
         self.unitPixRatio = float(unicode(px_text))
+
+        homography_path = os.path.join(get_project_path(), "homography")
+        self.api.uploadHomography(\
+            os.path.join(homography_path, "aerial.png"),\
+            os.path.join(homography_path, "camera.png"),\
+            get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+            self.unitPixRatio,\
+            self.ui.homography_aerialview.list_points(),\
+            self.ui.homography_cameraview.list_points())
+
         self.unscaled_world_pts = (np.array(self.ui.homography_aerialview.list_points()))
         self.worldPts = self.unitPixRatio * self.unscaled_world_pts
         self.videoPts = np.array(self.ui.homography_cameraview.list_points())
+
         if len(self.worldPts) >= 4:
             if len(self.worldPts) == len(self.videoPts):
                 self.homography, self.mask = cv2.findHomography(self.videoPts, self.worldPts)
@@ -292,9 +309,10 @@ class MainGUI(QtGui.QMainWindow):
 
 class configGui_features(QtGui.QWidget):
 
-    def __init__(self):
+    def __init__(self, api):
         super(configGui_features, self).__init__()
         self.initUI()
+        self.api = api
 
     def initUI(self):
         # lbl1.move(15, 10)
@@ -392,24 +410,34 @@ class configGui_features(QtGui.QWidget):
         max_nfeatures = str(self.input3.text())
         if max_nfeatures != "":
             update_config_with_sections(config_path, "config", "max-nfeatures", max_nfeatures)
+        else: max_nfeatures = None
 
         ndisplacements = str(self.input5.text())
         if ndisplacements != "":
             update_config_with_sections(config_path, "config", "ndisplacements", ndisplacements)
+        else: ndisplacements = None
 
         min_feature_displacement = str(self.input6.text())
         if min_feature_displacement != "":
             update_config_with_sections(config_path, "config", "min-feature-displacement", min_feature_displacement)
+        else: min_feature_displacement = None
 
         max_number_iterations = str(self.input8.text())
         if max_number_iterations != "":
             update_config_with_sections(config_path, "config", "max-number-iterations", max_number_iterations)
+        else: max_number_iterations = None
 
         min_feature_time = str(self.input10.text())
         if min_feature_time != "":
             update_config_with_sections(config_path, "config", "min-feature-time", min_feature_time)
+        else: min_feature_time = None
 
-        # TODO: upload config now?
+        self.api.configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+                     max_features_per_frame = max_nfeatures,\
+                     num_displacement_frames = ndisplacements,\
+                     min_feature_displacement = min_feature_displacement,\
+                     max_iterations_to_persist = max_number_iterations,\
+                     min_feature_frames = min_feature_time)
 
     def loadConfig_features(self):
         config_path = get_config_path()
@@ -442,9 +470,10 @@ class configGui_features(QtGui.QWidget):
 
 class configGui_object(QtGui.QWidget):
 
-    def __init__(self):
+    def __init__(self, api):
         super(configGui_object, self).__init__()
         self.initUI()
+        self.api = api
 
     def initUI(self):
         # lbl1.move(15, 10)
@@ -513,12 +542,16 @@ class configGui_object(QtGui.QWidget):
         mm_connection_distance = str(self.input3.text())
         if mm_connection_distance != "":
             update_config_with_sections(config_path, "config", "mm-connection-distance", mm_connection_distance)
+        else: mm_connection_distance = None
 
         mm_segmentation_distance = str(self.input4.text())
         if mm_segmentation_distance != "":
             update_config_with_sections(config_path, "config", "mm-segmentation-distance", mm_segmentation_distance)
+        else: mm_segmentation_distance = None
 
-        # TODO: upload config now?
+        self.api.configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+                     max_connection_distance = mm_connection_distance,\
+                     max_segmentation_distance = mm_segmentation_distance)
 
     def loadConfig_objects(self):
         config_path = get_config_path()
