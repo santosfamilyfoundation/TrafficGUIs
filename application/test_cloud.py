@@ -6,6 +6,8 @@ AERIAL_PATH = 'path/to/aerial/image'
 CAMERA_PATH = 'path/to/camera/image'
 UNIT_PIXEL_RATIO = 0.05
 
+#TODO: Remove raw_input hotfix in favor of checking function call
+
 #SAMPLE POINTS PROVIDED
 AERIAL_PTS = [
             (695.7036743164062, 406.8148193359375),
@@ -34,6 +36,7 @@ if __name__ == '__main__':
     # Upload Video
     ###########################################################################
     id = remote.uploadVideo(VIDEO_PATH)['identifier']
+    raw_input('Uploading Video, please wait...\n Press Enter to Continue')
 
     ###########################################################################
     # Upload Homography
@@ -41,7 +44,7 @@ if __name__ == '__main__':
     remote.uploadHomography(\
             AERIAL_PATH, CAMERA_PATH,\
             id, UNIT_PIXEL_RATIO, AERIAL_PTS, CAMERA_PTS)
-
+    raw_input('Uploading Homography, please wait...\n Press Enter to Continue')
 
     ###########################################################################
     # Test Configs
@@ -55,13 +58,42 @@ if __name__ == '__main__':
                 min_feature_frames = 14,\
                 max_connection_distance = 0.99,\
                 max_segmentation_distance = 0.69)
-    remote.testConfig('object', id)
+    raw_input('Updating Config Files, please wait...\n Press Enter to Continue')
+
     remote.testConfig('feature', id)
+    raw_input('Testing Feature Config, please wait...\n Press Enter to Continue')
+
+    remote.testConfig('object', id)
+    raw_input('Testing object Config, please wait...\n Press Enter to Continue')
 
     ###########################################################################
-    # Run Analysis Route
+    # Run Analysis Routes
     ###########################################################################
-    remote.analysis(id,EMAIL)
+
     #remote.objectTracking(id,EMAIL)
-    #remote.safetyAnalysis(id,EMAIL)
+    #raw_input('Running Object Tracking, please wait...\n Press Enter to Continue')
 
+    #remote.safetyAnalysis(id,EMAIL)
+    #raw_input('Running Safety Analysis, please wait...\n Press Enter to Continue')    
+
+    remote.analysis(id,EMAIL)
+    raw_input('Running Analysis, please wait...\n Press Enter to Continue')
+
+    ###########################################################################
+    # Run Result Routes
+    ###########################################################################
+
+    remote.highlightVideo(id)
+    raw_input('Generating Highlight Video, please wait...\n Press Enter to Continue')
+
+    remote.roadUserCounts(id)
+    raw_input('Generating User Counts, please wait...\n Press Enter to Continue')
+
+    remote.speedCDF(id)
+    raw_input('Generating Speed CDF, please wait...\n Press Enter to Continue')
+
+    remote.makeReport(id)
+    raw_input('Generating Report, please wait...\n Press Enter to Continue')
+
+    remote.retrieveResults(id)
+    raw_input('Running Analysis, please wait...\n Press Enter to Continue')
