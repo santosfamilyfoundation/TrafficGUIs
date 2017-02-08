@@ -553,7 +553,7 @@ class configGui_object(QtGui.QWidget):
                      max_connection_distance = mm_connection_distance,\
                      max_segmentation_distance = mm_segmentation_distance)
 
-    def loaConfig_objects(self):
+    def loadConfig_objects(self):
         config_path = get_config_path()
 
         exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
