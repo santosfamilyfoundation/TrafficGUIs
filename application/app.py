@@ -76,7 +76,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.feature_tracking_video_layout.addWidget(self.feature_tracking_video_player)
 
         # config
-        self.configGui_features = configGui_features()
+        self.configGui_features = configGui_features(self.api)
         self.ui.feature_tracking_parameter_layout.addWidget(self.configGui_features)
 
         # test button
@@ -92,7 +92,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.roadusers_tracking_video_layout.addWidget(self.roadusers_tracking_video_player)
 
         # config
-        self.configGui_object = configGui_object()
+        self.configGui_object = configGui_object(self.api)
         self.ui.roadusers_tracking_parameter_layout.addWidget(self.configGui_object)
 
         # test button
@@ -309,9 +309,10 @@ class MainGUI(QtGui.QMainWindow):
 
 class configGui_features(QtGui.QWidget):
 
-    def __init__(self):
+    def __init__(self, api):
         super(configGui_features, self).__init__()
         self.initUI()
+        self.api = api
 
     def initUI(self):
         # lbl1.move(15, 10)
@@ -433,12 +434,12 @@ class configGui_features(QtGui.QWidget):
 
         
         # TODO: cannot call self.api.configFiles here. So uncomment this when its possible
-        # configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
-        #             max_features_per_frame = max_nfeatures,\
-        #             num_displacement_frames = ndisplacements,\
-        #             min_feature_displacement = min_feature_displacement,\
-        #             max_iterations_to_persist = max_number_iterations,\
-        #             min_feature_frames = min_feature_time)
+        self.api.configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+                     max_features_per_frame = max_nfeatures,\
+                     num_displacement_frames = ndisplacements,\
+                     min_feature_displacement = min_feature_displacement,\
+                     max_iterations_to_persist = max_number_iterations,\
+                     min_feature_frames = min_feature_time)
 
     def loadConfig_features(self):
         config_path = get_config_path()
@@ -471,9 +472,10 @@ class configGui_features(QtGui.QWidget):
 
 class configGui_object(QtGui.QWidget):
 
-    def __init__(self):
+    def __init__(self, api):
         super(configGui_object, self).__init__()
         self.initUI()
+        self.api = api
 
     def initUI(self):
         # lbl1.move(15, 10)
@@ -550,9 +552,9 @@ class configGui_object(QtGui.QWidget):
         else: mm_segmentation_distance = None
 
         # TODO: cannot call self.api.configFiles here. So uncomment this when its possible
-        # configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
-        #             max_connection_distance = mm_connection_distance,\
-        #             max_segmentation_distance = mm_segmentation_distance)
+        self.api.configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+                     max_connection_distance = mm_connection_distance,\
+                     max_segmentation_distance = mm_segmentation_distance)
 
     def loadConfig_objects(self):
         config_path = get_config_path()
