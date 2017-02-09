@@ -162,6 +162,15 @@ class ProjectWizard(QtGui.QWizard):
         self.config_parser.set("video", "source", self.videopath)
         self.config_parser.set("video", "start", video_timestamp)
 
+        self.config_parser.add_section("config")
+        try:
+            config = self.api.defaultConfig()
+            for (key, value) in config.iteritems():
+                self.config_parser.set("config", key, str(value))
+        except Exception as e:
+            print("Failed to get default configuration")
+            print(str(e))
+
         with open(os.path.join(get_config_path()), 'wb') as configfile:
             self.config_parser.write(configfile)
 

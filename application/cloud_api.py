@@ -169,6 +169,9 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
+    def defaultConfig(self):
+        r = requests.get(self.server_addr + 'defaultConfig')
+        return r.json()
 
 ###############################################################################
 # Analysis Functions
