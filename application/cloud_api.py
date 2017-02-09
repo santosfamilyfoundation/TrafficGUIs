@@ -4,6 +4,7 @@ import pickle
 import uuid
 import requests
 from app_config import AppConfig as ac
+from app_config import get_project_path
 import json
 
 from pprint import pprint
@@ -245,10 +246,10 @@ class CloudWizard:
         payload = {
             'identifier': identifier,
         }
-        local_filename = 'results.zip'
+        path = os.path.join(get_project_path(), 'results/results.zip')
         r = requests.get(self.server_addr + 'retrieveResults', data = payload, stream=True)
-        with open(local_filename, 'wb') as f:
-            print('Dumping "{0}"...'.format(local_filename))
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
             for chunk in r.iter_content(chunk_size=2048):
                 if chunk:
                     f.write(chunk)

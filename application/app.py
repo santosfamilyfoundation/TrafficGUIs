@@ -40,7 +40,7 @@ class MainGUI(QtGui.QMainWindow):
         super(MainGUI, self).__init__()
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
-        self.api = capi.CloudWizard('10.7.24.11')
+        self.api = capi.CloudWizard('localhost')
         self.newp = pm.ProjectWizard(self)
         #self.api = capi.CloudWizard('10.7.27.225')
 
@@ -139,7 +139,7 @@ class MainGUI(QtGui.QMainWindow):
         Runs TrafficIntelligence trackers and support scripts.
         """
         #TODO: Make email some internal parameter.
-        remote.analysis(get_config_with_sections(get_config_path(), 'info', 'identifier'))
+        self.api.analysis(get_config_with_sections(get_config_path(), 'info', 'identifier'))
 
 ################################################################################################
 
