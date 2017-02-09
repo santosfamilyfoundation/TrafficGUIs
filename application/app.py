@@ -407,36 +407,36 @@ class configGui_features(QtGui.QWidget):
         if nframes != "":
             update_config_with_sections(config_path, "config", "nframes", nframes)
 
-        max_nfeatures = str(self.input3.text())
-        if max_nfeatures != "":
-            update_config_with_sections(config_path, "config", "max-nfeatures", max_nfeatures)
-        else: max_nfeatures = None
+        max_features_per_frame = str(self.input3.text())
+        if max_features_per_frame != "":
+            update_config_with_sections(config_path, "config", "max_features_per_frame", max_features_per_frame)
+        else: max_features_per_frame = None
 
-        ndisplacements = str(self.input5.text())
-        if ndisplacements != "":
-            update_config_with_sections(config_path, "config", "ndisplacements", ndisplacements)
-        else: ndisplacements = None
+        num_displacement_frames = str(self.input5.text())
+        if num_displacement_frames != "":
+            update_config_with_sections(config_path, "config", "num_displacement_frames", num_displacement_frames)
+        else: num_displacement_frames = None
 
         min_feature_displacement = str(self.input6.text())
         if min_feature_displacement != "":
-            update_config_with_sections(config_path, "config", "min-feature-displacement", min_feature_displacement)
+            update_config_with_sections(config_path, "config", "min_feature_displacement", min_feature_displacement)
         else: min_feature_displacement = None
 
-        max_number_iterations = str(self.input8.text())
-        if max_number_iterations != "":
-            update_config_with_sections(config_path, "config", "max-number-iterations", max_number_iterations)
-        else: max_number_iterations = None
+        max_iterations_to_persist = str(self.input8.text())
+        if max_iterations_to_persist != "":
+            update_config_with_sections(config_path, "config", "max_iterations_to_persist", max_iterations_to_persist)
+        else: max_iterations_to_persist = None
 
-        min_feature_time = str(self.input10.text())
-        if min_feature_time != "":
-            update_config_with_sections(config_path, "config", "min-feature-time", min_feature_time)
-        else: min_feature_time = None
+        min_feature_frames = str(self.input10.text())
+        if min_feature_frames != "":
+            update_config_with_sections(config_path, "config", "min_feature_frames", min_feature_frames)
+        else: min_feature_frames = None
 
         self.api.configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
-                     max_features_per_frame = max_nfeatures,\
-                     num_displacement_frames = ndisplacements,\
+                     max_features_per_frame = max_features_per_frame,\
+                     num_displacement_frames = num_displacement_frames,\
                      min_feature_displacement = min_feature_displacement,\
-                     max_iterations_to_persist = max_number_iterations,\
+                     max_iterations_to_persist = max_iterations_to_persist,\
                      min_feature_frames = min_feature_time)
 
     def loadConfig_features(self):
@@ -444,26 +444,26 @@ class configGui_features(QtGui.QWidget):
 
         exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
         exists, nframes = get_config_with_sections(config_path, "config", "nframes")
-        exists, max_nfeatures = get_config_with_sections(config_path, "config", "max-nfeatures")
-        exists, ndisplacements = get_config_with_sections(config_path, "config", "ndisplacements")
-        exists, min_feature_displacement = get_config_with_sections(config_path, "config", "min-feature-displacement")
-        exists, max_number_iterations = get_config_with_sections(config_path, "config", "max-number-iterations")
-        exists, min_feature_time = get_config_with_sections(config_path, "config", "min-feature-time")
+        exists, max_features_per_frame = get_config_with_sections(config_path, "config", "max_features_per_frame")
+        exists, num_displacement_frames = get_config_with_sections(config_path, "config", "num_displacement_frames")
+        exists, min_feature_displacement = get_config_with_sections(config_path, "config", "min_feature_displacement")
+        exists, max_iterations_to_persist = get_config_with_sections(config_path, "config", "max_iterations_to_persist")
+        exists, min_feature_frames = get_config_with_sections(config_path, "config", "min_feature_frames")
 
         if frame1 != None:
             self.input1.setText(frame1)
         if nframes != None:
             self.input2.setText(nframes)
-        if max_nfeatures != None:
-            self.input3.setText(max_nfeatures)
-        if ndisplacements != None:
-            self.input5.setText(ndisplacements)
+        if max_features_per_frame != None:
+            self.input3.setText(max_features_per_frame)
+        if num_displacement_frames != None:
+            self.input5.setText(num_displacement_frames)
         if min_feature_displacement != None:
             self.input6.setText(min_feature_displacement)
-        if max_number_iterations != None:
-            self.input8.setText(max_number_iterations)
-        if min_feature_time != None:
-            self.input10.setText(min_feature_time)
+        if max_iterations_to_persist != None:
+            self.input8.setText(max_iterations_to_persist)
+        if min_feature_frames != None:
+            self.input10.setText(min_feature_frames)
 
 
 ##########################################################################################################################
@@ -539,18 +539,18 @@ class configGui_object(QtGui.QWidget):
         if nframes != "":
             update_config_with_sections(config_path, "config", "nframes", nframes)
 
-        mm_connection_distance = str(self.input3.text())
-        if mm_connection_distance != "":
-            update_config_with_sections(config_path, "config", "mm-connection-distance", mm_connection_distance)
-        else: mm_connection_distance = None
+        max_connection_distance = str(self.input3.text())
+        if max_connection_distance != "":
+            update_config_with_sections(config_path, "config", "max_connection_distance", max_connection_distance)
+        else: max_connection_distance = None
 
-        mm_segmentation_distance = str(self.input4.text())
-        if mm_segmentation_distance != "":
-            update_config_with_sections(config_path, "config", "mm-segmentation-distance", mm_segmentation_distance)
-        else: mm_segmentation_distance = None
+        max_segmentation_distance = str(self.input4.text())
+        if max_segmentation_distance != "":
+            update_config_with_sections(config_path, "config", "max_segmentation_distance", max_segmentation_distance)
+        else: max_segmentation_distance = None
 
         self.api.configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
-                     max_connection_distance = mm_connection_distance,\
+                     max_connection_distance = max_connection_distance,\
                      max_segmentation_distance = mm_segmentation_distance)
 
     def loadConfig_objects(self):
@@ -558,17 +558,17 @@ class configGui_object(QtGui.QWidget):
 
         exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
         exists, nframes = get_config_with_sections(config_path, "config", "nframes")
-        exists, mm_connection_distance = get_config_with_sections(config_path, "config", "mm-connection-distance")
-        exists, mm_segmentation_distance = get_config_with_sections(config_path, "config", "mm-segmentation-distance")
+        exists, max_connection_distance = get_config_with_sections(config_path, "config", "max_connection_distance")
+        exists, max_segmentation_distance = get_config_with_sections(config_path, "config", "max_segmentation_distance")
 
         if frame1 != None:
             self.input1.setText(frame1)
         if nframes != None:
             self.input2.setText(nframes)
-        if mm_connection_distance != None:
-            self.input3.setText(mm_connection_distance)
-        if mm_segmentation_distance != None:
-            self.input4.setText(mm_segmentation_distance)
+        if max_connection_distance != None:
+            self.input3.setText(max_connection_distance)
+        if max_segmentation_distance != None:
+            self.input4.setText(max_segmentation_distance)
 
 ##########################################################################################################################
 
