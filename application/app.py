@@ -7,7 +7,6 @@ from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 import subprocess
 
-from plotting.make_object_trajectories import main as db_make_objtraj
 
 ##############################################3
 # testing feature objects
@@ -16,7 +15,6 @@ from plotting.make_object_trajectories import main as db_make_objtraj
 ###############################################
 
 import os
-from PyQt4.phonon import Phonon
 import ConfigParser
 from PyQt4.QtGui import *
 
@@ -27,12 +25,10 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import numpy as np
-import cvutils
 from app_config import get_base_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path
 import pm
 import cloud_api as capi
 
-import qt_plot
 
 class MainGUI(QtGui.QMainWindow):
 
@@ -102,7 +98,6 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.button_roadusers_tracking_run.clicked.connect(self.run)
 
 
-        qt_plot.plot_results(self)
 ###########################################################################################################################################
         # self.ui.track_image.mousePressEvent = self.get_image_position
 
@@ -147,8 +142,6 @@ class MainGUI(QtGui.QMainWindow):
         curr_i = self.ui.main_tab_widget.currentIndex()
         new_i = curr_i + 1
         self.ui.main_tab_widget.setCurrentIndex(new_i)
-        if new_i is 3:  # If we are moving to the plots page
-           qt_plot.plot_results(self)
 
 
     def show_prev_tab(self):
