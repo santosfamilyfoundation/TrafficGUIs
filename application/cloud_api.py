@@ -17,10 +17,23 @@ class CloudWizard:
         #self.project_path = project_path
         #self._ids[self.project_path] = uuid.uuid4()
         #self._writeIds()
-        if ip_addr == 'localhost':
-            self.server_addr = 'http://127.0.0.1:{}/'.format(port)
-        else:
-            self.server_addr = 'http://{}:{}/'.format(ip_addr, port)
+        self.set_url(ip_addr, port=port)
+
+    def set_url(self, ip_addr, port=8088):
+        protocol = self.protocol_from_url_string(ip_addr)
+        if protocol == None:
+            protocol = 'http://'
+
+        (addr, p) = self.ip_and_port_from_url_string(ip_addr)
+        if addr == 'localhost':
+            addr = '127.0.0.1'
+
+        # Use port specified by string, otherwise fall back to default port
+        if p == None:
+            p = port
+
+        self.server_addr = protocol + addr + ':{}/'.format(port)
+
 
 ###############################################################################
 # ID Storage Functions
@@ -53,6 +66,7 @@ class CloudWizard:
 
     def uploadVideo(self,  video_path, identifier = None):
         print "uploadVideo called with identifier = {}".format(identifier)
+        print(self.server_addr)
         with open(video_path, 'rb') as video:
             files = {'video' : video}
             payload = {'identifier': identifier}
@@ -279,3 +293,33 @@ class CloudWizard:
         r = requests.post(self.server_addr + 'speedCDF', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
+
+
+###############################################################################
+# Helper Methods
+###############################################################################
+
+    @classmethod
+    def ip_and_port_from_url_string(cls, url):
+        # Strip protocol if exists
+        protocol = cls.protocol_from_url_string(url)
+        if protocol:
+            url = url[len(protocol):]
+
+        # Now we should only have IP:PORT
+        if ':' in url:
+            l = url.split(':')
+            return (l[0], l[1])
+        else:
+            return (url, None)
+
+    @classmethod
+    def protocol_from_url_string(cls, url):
+        protocols = ['http://', 'https://']
+        for protocol in protocols:
+            if url.startswith(protocol):
+                return protocol
+        return None
+
+# Define singleton to be used everywhere
+api = CloudWizard('localhost')
