@@ -23,19 +23,17 @@ def get_config_path():
 def get_identifier():
     config_path = get_config_path()
     if config_path:
-        identifier_exists, identifier = get_config_with_sections(config_path, "info", "identifier")
-        return identifier
+        return get_config_with_sections(config_path, "info", "identifier")
     return None
 
 def get_project_video_path():
     config_path = get_config_path()
     if config_path:
-        (success, video) = get_config_with_sections(config_path, "video", "name")
-        if success:
+        video = get_config_with_sections(config_path, "video", "name")
+        if video:
             return os.path.join(get_project_path(), video)
         else:
             print("ERR: project_video(): Couldn't get video")
-            return None
     return None
 
 def update_config_with_sections(config_path, section, option, value):
@@ -65,8 +63,8 @@ def update_config_with_sections(config_path, section, option, value):
 def get_config_with_sections(config_path, section, option):
     """
     Checks the configuration file for the specified option
-    in the specified section. If it exists, this returns (True, <value>). If it does not
-    exist, this returns (False, None).
+    in the specified section. If it exists, this returns <value>. If it does not
+    exist, this returns None.
 
     Args:
         config_path (str): Path to the config file to check
@@ -75,28 +73,26 @@ def get_config_with_sections(config_path, section, option):
     """
     if config_path == None:
         print("ERR [get_config_with_sections()]: config_path was None.")
-        return (False, None)
+        return None
     if not os.path.exists(config_path):
         print("ERR [get_config_with_sections()]: File {} does not exist.".format(config_path))
-        return (False, None)
+        return None
     cfp = SafeConfigParser()
     cfp.read(config_path)
     try:
         value = cfp.get(section, option)
     except NoSectionError:
-        print("ERR [get_config_with_sections()]: Section {} is not available in {}.".format(section, config_path))
-        return (False, None)
+        return None
     except NoOptionError:
-        print("Option {} is not available in {}.".format(option, config_path))
-        return (False, None)
+        return None
     else:
-        return (True, value)
+        return value
 
 def get_config_section(config_path, section):
     """
     Checks the configuration file for the specified option
-    in the specified section. If it exists, this returns (True, dict_of_data). If it does not
-    exist, this returns (False, None).
+    in the specified section. If it exists, this returns dict_of_data. If it does not
+    exist, this returns None.
 
     Args:
         config_path (str): Path to the config file to check
@@ -104,19 +100,19 @@ def get_config_section(config_path, section):
     """
     if not os.path.exists(config_path):
         print("ERR [get_config_section()]: File {} does not exist.".format(config_path))
-        return (False, None)
+        return None
     cfp = SafeConfigParser()
     cfp.read(config_path)
     try:
         tuples = cfp.items(section)
     except NoSectionError:
         print("ERR [get_config_section()]: Section {} is not available in {}.".format(section, config_path))
-        return (False, None)
+        return None
     else:
         d = {}
         for (key, value) in tuples:
             d[key] = value
-        return (True, d)
+        return d
 
 
 def config_section_exists(config_path, section):

@@ -214,8 +214,8 @@ def load_homography(main_window):
     # Has a homography been previously computed?
     if config_section_exists(get_config_path(), "homography"):  # If we can load homography unit-pix ratio load it
         # load unit-pixel ratio
-        upr_exists, upr = get_config_with_sections(get_config_path(), "homography", "unitpixelratio")
-        if upr_exists:
+        upr = get_config_with_sections(get_config_path(), "homography", "unitpixelratio")
+        if upr:
             gui.unit_px_input.setText(upr)
     if os.path.exists(corr_path):  # If points have been previously selected
         worldPts, videoPts = cvutils.loadPointCorrespondences(corr_path)
@@ -235,8 +235,8 @@ def load_homography(main_window):
         print ("{} does not exist. No points loaded.".format(corr_path))
 
 def update_api():
-    exists, addr = get_config_with_sections(get_config_path(), "info", "server")
-    if exists:
+    addr = get_config_with_sections(get_config_path(), "info", "server")
+    if addr:
         api.set_url(addr)
     else:
         print("No server, resorting to localhost")

@@ -115,18 +115,18 @@ class MainGUI(QtGui.QMainWindow):
 ######################################################################################################
 
     def test_feature(self):
-        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
-        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
+        frame1 = get_config_with_sections(config_path, "config", "frame1")
+        nframes = get_config_with_sections(config_path, "config", "nframes")
         api.testConfig('feature',\
-                            get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+                            get_identifier(),\
                             frame_start = frame1,\
                             num_frames = nframes)
 
     def test_object(self):
-        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
-        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
+        frame1 = get_config_with_sections(config_path, "config", "frame1")
+        nframes = get_config_with_sections(config_path, "config", "nframes")
         api.testConfig('object',\
-                            get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+                            get_identifier(),\
                             frame_start = frame1,\
                             num_frames = nframes)
 
@@ -135,9 +135,8 @@ class MainGUI(QtGui.QMainWindow):
         """
         Runs TrafficIntelligence trackers and support scripts.
         """
-        email_exists, email = get_config_with_sections(get_config_path(), 'info', 'identifier')
-        identifier_exists, identifier = get_config_with_sections(get_config_path(), 'info', 'identifier')
-        api.analysis(identifier, email=email)
+        email = get_config_with_sections(get_config_path(), 'info', 'email')
+        api.analysis(get_identifier(), email=email)
 
 ################################################################################################
 
@@ -223,7 +222,7 @@ class MainGUI(QtGui.QMainWindow):
         api.uploadHomography(\
             os.path.join(homography_path, "aerial.png"),\
             os.path.join(homography_path, "camera.png"),\
-            get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+            get_identifier(),\
             self.unitPixRatio,\
             self.ui.homography_aerialview.list_points(),\
             self.ui.homography_cameraview.list_points())
@@ -429,7 +428,7 @@ class configGui_features(QtGui.QWidget):
             update_config_with_sections(config_path, "config", "min-feature-time", min_feature_time)
         else: min_feature_time = None
 
-        api.configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+        api.configFiles(get_identifier(),\
                      max_features_per_frame = max_nfeatures,\
                      num_displacement_frames = ndisplacements,\
                      min_feature_displacement = min_feature_displacement,\
@@ -439,13 +438,13 @@ class configGui_features(QtGui.QWidget):
     def loadConfig_features(self):
         config_path = get_config_path()
 
-        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
-        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
-        exists, max_nfeatures = get_config_with_sections(config_path, "config", "max-nfeatures")
-        exists, ndisplacements = get_config_with_sections(config_path, "config", "ndisplacements")
-        exists, min_feature_displacement = get_config_with_sections(config_path, "config", "min-feature-displacement")
-        exists, max_number_iterations = get_config_with_sections(config_path, "config", "max-number-iterations")
-        exists, min_feature_time = get_config_with_sections(config_path, "config", "min-feature-time")
+        frame1 = get_config_with_sections(config_path, "config", "frame1")
+        nframes = get_config_with_sections(config_path, "config", "nframes")
+        max_nfeatures = get_config_with_sections(config_path, "config", "max-nfeatures")
+        ndisplacements = get_config_with_sections(config_path, "config", "ndisplacements")
+        min_feature_displacement = get_config_with_sections(config_path, "config", "min-feature-displacement")
+        max_number_iterations = get_config_with_sections(config_path, "config", "max-number-iterations")
+        min_feature_time = get_config_with_sections(config_path, "config", "min-feature-time")
 
         if frame1 != None:
             self.input1.setText(frame1)
@@ -545,17 +544,17 @@ class configGui_object(QtGui.QWidget):
             update_config_with_sections(config_path, "config", "mm-segmentation-distance", mm_segmentation_distance)
         else: mm_segmentation_distance = None
 
-        api.configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+        api.configFiles(get_identifier(),\
                      max_connection_distance = mm_connection_distance,\
                      max_segmentation_distance = mm_segmentation_distance)
 
     def loadConfig_objects(self):
         config_path = get_config_path()
 
-        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
-        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
-        exists, mm_connection_distance = get_config_with_sections(config_path, "config", "mm-connection-distance")
-        exists, mm_segmentation_distance = get_config_with_sections(config_path, "config", "mm-segmentation-distance")
+        frame1 = get_config_with_sections(config_path, "config", "frame1")
+        nframes = get_config_with_sections(config_path, "config", "nframes")
+        mm_connection_distance = get_config_with_sections(config_path, "config", "mm-connection-distance")
+        mm_segmentation_distance = get_config_with_sections(config_path, "config", "mm-segmentation-distance")
 
         if frame1 != None:
             self.input1.setText(frame1)
