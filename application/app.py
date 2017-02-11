@@ -28,7 +28,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import numpy as np
 import cvutils
-from app_config import get_base_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path
+from app_config import get_base_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path, get_identifier
 import pm
 from cloud_api import api
 
@@ -115,16 +115,16 @@ class MainGUI(QtGui.QMainWindow):
 ######################################################################################################
 
     def test_feature(self):
-        frame1 = get_config_with_sections(config_path, "config", "frame1")
-        nframes = get_config_with_sections(config_path, "config", "nframes")
+        frame1 = get_config_with_sections(get_config_path(), "config", "frame1")
+        nframes = get_config_with_sections(get_config_path(), "config", "nframes")
         api.testConfig('feature',\
                             get_identifier(),\
                             frame_start = frame1,\
                             num_frames = nframes)
 
     def test_object(self):
-        frame1 = get_config_with_sections(config_path, "config", "frame1")
-        nframes = get_config_with_sections(config_path, "config", "nframes")
+        frame1 = get_config_with_sections(get_config_path(), "config", "frame1")
+        nframes = get_config_with_sections(get_config_path(), "config", "nframes")
         api.testConfig('object',\
                             get_identifier(),\
                             frame_start = frame1,\
