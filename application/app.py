@@ -73,7 +73,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.feature_tracking_video_layout.addWidget(self.feature_tracking_video_player)
 
         # config
-        self.configGui_features = configGui_features(self)
+        self.configGui_features = configGui_features()
         self.ui.feature_tracking_parameter_layout.addWidget(self.configGui_features)
 
         # test button
@@ -89,7 +89,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.roadusers_tracking_video_layout.addWidget(self.roadusers_tracking_video_player)
 
         # config
-        self.configGui_object = configGui_object(self)
+        self.configGui_object = configGui_object()
         self.ui.roadusers_tracking_parameter_layout.addWidget(self.configGui_object)
 
         # test button
@@ -306,8 +306,8 @@ class MainGUI(QtGui.QMainWindow):
 
 class configGui_features(QtGui.QWidget):
 
-    def __init__(self, parent=None):
-        super(configGui_features, self).__init__(parent)
+    def __init__(self):
+        super(configGui_features, self).__init__()
         self.initUI()
 
     def initUI(self):
@@ -466,8 +466,8 @@ class configGui_features(QtGui.QWidget):
 
 class configGui_object(QtGui.QWidget):
 
-    def __init__(self, parent=None):
-        super(configGui_object, self).__init__(parent)
+    def __init__(self):
+        super(configGui_object, self).__init__()
         self.initUI()
 
     def initUI(self):
