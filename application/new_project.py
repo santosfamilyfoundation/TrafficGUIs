@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'new_project.ui'
 #
-# Created: Thu Apr  7 07:08:52 2016
-#      by: PyQt4 UI code generator 4.10.4
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -101,12 +100,18 @@ class Ui_create_new_project(object):
         self.newp_video_start_time_input = QtGui.QDateTimeEdit(self.newp_p2)
         self.newp_video_start_time_input.setObjectName(_fromUtf8("newp_video_start_time_input"))
         self.newp_p2_video_layout.setWidget(1, QtGui.QFormLayout.FieldRole, self.newp_video_start_time_input)
-        self.newp_video_fps_label = QtGui.QLabel(self.newp_p2)
-        self.newp_video_fps_label.setObjectName(_fromUtf8("newp_video_fps_label"))
-        self.newp_p2_video_layout.setWidget(2, QtGui.QFormLayout.LabelRole, self.newp_video_fps_label)
-        self.newp_video_fps_input = QtGui.QLineEdit(self.newp_p2)
-        self.newp_video_fps_input.setObjectName(_fromUtf8("newp_video_fps_input"))
-        self.newp_p2_video_layout.setWidget(2, QtGui.QFormLayout.FieldRole, self.newp_video_fps_input)
+        self.newp_video_server_label = QtGui.QLabel(self.newp_p2)
+        self.newp_video_server_label.setObjectName(_fromUtf8("newp_video_server_label"))
+        self.newp_p2_video_layout.setWidget(2, QtGui.QFormLayout.LabelRole, self.newp_video_server_label)
+        self.newp_video_server_input = QtGui.QLineEdit(self.newp_p2)
+        self.newp_video_server_input.setObjectName(_fromUtf8("newp_video_server_input"))
+        self.newp_p2_video_layout.setWidget(2, QtGui.QFormLayout.FieldRole, self.newp_video_server_input)
+        self.newp_video_email_label = QtGui.QLabel(self.newp_p2)
+        self.newp_video_email_label.setObjectName(_fromUtf8("newp_video_email_label"))
+        self.newp_p2_video_layout.setWidget(3, QtGui.QFormLayout.LabelRole, self.newp_video_email_label)
+        self.newp_video_email_input = QtGui.QLineEdit(self.newp_p2)
+        self.newp_video_email_input.setObjectName(_fromUtf8("newp_video_email_input"))
+        self.newp_p2_video_layout.setWidget(3, QtGui.QFormLayout.FieldRole, self.newp_video_email_input)
         self.verticalLayout_2.addLayout(self.newp_p2_video_layout)
         self.newp_add_aerial_image_title = QtGui.QLabel(self.newp_p2)
         font = QtGui.QFont()
@@ -175,11 +180,12 @@ class Ui_create_new_project(object):
         self.newp_p1_title.setText(_translate("create_new_project", "New Safety Project", None))
         self.newp_projectname_label.setText(_translate("create_new_project", "Project Name", None))
         self.newp_p2_add_video_title.setText(_translate("create_new_project", "Add project video", None))
-        self.newp_p2_add_vido_description.setText(_translate("create_new_project", "Browse and select a video file to analyze. Please also input the date and time when the video recording began as well as the framerate of the video in frames per second.", None))
+        self.newp_p2_add_vido_description.setText(_translate("create_new_project", "Browse and select a video file to analyze. Please input the time when the video recording occurred. You may optionally enter an email that should be notified when long-running analysis is finished. You should also enter the IP address or URL of the server that should be used for analysis.", None))
         self.newp_video_label.setText(_translate("create_new_project", "Selected video", None))
         self.newp_video_browse.setText(_translate("create_new_project", "Browse...", None))
         self.newp_video_start_time_label.setText(_translate("create_new_project", "Recording start time", None))
-        self.newp_video_fps_label.setText(_translate("create_new_project", "Video framerate", None))
+        self.newp_video_server_label.setText(_translate("create_new_project", "Server IP or URL", None))
+        self.newp_video_email_label.setText(_translate("create_new_project", "Email", None))
         self.newp_add_aerial_image_title.setText(_translate("create_new_project", "Add aerial image", None))
         self.newp_p2_add_aerial_image_description.setText(_translate("create_new_project", "Browse and select an aerial image of the video\'s target. ", None))
         self.newp_aerial_image_label.setText(_translate("create_new_project", "Aerial image", None))
