@@ -63,9 +63,12 @@ class CloudWizard:
         print "Response Text: {}".format(r.text)
         print "Response JSON: {}".format(r.json())
         return r.json()['identifier']
-        #TO-DO: Add returned identifier to internal storage
-
-    def uploadHomography(self,
+        
+###############################################################################
+# Configuration Functions
+###############################################################################
+    
+    def configHomography(self,
                             identifier,\
                             up_ratio,\
                             aerial_pts,\
@@ -81,10 +84,6 @@ class CloudWizard:
             self.server_addr + 'configHomography', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-
-###############################################################################
-# Configuration Functions
-###############################################################################
 
     def configFiles(self, identifier,
                     max_features_per_frame = None,\
