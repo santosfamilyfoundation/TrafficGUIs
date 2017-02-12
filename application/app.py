@@ -221,8 +221,6 @@ class MainGUI(QtGui.QMainWindow):
 
         homography_path = os.path.join(get_project_path(), "homography")
         api.uploadHomography(\
-            os.path.join(homography_path, "aerial.png"),\
-            os.path.join(homography_path, "camera.png"),\
             get_identifier(),\
             self.unitPixRatio,\
             self.ui.homography_aerialview.list_points(),\
