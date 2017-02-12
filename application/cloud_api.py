@@ -223,6 +223,7 @@ class CloudWizard:
 
         r = requests.post(self.server_addr + 'status', data = payload)
         status_dict = r.json()
+        status_dict = {k:int(v) for (k,v) in status_dict.iteritems()}
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         return status_dict
