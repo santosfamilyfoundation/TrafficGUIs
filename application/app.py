@@ -220,7 +220,7 @@ class MainGUI(QtGui.QMainWindow):
         self.unitPixRatio = float(unicode(px_text))
 
         homography_path = os.path.join(get_project_path(), "homography")
-        api.uploadHomography(\
+        api.configHomography(\
             get_identifier(),\
             self.unitPixRatio,\
             self.ui.homography_aerialview.list_points(),\
@@ -555,7 +555,7 @@ class configGui_object(QtGui.QWidget):
         num_frames = get_config_with_sections(config_path, "config", "num_frames")
         max_connection_distance = get_config_with_sections(config_path, "config", "max_connection_distance")
         max_segmentation_distance = get_config_with_sections(config_path, "config", "max_segmentation_distance")
-        
+
         if frame_start != None:
             self.input1.setText(frame_start)
         if num_frames != None:
