@@ -214,6 +214,19 @@ class CloudWizard:
 # Results Functions
 ###############################################################################
 
+    def results(self, identifier, ttc_threshold = None, vehicle_only = None, speed_limit = None):
+        print "results called with identifier = {}, ttc_threshold = {}, vehicle_only = {}, and speed_limit= {}"\
+                .format(identifier, ttc_threshold, vehicle_only, speed_limit)
+
+        # sync calls 
+        self.roadUserCounts(identifier)
+        self.speedCDF(identifier, speed_limit, vehicle_only)
+       
+        self.makeReport(identifier)
+
+        # async calls
+        self.highlightVideo(identifier, ttc_threshold, vehicle_only)
+
     def highlightVideo(self, identifier, ttc_threshold = None, vehicle_only = None):
         print "highlightVideo called with identifier = {}, ttc_threshold = {} and vehicle_only = {}"\
                 .format(identifier, ttc_threshold, vehicle_only)

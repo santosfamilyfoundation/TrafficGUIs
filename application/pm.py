@@ -1,4 +1,4 @@
-
+"""
 Project management classes and functions
 """
 
@@ -174,8 +174,9 @@ def load_project(project_name, main_window):
 
 def loadPointCorrespondences(filename):
     '''Loads and returns the corresponding points in world (first 2 lines) and image spaces (last 2 lines)'''
-    points = np.loadtxt(filename, dtype=float32)
+    points = np.loadtxt(filename, dtype=np.float32)
     return  (points[:2,:].T, points[2:,:].T) # (world points, image points)
+
 def load_homography(main_window):
     """
     Loads homography information into the specified main window.
