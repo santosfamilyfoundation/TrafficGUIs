@@ -39,10 +39,10 @@ if __name__ == '__main__':
     raw_input('Uploading Video, please wait...\n Press Enter to Continue')
 
     ###########################################################################
-    # Upload Homography
+    # Configure Homography
     ###########################################################################
-    remote.uploadHomography(identifier, UNIT_PIXEL_RATIO, AERIAL_PTS, CAMERA_PTS)
-    raw_input('Uploading Homography, please wait...\n Press Enter to Continue')
+    remote.configHomography(identifier, UNIT_PIXEL_RATIO, AERIAL_PTS, CAMERA_PTS)
+    raw_input('Configuring Homography, please wait...\n Press Enter to Continue')
 
     ###########################################################################
     # Test Configs
