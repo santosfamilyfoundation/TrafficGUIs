@@ -222,7 +222,7 @@ class MainGUI(QtGui.QMainWindow):
         self.unitPixRatio = float(unicode(px_text))
 
         homography_path = os.path.join(get_project_path(), "homography")
-        self.api.uploadHomography(\
+        self.api.configHomography(\
             get_config_with_sections(get_config_path(), 'info', 'identifier'),\
             self.unitPixRatio,\
             self.ui.homography_aerialview.list_points(),\
