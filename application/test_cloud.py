@@ -8,7 +8,7 @@ UNIT_PIXEL_RATIO = 0.05
 
 #SAMPLE POINTS PROVIDED
 AERIAL_PTS = [
-            (1002.2857055664062, 388.0), 
+            (1002.2857055664062, 388.0),
             (864.7857055664062, 575.5),
             (1061.2142333984375, 389.78570556640625),
             (1036.2142333984375, 291.5714416503906),
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     ###########################################################################
     # Test Configs
     ###########################################################################
- 
+
     remote.configFiles(identifier,\
                 max_features_per_frame = 1001,\
                 num_displacement_frames = 11,\
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     #raw_input('Running Object Tracking, please wait...\n Press Enter to Continue')
 
     #remote.safetyAnalysis(identifier,EMAIL)
-    #raw_input('Running Safety Analysis, please wait...\n Press Enter to Continue')    
+    #raw_input('Running Safety Analysis, please wait...\n Press Enter to Continue')
 
     remote.analysis(identifier,EMAIL)
     raw_input('Running Analysis, please wait...\n Press Enter to Continue')

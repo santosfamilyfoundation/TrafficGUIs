@@ -6,6 +6,7 @@ import requests
 from app_config import AppConfig as ac
 from app_config import get_project_path
 import json
+from threading import Timer
 
 from pprint import pprint
 
@@ -135,7 +136,7 @@ class CloudWizard:
                 .format(identifier,test_flag,frame_start,num_frames)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["upload_homography"] != 2:
+        if status_dict["config_homography"] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -162,7 +163,7 @@ class CloudWizard:
         print "analysis called with identifier = {} and email = {}".format(identifier, email)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["upload_homography"] != 2:
+        if status_dict["config_homography"] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -179,7 +180,7 @@ class CloudWizard:
         print "objectTracking called with identifier = {} and email = {}".format(identifier, email)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["upload_homography"] != 2:
+        if status_dict["config_homography"] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -195,7 +196,7 @@ class CloudWizard:
         print "safetyAnalysis called with identifier = {} and email = {}".format(identifier, email)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["upload_homography"] != 2:
+        if status_dict["config_homography"] != 2:
             print "Check your homography and upload (again)."
             return
         elif status_dict["object_tracking"] != 2:
@@ -237,7 +238,7 @@ class CloudWizard:
                 .format(identifier, ttc_threshold, vehicle_only)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["upload_homography"] != 2:
+        if status_dict["config_homography"] != 2:
             print "Check your homography and upload (again)."
             return
         elif status_dict["object_tracking"] != 2:
@@ -309,6 +310,7 @@ class CloudWizard:
         print "Response Text: {}".format(r.text)
 
 
+
 ###############################################################################
 # Helper Methods
 ###############################################################################
@@ -337,3 +339,54 @@ class CloudWizard:
 
 # Define singleton to be used everywhere
 api = CloudWizard('localhost')
+
+###############################################################################
+# Poll for Status with Callback
+###############################################################################
+
+class StatusPoller(object):
+    def __init__(self, identifier, status_name, interval, callback):
+        self._timer = None
+        self.identifier = identifier
+        self.status_name = status_name
+        self.interval = interval
+        self.callback = callback
+        self.is_running = False
+        self.has_run = False
+
+    def _run(self):
+        print('run')
+        self.is_running = False
+        self.start()
+
+        self._poll_for_status()
+
+    def _poll_for_status(self):
+        status_dict = api.getProjectStatus(self.identifier)
+
+        if self.status_name not in status_dict.keys():
+            print(self.status_name + ' not in status dictionary')
+        elif status_dict[self.status_name] == 2:
+            self.callback()
+            self.stop()
+        elif status_dict[self.status_name] == 1:
+            print(self.status_name + ' is still running')
+        else:
+            print(self.status_name + ' is not running, not continuing to poll for status')
+            self.stop()
+
+    def start(self):
+        if not self.is_running:
+            # If it's the first time, run it immediately
+            if not self.has_run:
+                self._timer = Timer(0, self._run)
+                self.has_run = True
+            else:
+                self._timer = Timer(self.interval, self._run)
+            self._timer.start()
+            self.is_running = True
+
+    def stop(self):
+        self._timer.cancel()
+        self.is_running = False
+
