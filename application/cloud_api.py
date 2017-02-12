@@ -78,7 +78,7 @@ class CloudWizard:
         }
 
         r = requests.post(\
-            self.server_addr + 'uploadHomography', data = payload)
+            self.server_addr + 'configHomography', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
