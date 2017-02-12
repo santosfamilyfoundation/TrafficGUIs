@@ -62,20 +62,14 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         print "Response JSON: {}".format(r.json())
-        return r.json()
+        return r.json()['identifier']
         #TO-DO: Add returned identifier to internal storage
 
     def uploadHomography(self,
-                            aerial_path,\
-                            camera_path,\
                             identifier,\
                             up_ratio,\
                             aerial_pts,\
                             camera_pts):
-        files = {
-            'aerial': open(aerial_path, 'rb'),
-            'camera': open(camera_path, 'rb'),
-        }
         payload = {
             'identifier': identifier,
             'unit_pixel_ratio': up_ratio,
@@ -84,40 +78,9 @@ class CloudWizard:
         }
 
         r = requests.post(\
-            self.server_addr + 'uploadHomography',\
-            data = payload, files = files)
+            self.server_addr + 'uploadHomography', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-
-    def uploadFiles(self):
-        print "uploadFiles called"
-        project_name = ac.CURRENT_PROJECT_PATH.strip('/').split('/')[-1]
-        homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
-
-        video_extn = ac.CURRENT_PROJECT_VIDEO_PATH.split('.')[-1]
-        print ac.CURRENT_PROJECT_VIDEO_PATH
-
-        with open(os.path.join(homography_path, "aerial.png"), 'rb') as hg_aerial,\
-             open(os.path.join(homography_path, "camera.png"), 'rb') as hg_camera,\
-             open(os.path.join(homography_path, "homography.txt"), 'rb') as hg_txt,\
-             open(os.path.join(ac.CURRENT_PROJECT_PATH, project_name  + ".cfg"), 'rb') as cfg_prname,\
-             open(os.path.join(ac.CURRENT_PROJECT_PATH, "tracking.cfg"), 'rb') as cfg_track,\
-             open(os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_object/object_tracking.cfg"), 'rb') as test_obj,\
-             open(os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_feature/feature_tracking.cfg"), 'rb') as test_track,\
-             open(ac.CURRENT_PROJECT_VIDEO_PATH, 'rb') as video:
-
-            files = {
-                'homography/aerial.png': hg_aerial,
-                'homography/camera.png': hg_camera,
-                'homography/homography.txt': hg_txt,
-                'project_name.cfg': cfg_prname,
-                'tracking.cfg': cfg_track,
-                '.temp/test/test_object/object_tracking.cfg': test_obj,
-                '.temp/test/test_feature/feature_tracking.cfg': test_track,
-                'video.%s'%video_extn : video
-            }
-            r = requests.post(self.server_addr+'upload',files = files)
-            print r.text;
 
 ###############################################################################
 # Configuration Functions

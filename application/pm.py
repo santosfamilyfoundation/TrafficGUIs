@@ -118,7 +118,7 @@ class ProjectWizard(QtGui.QWizard):
             copy(self.videopath, video_dest)
 
             progress_msg.setText("Uploading video file...")
-            identifier = self.api.uploadVideo(self.videopath)['identifier']
+            identifier = self.api.uploadVideo(self.videopath)
             update_config_with_sections(get_config_path(), 'info', 'identifier', identifier)
             progress_bar.setValue(80)
 
