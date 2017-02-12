@@ -25,9 +25,10 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import numpy as np
-from app_config import get_base_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path
+from app_config import get_base_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path, get_identifier
+
 import pm
-import cloud_api as capi
+from cloud_api import api
 
 cvBlue = (0,0,255)
 cvRed = (255,0,0)
@@ -38,11 +39,7 @@ class MainGUI(QtGui.QMainWindow):
         super(MainGUI, self).__init__()
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
-        # self.api = capi.CloudWizard('10.7.24.11')
-        self.api = capi.CloudWizard('localhost')
         self.newp = pm.ProjectWizard(self)
-        #self.api = capi.CloudWizard('10.7.27.225')
-
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
@@ -75,7 +72,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.feature_tracking_video_layout.addWidget(self.feature_tracking_video_player)
 
         # config
-        self.configGui_features = configGui_features(self.api)
+        self.configGui_features = configGui_features()
         self.ui.feature_tracking_parameter_layout.addWidget(self.configGui_features)
 
         # test button
@@ -91,7 +88,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.roadusers_tracking_video_layout.addWidget(self.roadusers_tracking_video_player)
 
         # config
-        self.configGui_object = configGui_object(self.api)
+        self.configGui_object = configGui_object()
         self.ui.roadusers_tracking_parameter_layout.addWidget(self.configGui_object)
 
         # test button
@@ -119,28 +116,29 @@ class MainGUI(QtGui.QMainWindow):
 ######################################################################################################
 
     def test_feature(self):
-        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
-        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
-        self.api.testConfig('feature',\
-                            get_config_with_sections(get_config_path(), 'info', 'identifier'),\
-                            frame_start = frame1,\
-                            num_frames = nframes)
+        frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
+        num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
+        api.testConfig('feature',\
+                            get_identifier(),\
+                            frame_start = frame_start,\
+                            num_frames = num_frames)
 
     def test_object(self):
-        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
-        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
-        self.api.testConfig('object',\
-                            get_config_with_sections(get_config_path(), 'info', 'identifier'),\
-                            frame_start = frame1,\
-                            num_frames = nframes)
+        frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
+        num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
+        api.testConfig('object',\
+                            get_identifier(),\
+                            frame_start = frame_start,\
+                            num_frames = num_frames)
+
 
     # for the runAnalysis button
     def runAnalysis(self):
         """
         Runs TrafficIntelligence trackers and support scripts.
         """
-        #TODO: Make email some internal parameter.
-        self.api.analysis(get_config_with_sections(get_config_path(), 'info', 'identifier'))
+        email = get_config_with_sections(get_config_path(), 'info', 'email')
+        api.analysis(get_identifier(), email=email)
 
     def runResults(self):
         """Runs server methods that generate safety metric results and visualizations"""
@@ -148,7 +146,7 @@ class MainGUI(QtGui.QMainWindow):
         ttc_threshold = self.ui.timeToCollisionLineEdit.text()
         vehicle_only = self.ui.vehiclesOnlyCheckBox.isChecked()
         speed_limit = self.ui.speedLimitLineEdit.text()
-        self.api.results(identifier, ttc_threshold, vehicle_only, speed_limit)
+        api.results(identifier, ttc_threshold, vehicle_only, speed_limit)
 
 ################################################################################################
 
@@ -229,10 +227,8 @@ class MainGUI(QtGui.QMainWindow):
         self.unitPixRatio = float(unicode(px_text))
 
         homography_path = os.path.join(get_project_path(), "homography")
-        self.api.uploadHomography(\
-            os.path.join(homography_path, "aerial.png"),\
-            os.path.join(homography_path, "camera.png"),\
-            get_config_with_sections(get_config_path(), 'info', 'identifier'),\
+        api.configHomography(\
+            get_identifier(),\
             self.unitPixRatio,\
             self.ui.homography_aerialview.list_points(),\
             self.ui.homography_cameraview.list_points())
@@ -316,10 +312,9 @@ class MainGUI(QtGui.QMainWindow):
 
 class configGui_features(QtGui.QWidget):
 
-    def __init__(self, api):
+    def __init__(self):
         super(configGui_features, self).__init__()
         self.initUI()
-        self.api = api
 
     def initUI(self):
         # lbl1.move(15, 10)
@@ -406,81 +401,81 @@ class configGui_features(QtGui.QWidget):
         """
         config_path = get_config_path()
 
-        frame1 = str(self.input1.text())
-        if frame1 != "":
-            update_config_with_sections(config_path, "config", "frame1", frame1)
+        frame_start = str(self.input1.text())
+        if frame_start != "":
+            update_config_with_sections(config_path, "config", "frame_start", frame_start)
 
-        nframes = str(self.input2.text())
-        if nframes != "":
-            update_config_with_sections(config_path, "config", "nframes", nframes)
+        num_frames = str(self.input2.text())
+        if num_frames != "":
+            update_config_with_sections(config_path, "config", "num_frames", num_frames)
 
-        max_nfeatures = str(self.input3.text())
-        if max_nfeatures != "":
-            update_config_with_sections(config_path, "config", "max-nfeatures", max_nfeatures)
-        else: max_nfeatures = None
+        max_features_per_frame = str(self.input3.text())
+        if max_features_per_frame != "":
+            update_config_with_sections(config_path, "config", "max_features_per_frame", max_features_per_frame)
+        else: max_features_per_frame = None
 
-        ndisplacements = str(self.input5.text())
-        if ndisplacements != "":
-            update_config_with_sections(config_path, "config", "ndisplacements", ndisplacements)
-        else: ndisplacements = None
+        num_displacement_frames = str(self.input5.text())
+        if num_displacement_frames != "":
+            update_config_with_sections(config_path, "config", "num_displacement_frames", num_displacement_frames)
+        else: num_displacement_frames = None
 
         min_feature_displacement = str(self.input6.text())
         if min_feature_displacement != "":
-            update_config_with_sections(config_path, "config", "min-feature-displacement", min_feature_displacement)
+            update_config_with_sections(config_path, "config", "min_feature_displacement", min_feature_displacement)
         else: min_feature_displacement = None
 
-        max_number_iterations = str(self.input8.text())
-        if max_number_iterations != "":
-            update_config_with_sections(config_path, "config", "max-number-iterations", max_number_iterations)
-        else: max_number_iterations = None
+        max_iterations_to_persist = str(self.input8.text())
+        if max_iterations_to_persist != "":
+            update_config_with_sections(config_path, "config", "max_iterations_to_persist", max_iterations_to_persist)
+        else: max_iterations_to_persist = None
 
-        min_feature_time = str(self.input10.text())
-        if min_feature_time != "":
-            update_config_with_sections(config_path, "config", "min-feature-time", min_feature_time)
-        else: min_feature_time = None
+        min_feature_frames = str(self.input10.text())
+        if min_feature_frames != "":
+            update_config_with_sections(config_path, "config", "min_feature_frames", min_feature_frames)
+        else: min_feature_frames = None
 
-        self.api.configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
-                     max_features_per_frame = max_nfeatures,\
-                     num_displacement_frames = ndisplacements,\
+
+        api.configFiles(get_identifier(),\
+                     max_features_per_frame = max_features_per_frame,\
+                     num_displacement_frames = num_displacement_frames,\
                      min_feature_displacement = min_feature_displacement,\
-                     max_iterations_to_persist = max_number_iterations,\
-                     min_feature_frames = min_feature_time)
+                     max_iterations_to_persist = max_iterations_to_persist,\
+                     min_feature_frames = min_feature_frames)
 
     def loadConfig_features(self):
         config_path = get_config_path()
 
-        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
-        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
-        exists, max_nfeatures = get_config_with_sections(config_path, "config", "max-nfeatures")
-        exists, ndisplacements = get_config_with_sections(config_path, "config", "ndisplacements")
-        exists, min_feature_displacement = get_config_with_sections(config_path, "config", "min-feature-displacement")
-        exists, max_number_iterations = get_config_with_sections(config_path, "config", "max-number-iterations")
-        exists, min_feature_time = get_config_with_sections(config_path, "config", "min-feature-time")
+        frame_start = get_config_with_sections(config_path, "config", "frame_start")
+        num_frames = get_config_with_sections(config_path, "config", "num_frames")
+        max_features_per_frame = get_config_with_sections(config_path, "config", "max_features_per_frame")
+        num_displacement_frames = get_config_with_sections(config_path, "config", "num_displacement_frames")
+        min_feature_displacement = get_config_with_sections(config_path, "config", "min_feature_displacement")
+        max_iterations_to_persist = get_config_with_sections(config_path, "config", "max_iterations_to_persist")
+        min_feature_frames = get_config_with_sections(config_path, "config", "min_feature_frames")
 
-        if frame1 != None:
-            self.input1.setText(frame1)
-        if nframes != None:
-            self.input2.setText(nframes)
-        if max_nfeatures != None:
-            self.input3.setText(max_nfeatures)
-        if ndisplacements != None:
-            self.input5.setText(ndisplacements)
+        if frame_start != None:
+            self.input1.setText(frame_start)
+        if num_frames != None:
+            self.input2.setText(num_frames)
+        if max_features_per_frame != None:
+            self.input3.setText(max_features_per_frame)
+        if num_displacement_frames != None:
+            self.input5.setText(num_displacement_frames)
         if min_feature_displacement != None:
             self.input6.setText(min_feature_displacement)
-        if max_number_iterations != None:
-            self.input8.setText(max_number_iterations)
-        if min_feature_time != None:
-            self.input10.setText(min_feature_time)
+        if max_iterations_to_persist != None:
+            self.input8.setText(max_iterations_to_persist)
+        if min_feature_frames != None:
+            self.input10.setText(min_feature_frames)
 
 
 ##########################################################################################################################
 
 class configGui_object(QtGui.QWidget):
 
-    def __init__(self, api):
+    def __init__(self):
         super(configGui_object, self).__init__()
         self.initUI()
-        self.api = api
 
     def initUI(self):
         # lbl1.move(15, 10)
@@ -538,44 +533,44 @@ class configGui_object(QtGui.QWidget):
         """
         config_path = get_config_path()
 
-        frame1 = str(self.input1.text())
-        if frame1 != "":
-            update_config_with_sections(config_path, "config", "frame1", frame1)
+        frame_start = str(self.input1.text())
+        if frame_start != "":
+            update_config_with_sections(config_path, "config", "frame_start", frame_start)
 
-        nframes = str(self.input2.text())
-        if nframes != "":
-            update_config_with_sections(config_path, "config", "nframes", nframes)
+        num_frames = str(self.input2.text())
+        if num_frames != "":
+            update_config_with_sections(config_path, "config", "num_frames", num_frames)
 
-        mm_connection_distance = str(self.input3.text())
-        if mm_connection_distance != "":
-            update_config_with_sections(config_path, "config", "mm-connection-distance", mm_connection_distance)
-        else: mm_connection_distance = None
+        max_connection_distance = str(self.input3.text())
+        if max_connection_distance != "":
+            update_config_with_sections(config_path, "config", "max_connection_distance", max_connection_distance)
+        else: max_connection_distance = None
 
-        mm_segmentation_distance = str(self.input4.text())
-        if mm_segmentation_distance != "":
-            update_config_with_sections(config_path, "config", "mm-segmentation-distance", mm_segmentation_distance)
-        else: mm_segmentation_distance = None
+        max_segmentation_distance = str(self.input4.text())
+        if max_segmentation_distance != "":
+            update_config_with_sections(config_path, "config", "max_segmentation_distance", max_segmentation_distance)
+        else: max_segmentation_distance = None
 
-        self.api.configFiles(get_config_with_sections(get_config_path(), 'info', 'identifier'),\
-                     max_connection_distance = mm_connection_distance,\
-                     max_segmentation_distance = mm_segmentation_distance)
+        api.configFiles(get_identifier(),\
+                     max_connection_distance = max_connection_distance,\
+                     max_segmentation_distance = max_segmentation_distance)
 
     def loadConfig_objects(self):
         config_path = get_config_path()
 
-        exists, frame1 = get_config_with_sections(config_path, "config", "frame1")
-        exists, nframes = get_config_with_sections(config_path, "config", "nframes")
-        exists, mm_connection_distance = get_config_with_sections(config_path, "config", "mm-connection-distance")
-        exists, mm_segmentation_distance = get_config_with_sections(config_path, "config", "mm-segmentation-distance")
+        frame_start = get_config_with_sections(config_path, "config", "frame_start")
+        num_frames = get_config_with_sections(config_path, "config", "num_frames")
+        max_connection_distance = get_config_with_sections(config_path, "config", "max_connection_distance")
+        max_segmentation_distance = get_config_with_sections(config_path, "config", "max_segmentation_distance")
 
-        if frame1 != None:
-            self.input1.setText(frame1)
-        if nframes != None:
-            self.input2.setText(nframes)
-        if mm_connection_distance != None:
-            self.input3.setText(mm_connection_distance)
-        if mm_segmentation_distance != None:
-            self.input4.setText(mm_segmentation_distance)
+        if frame_start != None:
+            self.input1.setText(frame_start)
+        if num_frames != None:
+            self.input2.setText(num_frames)
+        if max_connection_distance != None:
+            self.input3.setText(max_connection_distance)
+        if max_segmentation_distance != None:
+            self.input4.setText(max_segmentation_distance)
 
 ##########################################################################################################################
 def projectArray(homography, points):

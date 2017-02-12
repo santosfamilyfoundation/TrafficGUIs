@@ -4,6 +4,7 @@ import pickle
 import uuid
 import requests
 from app_config import AppConfig as ac
+from app_config import get_project_path
 import json
 
 from pprint import pprint
@@ -16,10 +17,23 @@ class CloudWizard:
         #self.project_path = project_path
         #self._ids[self.project_path] = uuid.uuid4()
         #self._writeIds()
-        if ip_addr == 'localhost':
-            self.server_addr = 'http://127.0.0.1:{}/'.format(port)
-        else:
-            self.server_addr = 'http://{}:{}/'.format(ip_addr, port)
+        self.set_url(ip_addr, port=port)
+
+    def set_url(self, ip_addr, port=8088):
+        protocol = self.protocol_from_url_string(ip_addr)
+        if protocol == None:
+            protocol = 'http://'
+
+        (addr, p) = self.ip_and_port_from_url_string(ip_addr)
+        if addr == 'localhost':
+            addr = '127.0.0.1'
+
+        # Use port specified by string, otherwise fall back to default port
+        if p == None:
+            p = port
+
+        self.server_addr = protocol + addr + ':{}/'.format(port)
+
 
 ###############################################################################
 # ID Storage Functions
@@ -61,20 +75,17 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         print "Response JSON: {}".format(r.json())
-        return r.json()
-        #TO-DO: Add returned identifier to internal storage
+        return r.json()['identifier']
 
-    def uploadHomography(self,
-                            aerial_path,\
-                            camera_path,\
+###############################################################################
+# Configuration Functions
+###############################################################################
+
+    def configHomography(self,
                             identifier,\
                             up_ratio,\
                             aerial_pts,\
                             camera_pts):
-        files = {
-            'aerial': open(aerial_path, 'rb'),
-            'camera': open(camera_path, 'rb'),
-        }
         payload = {
             'identifier': identifier,
             'unit_pixel_ratio': up_ratio,
@@ -83,44 +94,9 @@ class CloudWizard:
         }
 
         r = requests.post(\
-            self.server_addr + 'uploadHomography',\
-            data = payload, files = files)
+            self.server_addr + 'configHomography', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-
-    def uploadFiles(self):
-        print "uploadFiles called"
-        project_name = ac.CURRENT_PROJECT_PATH.strip('/').split('/')[-1]
-        homography_path = os.path.join(ac.CURRENT_PROJECT_PATH, "homography")
-
-        video_extn = ac.CURRENT_PROJECT_VIDEO_PATH.split('.')[-1]
-        print ac.CURRENT_PROJECT_VIDEO_PATH
-
-        with open(os.path.join(homography_path, "aerial.png"), 'rb') as hg_aerial,\
-             open(os.path.join(homography_path, "camera.png"), 'rb') as hg_camera,\
-             open(os.path.join(homography_path, "homography.txt"), 'rb') as hg_txt,\
-             open(os.path.join(ac.CURRENT_PROJECT_PATH, project_name  + ".cfg"), 'rb') as cfg_prname,\
-             open(os.path.join(ac.CURRENT_PROJECT_PATH, "tracking.cfg"), 'rb') as cfg_track,\
-             open(os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_object/object_tracking.cfg"), 'rb') as test_obj,\
-             open(os.path.join(ac.CURRENT_PROJECT_PATH, ".temp/test/test_feature/feature_tracking.cfg"), 'rb') as test_track,\
-             open(ac.CURRENT_PROJECT_VIDEO_PATH, 'rb') as video:
-
-            files = {
-                'homography/aerial.png': hg_aerial,
-                'homography/camera.png': hg_camera,
-                'homography/homography.txt': hg_txt,
-                'project_name.cfg': cfg_prname,
-                'tracking.cfg': cfg_track,
-                '.temp/test/test_object/object_tracking.cfg': test_obj,
-                '.temp/test/test_feature/feature_tracking.cfg': test_track,
-                'video.%s'%video_extn : video
-            }
-            r = requests.post(self.server_addr+'upload',files = files)
-            print r.text;
-
-###############################################################################
-# Configuration Functions
-###############################################################################
 
     def configFiles(self, identifier,
                     max_features_per_frame = None,\
@@ -169,6 +145,9 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
+    def defaultConfig(self):
+        r = requests.get(self.server_addr + 'defaultConfig')
+        return r.json()
 
 ###############################################################################
 # Analysis Functions
@@ -252,16 +231,16 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def retrieveResults(self, identifier):
+    def retrieveResults(self, identifier, project_path):
         print "retrieveResults called with identifier = {}".format(identifier)
 
         payload = {
             'identifier': identifier,
         }
-        local_filename = 'results.zip'
+        path = os.path.join(project_path, 'results', 'results.zip')
         r = requests.get(self.server_addr + 'retrieveResults', data = payload, stream=True)
-        with open(local_filename, 'wb') as f:
-            print('Dumping "{0}"...'.format(local_filename))
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
             for chunk in r.iter_content(chunk_size=2048):
                 if chunk:
                     f.write(chunk)
@@ -291,3 +270,33 @@ class CloudWizard:
         r = requests.post(self.server_addr + 'speedCDF', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
+
+
+###############################################################################
+# Helper Methods
+###############################################################################
+
+    @classmethod
+    def ip_and_port_from_url_string(cls, url):
+        # Strip protocol if exists
+        protocol = cls.protocol_from_url_string(url)
+        if protocol:
+            url = url[len(protocol):]
+
+        # Now we should only have IP:PORT
+        if ':' in url:
+            l = url.split(':')
+            return (l[0], l[1])
+        else:
+            return (url, None)
+
+    @classmethod
+    def protocol_from_url_string(cls, url):
+        protocols = ['http://', 'https://']
+        for protocol in protocols:
+            if url.startswith(protocol):
+                return protocol
+        return None
+
+# Define singleton to be used everywhere
+api = CloudWizard('localhost')

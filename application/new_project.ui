@@ -96,7 +96,7 @@
     <item>
      <widget class="QLabel" name="newp_p2_add_vido_description">
       <property name="text">
-       <string>Browse and select a video file to analyze. Please also input the date and time when the video recording began</string>
+       <string>Browse and select a video file to analyze. Please input the time when the video recording occurred. You may optionally enter an email that should be notified when long-running analysis is finished. You should also enter the IP address or URL of the server that should be used for analysis.</string>
       </property>
       <property name="wordWrap">
        <bool>true</bool>
@@ -138,6 +138,26 @@
       </item>
       <item row="1" column="1">
        <widget class="QDateTimeEdit" name="newp_video_start_time_input"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="newp_video_server_label">
+        <property name="text">
+         <string>Server IP or URL</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="newp_video_server_input"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="newp_video_email_label">
+        <property name="text">
+         <string>Email</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="newp_video_email_input"/>
       </item>
      </layout>
     </item>
