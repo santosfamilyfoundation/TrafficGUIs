@@ -66,7 +66,6 @@ class CloudWizard:
 
     def uploadVideo(self,  video_path, identifier = None):
         print "uploadVideo called with identifier = {}".format(identifier)
-        print(self.server_addr)
         with open(video_path, 'rb') as video:
             files = {'video' : video}
             payload = {'identifier': identifier}

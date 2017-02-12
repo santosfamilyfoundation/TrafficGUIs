@@ -147,7 +147,7 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="newp_video_server_input" setText="http://localhost:8088"/>
+       <widget class="QLineEdit" name="newp_video_server_input"/>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="newp_video_email_label">
