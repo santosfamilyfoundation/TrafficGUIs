@@ -14,12 +14,10 @@ try:
     from PIL import Image
 except:
     import Image
-import cvutils
 import numpy as np
 
 from app_config import AppConfig as ac
 from app_config import get_project_path, get_config_path, config_section_exists, get_config_with_sections, update_config_with_sections
-from qt_plot import plot_results
 from cloud_api import api
 
 class ProjectWizard(QtGui.QWizard):
@@ -193,8 +191,11 @@ def load_project(project_name, main_window):
     load_homography(main_window)
     update_api()
     load_config(main_window)
-    load_results(main_window)
 
+def loadPointCorrespondences(filename):
+    '''Loads and returns the corresponding points in world (first 2 lines) and image spaces (last 2 lines)'''
+    points = np.loadtxt(filename, dtype=np.float32)
+    return  (points[:2,:].T, points[2:,:].T) # (world points, image points)
 
 def load_homography(main_window):
     """
@@ -227,7 +228,7 @@ def load_homography(main_window):
         if upr:
             gui.unit_px_input.setText(upr)
     if os.path.exists(corr_path):  # If points have been previously selected
-        worldPts, videoPts = cvutils.loadPointCorrespondences(corr_path)
+        worldPts, videoPts = loadPointCorrespondences(corr_path)
         main_window.homography = np.loadtxt(homo_path)
         if load_from is "image_pts":
             for point in worldPts:
@@ -255,7 +256,3 @@ def load_config(main_window):
     main_window.configGui_features.loadConfig_features()
     main_window.configGui_object.loadConfig_objects()
 
-def load_results(main_window):
-    if os.path.exists(os.path.join(get_project_path(), "homography", "homography.txt")):
-        if os.path.exists(os.path.join(get_project_path(), "results", "results.sqlite")):
-            plot_results(main_window)
