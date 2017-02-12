@@ -7,7 +7,6 @@ from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 import subprocess
 
-from plotting.make_object_trajectories import main as db_make_objtraj
 
 ##############################################3
 # testing feature objects
@@ -16,7 +15,6 @@ from plotting.make_object_trajectories import main as db_make_objtraj
 ###############################################
 
 import os
-from PyQt4.phonon import Phonon
 import ConfigParser
 from PyQt4.QtGui import *
 
@@ -27,12 +25,13 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import numpy as np
-import cvutils
 from app_config import get_base_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path, get_identifier
+
 import pm
 from cloud_api import api
 
-import qt_plot
+cvBlue = (0,0,255)
+cvRed = (255,0,0)
 
 class MainGUI(QtGui.QMainWindow):
 
@@ -95,11 +94,13 @@ class MainGUI(QtGui.QMainWindow):
         # test button
         self.ui.button_roadusers_tracking_test.clicked.connect(self.test_object)
 
-        # run button
-        self.ui.button_roadusers_tracking_run.clicked.connect(self.run)
+        # runAnalysis button
+        self.ui.button_roadusers_tracking_run.clicked.connect(self.runAnalysis)
+
+        # runResults button
+        self.ui.runResultsButton.clicked.connect(self.runResults)
 
 
-        qt_plot.plot_results(self)
 ###########################################################################################################################################
         # self.ui.track_image.mousePressEvent = self.get_image_position
 
@@ -131,13 +132,21 @@ class MainGUI(QtGui.QMainWindow):
                             num_frames = num_frames)
 
 
-    # for the run button
-    def run(self):
+    # for the runAnalysis button
+    def runAnalysis(self):
         """
         Runs TrafficIntelligence trackers and support scripts.
         """
         email = get_config_with_sections(get_config_path(), 'info', 'email')
         api.analysis(get_identifier(), email=email)
+
+    def runResults(self):
+        """Runs server methods that generate safety metric results and visualizations"""
+        identifier = get_config_with_sections(get_config_path(), 'info', 'identifier')
+        ttc_threshold = self.ui.timeToCollisionLineEdit.text()
+        vehicle_only = self.ui.vehiclesOnlyCheckBox.isChecked()
+        speed_limit = self.ui.speedLimitLineEdit.text()
+        api.results(identifier, ttc_threshold, vehicle_only, speed_limit)
 
 ################################################################################################
 
@@ -145,8 +154,6 @@ class MainGUI(QtGui.QMainWindow):
         curr_i = self.ui.main_tab_widget.currentIndex()
         new_i = curr_i + 1
         self.ui.main_tab_widget.setCurrentIndex(new_i)
-        if new_i is 3:  # If we are moving to the plots page
-           qt_plot.plot_results(self)
 
 
     def show_prev_tab(self):
@@ -280,19 +287,19 @@ class MainGUI(QtGui.QMainWindow):
 
         invHomography = np.linalg.inv(self.homography)
 
-        projectedWorldPts = cvutils.projectArray(invHomography, self.worldPts.T).T
-        projectedVideoPts = cvutils.projectArray(self.homography, self.videoPts.T).T
+        projectedWorldPts = projectArray(invHomography, self.worldPts.T).T
+        projectedVideoPts = projectArray(self.homography, self.videoPts.T).T
 
         # TODO: Nicer formatting for computed goodness images
         for i in range(self.worldPts.shape[0]):
             # world image
-            cv2.circle(worldImg, tuple(np.int32(np.round(self.worldPts[i] / self.unitPixRatio))), 2, cvutils.cvBlue)
-            cv2.circle(worldImg, tuple(np.int32(np.round(projectedVideoPts[i] / self.unitPixRatio))), 2, cvutils.cvRed)
-            cv2.putText(worldImg, str(i+1), tuple(np.int32(np.round(self.worldPts[i]/self.unitPixRatio)) + 5), cv2.FONT_HERSHEY_PLAIN, 2., cvutils.cvBlue, 2)
+            cv2.circle(worldImg, tuple(np.int32(np.round(self.worldPts[i] / self.unitPixRatio))), 2, cvBlue)
+            cv2.circle(worldImg, tuple(np.int32(np.round(projectedVideoPts[i] / self.unitPixRatio))), 2, cvRed)
+            cv2.putText(worldImg, str(i+1), tuple(np.int32(np.round(self.worldPts[i]/self.unitPixRatio)) + 5), cv2.FONT_HERSHEY_PLAIN, 2., cvBlue, 2)
             # video image
-            cv2.circle(videoImg, tuple(np.int32(np.round(self.videoPts[i]))), 2, cvutils.cvBlue)
-            cv2.circle(videoImg, tuple(np.int32(np.round(projectedWorldPts[i]))), 2, cvutils.cvRed)
-            cv2.putText(videoImg, str(i+1), tuple(np.int32(np.round(self.videoPts[i]) + 5)), cv2.FONT_HERSHEY_PLAIN, 2., cvutils.cvBlue, 2)
+            cv2.circle(videoImg, tuple(np.int32(np.round(self.videoPts[i]))), 2, cvBlue)
+            cv2.circle(videoImg, tuple(np.int32(np.round(projectedWorldPts[i]))), 2, cvRed)
+            cv2.putText(videoImg, str(i+1), tuple(np.int32(np.round(self.videoPts[i]) + 5)), cv2.FONT_HERSHEY_PLAIN, 2., cvBlue, 2)
         aerial_goodness_path = os.path.join(homography_path, "homography_goodness_aerial.png")
         camera_goodness_path = os.path.join(homography_path, "homography_goodness_camera.png")
 
@@ -566,7 +573,22 @@ class configGui_object(QtGui.QWidget):
             self.input4.setText(max_segmentation_distance)
 
 ##########################################################################################################################
+def projectArray(homography, points):
+    '''Returns the coordinates of the projected points through homography
+    (format: array 2xN points)
+    '''
+    if points.shape[0] != 2:
+        raise Exception('points of dimension {0} {1}'.format(points.shape[0], points.shape[1]))
 
+    if (homography is not None) and homography.size>0:
+        #alternatively, on could use cv2.convertpointstohomogeneous and other conversion to/from homogeneous coordinates
+        augmentedPoints = np.append(points,[[1]*points.shape[1]], 0)
+        prod = np.dot(homography, augmentedPoints)
+        return prod[0:2]/prod[2]
+    else:
+        return points
+
+##########################################################################################################################
 def main():
     app.exec_()
 
