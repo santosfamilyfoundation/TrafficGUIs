@@ -134,6 +134,11 @@ class CloudWizard:
                 test_flag = {}, frame_start = {}, and num_frames = {}"\
                 .format(identifier,test_flag,frame_start,num_frames)
 
+        status_dict = self.getProjectStatus(identifier)
+        if status_dict["upload_homography"] != 2:
+            print "Check your homography and upload (again)."
+            return
+
         payload = {
             'test_flag': test_flag,
             'identifier': identifier,
@@ -156,6 +161,11 @@ class CloudWizard:
     def analysis(self, identifier, email=None):
         print "analysis called with identifier = {} and email = {}".format(identifier, email)
 
+        status_dict = self.getProjectStatus(identifier)
+        if status_dict["upload_homography"] != 2:
+            print "Check your homography and upload (again)."
+            return
+
         payload = {
             'identifier': identifier,
             'email': email
@@ -168,17 +178,29 @@ class CloudWizard:
     def objectTracking(self, identifier, email=None):
         print "objectTracking called with identifier = {} and email = {}".format(identifier, email)
 
+        status_dict = self.getProjectStatus(identifier)
+        if status_dict["upload_homography"] != 2:
+            print "Check your homography and upload (again)."
+            return
+
         payload = {
             'identifier': identifier,
             'email': email
         }
-
         r = requests.post(self.server_addr + 'objectTracking', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
     def safetyAnalysis(self, identifier, email=None):
         print "safetyAnalysis called with identifier = {} and email = {}".format(identifier, email)
+
+        status_dict = self.getProjectStatus(identifier)
+        if status_dict["upload_homography"] != 2:
+            print "Check your homography and upload (again)."
+            return
+        elif status_dict["object_tracking"] != 2:
+            print "Check object tracking and run (again)."
+            return
 
         payload = {
             'identifier': identifier,
@@ -190,12 +212,40 @@ class CloudWizard:
         print "Response Text: {}".format(r.text)
 
 ###############################################################################
+# Status Checking Functions
+###############################################################################
+
+    def getProjectStatus(self, identifier):
+
+        payload = {
+            'identifier': identifier,
+        }
+
+        r = requests.post(self.server_addr + 'status', data = payload)
+        status_dict = r.json()
+        status_dict = {k:int(v) for (k,v) in status_dict.iteritems()}
+        print "Status Code: {}".format(r.status_code)
+        print "Response Text: {}".format(r.text)
+        return status_dict
+
+###############################################################################
 # Results Functions
 ###############################################################################
 
     def highlightVideo(self, identifier, ttc_threshold = None, vehicle_only = None):
         print "highlightVideo called with identifier = {}, ttc_threshold = {} and vehicle_only = {}"\
                 .format(identifier, ttc_threshold, vehicle_only)
+
+        status_dict = self.getProjectStatus(identifier)
+        if status_dict["upload_homography"] != 2:
+            print "Check your homography and upload (again)."
+            return
+        elif status_dict["object_tracking"] != 2:
+            print "Check object tracking and run (again)."
+            return
+        elif status_dict["safety_analysis"] != 2:
+            print "Check safety analysis and run (again)."
+            return
 
         payload = {
             'identifier': identifier,
