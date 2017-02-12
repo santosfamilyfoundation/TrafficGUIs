@@ -6,7 +6,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
-from app_config import get_project_path, get_config_with_sections, get_config_path
+from app_config import get_project_path
 from plotting import visualization
 import random
 
