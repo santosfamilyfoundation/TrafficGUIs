@@ -20,7 +20,7 @@ import numpy as np
 from app_config import AppConfig as ac
 from app_config import get_project_path, get_config_path, config_section_exists, get_config_with_sections, update_config_with_sections
 from qt_plot import plot_results
-
+from cloud_api import api
 
 class ProjectWizard(QtGui.QWizard):
 
@@ -32,7 +32,6 @@ class ProjectWizard(QtGui.QWizard):
         self.ui.newp_video_browse.clicked.connect(self.open_video)
         self.aerial_image_selected = False
         self.video_selected = False
-        self.api = parent.api
 
         self.ui.newp_start_creation.clicked.connect(self.start_create_project)
         self.config_parser = SafeConfigParser()
@@ -43,6 +42,11 @@ class ProjectWizard(QtGui.QWizard):
 
         self.ui.newp_p2.registerField("video_path*", self.ui.newp_video_input)
         self.ui.newp_p2.registerField("video_start_datetime", self.ui.newp_video_start_time_input)
+        self.ui.newp_p2.registerField("video_server_input*", self.ui.newp_video_server_input)
+        self.ui.newp_p2.registerField("video_email", self.ui.newp_video_email_input)
+
+        # Set default server
+        self.ui.newp_video_server_input.setText("http://localhost:8088")
 
         self.ui.newp_p2.registerField("aerial_image*", self.ui.newp_aerial_image_input)
 
@@ -111,6 +115,7 @@ class ProjectWizard(QtGui.QWizard):
             progress_bar.setValue(progress_bar.value() + 5)
             progress_msg.setText("Writing configuration files...")
             self._write_to_project_config()
+            update_api()
 
             progress_msg.setText("Copying video file...")
             video_extension = self.videopath.split('.')[-1]
@@ -118,7 +123,7 @@ class ProjectWizard(QtGui.QWizard):
             copy(self.videopath, video_dest)
 
             progress_msg.setText("Uploading video file...")
-            identifier = self.api.uploadVideo(self.videopath)
+            identifier = api.uploadVideo(self.videopath)
             update_config_with_sections(get_config_path(), 'info', 'identifier', identifier)
             progress_bar.setValue(80)
 
@@ -151,11 +156,16 @@ class ProjectWizard(QtGui.QWizard):
     def _write_to_project_config(self):
         ts = time.time()
         vid_ts = self.ui.newp_video_start_time_input.dateTime().toPyDateTime()
+        email = str(self.ui.newp_video_email_input.text())
+        server = str(self.ui.newp_video_server_input.text())
+
         timestamp = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y %H:%M:%S %Z')
         video_timestamp = vid_ts.strftime('%d-%m-%Y %H:%M:%S %Z')
         self.config_parser.add_section("info")
         self.config_parser.set("info", "project_name", ac.CURRENT_PROJECT_NAME)
         self.config_parser.set("info", "creation_date", timestamp)
+        self.config_parser.set("info", "server", server)
+        self.config_parser.set("info", "email", email)
         self.config_parser.add_section("video")
         video_extension = self.videopath.split('.')[-1]
         self.config_parser.set("video", "name", 'video.'+video_extension)
@@ -164,7 +174,7 @@ class ProjectWizard(QtGui.QWizard):
 
         self.config_parser.add_section("config")
         try:
-            config = self.api.defaultConfig()
+            config = api.defaultConfig()
             for (key, value) in config.iteritems():
                 self.config_parser.set("config", key, str(value))
         except Exception as e:
@@ -181,6 +191,7 @@ def load_project(project_name, main_window):
     ac.CURRENT_PROJECT_NAME = project_name
 
     load_homography(main_window)
+    update_api()
     load_config(main_window)
     load_results(main_window)
 
@@ -212,8 +223,8 @@ def load_homography(main_window):
     # Has a homography been previously computed?
     if config_section_exists(get_config_path(), "homography"):  # If we can load homography unit-pix ratio load it
         # load unit-pixel ratio
-        upr_exists, upr = get_config_with_sections(get_config_path(), "homography", "unitpixelratio")
-        if upr_exists:
+        upr = get_config_with_sections(get_config_path(), "homography", "unitpixelratio")
+        if upr:
             gui.unit_px_input.setText(upr)
     if os.path.exists(corr_path):  # If points have been previously selected
         worldPts, videoPts = cvutils.loadPointCorrespondences(corr_path)
@@ -231,6 +242,14 @@ def load_homography(main_window):
         gui.homography_results.load_image_from_path(goodness_path)
     else:
         print ("{} does not exist. No points loaded.".format(corr_path))
+
+def update_api():
+    addr = get_config_with_sections(get_config_path(), "info", "server")
+    if addr:
+        api.set_url(addr)
+    else:
+        print("No server, resorting to localhost")
+        api.set_url('localhost')
 
 def load_config(main_window):
     main_window.configGui_features.loadConfig_features()
