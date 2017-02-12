@@ -174,7 +174,7 @@ class ProjectWizard(QtGui.QWizard):
 
         self.config_parser.add_section("config")
         try:
-            config = self.api.defaultConfig()
+            config = api.defaultConfig()
             for (key, value) in config.iteritems():
                 self.config_parser.set("config", key, str(value))
         except Exception as e:

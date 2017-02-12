@@ -77,11 +77,11 @@ class CloudWizard:
         print "Response Text: {}".format(r.text)
         print "Response JSON: {}".format(r.json())
         return r.json()['identifier']
-        
+
 ###############################################################################
 # Configuration Functions
 ###############################################################################
-    
+
     def configHomography(self,
                             identifier,\
                             up_ratio,\
@@ -219,13 +219,13 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def retrieveResults(self, identifier):
+    def retrieveResults(self, identifier, project_path):
         print "retrieveResults called with identifier = {}".format(identifier)
 
         payload = {
             'identifier': identifier,
         }
-        path = os.path.join(get_project_path(), 'results/results.zip')
+        path = os.path.join(project_path, 'results', 'results.zip')
         r = requests.get(self.server_addr + 'retrieveResults', data = payload, stream=True)
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))

@@ -115,16 +115,16 @@ class MainGUI(QtGui.QMainWindow):
 ######################################################################################################
 
     def test_feature(self):
-        frame_start = get_config_with_sections(config_path, "config", "frame_start")
-        num_frames = get_config_with_sections(config_path, "config", "num_frames")
+        frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
+        num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
         api.testConfig('feature',\
                             get_identifier(),\
                             frame_start = frame_start,\
                             num_frames = num_frames)
 
     def test_object(self):
-        frame_start = get_config_with_sections(config_path, "config", "frame_start")
-        num_frames = get_config_with_sections(config_path, "config", "num_frames")
+        frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
+        num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
         api.testConfig('object',\
                             get_identifier(),\
                             frame_start = frame_start,\
