@@ -70,3 +70,7 @@ project_dir/*
 *.IDdict
 application/test_app.py
 application/test_cloud.py
+
+*.dmg
+
+*.zip
