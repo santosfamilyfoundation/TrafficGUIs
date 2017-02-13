@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1129</width>
-    <height>691</height>
+    <width>1280</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -457,8 +457,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>521</width>
-               <height>432</height>
+               <width>468</width>
+               <height>425</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -605,8 +605,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>521</width>
-               <height>432</height>
+               <width>597</width>
+               <height>541</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -619,8 +619,18 @@
               <property name="fieldGrowthPolicy">
                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
               </property>
+              <property name="labelAlignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
               <item row="0" column="0">
-               <layout class="QHBoxLayout" name="roadusers_tracking_parameter_layout"/>
+               <layout class="QHBoxLayout" name="roadusers_tracking_parameter_layout">
+                <property name="sizeConstraint">
+                 <enum>QLayout::SetDefaultConstraint</enum>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+               </layout>
               </item>
              </layout>
             </widget>
@@ -692,8 +702,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>1055</width>
-               <height>552</height>
+               <width>920</width>
+               <height>545</height>
               </rect>
              </property>
              <widget class="QWidget" name="formLayoutWidget">
@@ -744,9 +754,9 @@
              <widget class="QPushButton" name="runAnalysisButton">
               <property name="geometry">
                <rect>
-                <x>160</x>
+                <x>12</x>
                 <y>130</y>
-                <width>113</width>
+                <width>261</width>
                 <height>32</height>
                </rect>
               </property>
@@ -770,7 +780,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1129</width>
+     <width>1280</width>
      <height>22</height>
     </rect>
    </property>
