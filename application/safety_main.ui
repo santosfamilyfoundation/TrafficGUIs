@@ -573,13 +573,6 @@
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="button_roadusers_tracking_run">
-               <property name="text">
-                <string>Run</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
           </item>
@@ -748,7 +741,7 @@
                </item>
               </layout>
              </widget>
-             <widget class="QPushButton" name="runResultsButton">
+             <widget class="QPushButton" name="runAnalysisButton">
               <property name="geometry">
                <rect>
                 <x>160</x>
@@ -758,7 +751,7 @@
                </rect>
               </property>
               <property name="text">
-               <string>Run Results</string>
+               <string>Run Video Analysis</string>
               </property>
              </widget>
             </widget>

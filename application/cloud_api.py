@@ -237,10 +237,10 @@ class CloudWizard:
         print "results called with identifier = {}, ttc_threshold = {}, vehicle_only = {}, and speed_limit= {}"\
                 .format(identifier, ttc_threshold, vehicle_only, speed_limit)
 
-        # sync calls 
+        # sync calls
         self.roadUserCounts(identifier)
         self.speedCDF(identifier, speed_limit, vehicle_only)
-       
+
         self.makeReport(identifier)
 
         # async calls
@@ -368,7 +368,6 @@ class StatusPoller(object):
         self.has_run = False
 
     def _run(self):
-        print('run')
         self.is_running = False
         self.start()
 
@@ -380,8 +379,8 @@ class StatusPoller(object):
         if self.status_name not in status_dict.keys():
             print(self.status_name + ' not in status dictionary')
         elif status_dict[self.status_name] == 2:
-            self.callback()
             self.stop()
+            self.callback()
         elif status_dict[self.status_name] == 1:
             print(self.status_name + ' is still running')
         else:
