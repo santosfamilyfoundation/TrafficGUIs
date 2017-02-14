@@ -31,6 +31,10 @@ class ProjectWizard(QtGui.QWizard):
         self.aerial_image_selected = False
         self.video_selected = False
 
+        # Remove '?' icon
+        flags = self.windowFlags() & (~QtCore.Qt.WindowContextHelpButtonHint)
+        self.setWindowFlags(flags)
+
         self.ui.newp_start_creation.clicked.connect(self.start_create_project)
         self.config_parser = SafeConfigParser()
 
