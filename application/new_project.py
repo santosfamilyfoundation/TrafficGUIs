@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'new_project.ui'
+# Form implementation generated from reading ui file 'application/new_project.ui'
 #
-# Created by: PyQt4 UI code generator 4.11.4
+# Created: Mon Feb 13 23:10:23 2017
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -26,7 +27,7 @@ class Ui_create_new_project(object):
     def setupUi(self, create_new_project):
         create_new_project.setObjectName(_fromUtf8("create_new_project"))
         create_new_project.setWindowModality(QtCore.Qt.ApplicationModal)
-        create_new_project.resize(568, 406)
+        create_new_project.setMinimumSize(QtCore.QSize(550, 500))
         create_new_project.setAutoFillBackground(False)
         create_new_project.setModal(True)
         create_new_project.setWizardStyle(QtGui.QWizard.ClassicStyle)
@@ -64,6 +65,11 @@ class Ui_create_new_project(object):
         self.verticalLayout.addWidget(self.newp_ldir_label)
         create_new_project.addPage(self.newp_p1)
         self.newp_p2 = QtGui.QWizardPage()
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.newp_p2.sizePolicy().hasHeightForWidth())
+        self.newp_p2.setSizePolicy(sizePolicy)
         self.newp_p2.setObjectName(_fromUtf8("newp_p2"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.newp_p2)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
@@ -80,36 +86,46 @@ class Ui_create_new_project(object):
         self.newp_p2_add_vido_description.setObjectName(_fromUtf8("newp_p2_add_vido_description"))
         self.verticalLayout_2.addWidget(self.newp_p2_add_vido_description)
         self.newp_p2_video_layout = QtGui.QFormLayout()
-        self.newp_p2_video_layout.setContentsMargins(-1, 8, -1, -1)
+        self.newp_p2_video_layout.setSizeConstraint(QtGui.QLayout.SetNoConstraint)
+        self.newp_p2_video_layout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
         self.newp_p2_video_layout.setObjectName(_fromUtf8("newp_p2_video_layout"))
         self.newp_video_label = QtGui.QLabel(self.newp_p2)
+        self.newp_video_label.setMinimumSize(QtCore.QSize(0, 28))
         self.newp_video_label.setObjectName(_fromUtf8("newp_video_label"))
         self.newp_p2_video_layout.setWidget(0, QtGui.QFormLayout.LabelRole, self.newp_video_label)
         self.newp_p2_video_browse_layout = QtGui.QHBoxLayout()
         self.newp_p2_video_browse_layout.setObjectName(_fromUtf8("newp_p2_video_browse_layout"))
         self.newp_video_input = QtGui.QLineEdit(self.newp_p2)
+        self.newp_video_input.setMinimumSize(QtCore.QSize(0, 21))
         self.newp_video_input.setObjectName(_fromUtf8("newp_video_input"))
         self.newp_p2_video_browse_layout.addWidget(self.newp_video_input)
         self.newp_video_browse = QtGui.QPushButton(self.newp_p2)
+        self.newp_video_browse.setMinimumSize(QtCore.QSize(0, 32))
         self.newp_video_browse.setObjectName(_fromUtf8("newp_video_browse"))
         self.newp_p2_video_browse_layout.addWidget(self.newp_video_browse)
         self.newp_p2_video_layout.setLayout(0, QtGui.QFormLayout.FieldRole, self.newp_p2_video_browse_layout)
         self.newp_video_start_time_label = QtGui.QLabel(self.newp_p2)
+        self.newp_video_start_time_label.setMinimumSize(QtCore.QSize(0, 24))
         self.newp_video_start_time_label.setObjectName(_fromUtf8("newp_video_start_time_label"))
         self.newp_p2_video_layout.setWidget(1, QtGui.QFormLayout.LabelRole, self.newp_video_start_time_label)
         self.newp_video_start_time_input = QtGui.QDateTimeEdit(self.newp_p2)
+        self.newp_video_start_time_input.setMinimumSize(QtCore.QSize(0, 24))
         self.newp_video_start_time_input.setObjectName(_fromUtf8("newp_video_start_time_input"))
         self.newp_p2_video_layout.setWidget(1, QtGui.QFormLayout.FieldRole, self.newp_video_start_time_input)
         self.newp_video_server_label = QtGui.QLabel(self.newp_p2)
+        self.newp_video_server_label.setMinimumSize(QtCore.QSize(0, 21))
         self.newp_video_server_label.setObjectName(_fromUtf8("newp_video_server_label"))
         self.newp_p2_video_layout.setWidget(2, QtGui.QFormLayout.LabelRole, self.newp_video_server_label)
         self.newp_video_server_input = QtGui.QLineEdit(self.newp_p2)
+        self.newp_video_server_input.setMinimumSize(QtCore.QSize(0, 21))
         self.newp_video_server_input.setObjectName(_fromUtf8("newp_video_server_input"))
         self.newp_p2_video_layout.setWidget(2, QtGui.QFormLayout.FieldRole, self.newp_video_server_input)
         self.newp_video_email_label = QtGui.QLabel(self.newp_p2)
+        self.newp_video_email_label.setMinimumSize(QtCore.QSize(0, 21))
         self.newp_video_email_label.setObjectName(_fromUtf8("newp_video_email_label"))
         self.newp_p2_video_layout.setWidget(3, QtGui.QFormLayout.LabelRole, self.newp_video_email_label)
         self.newp_video_email_input = QtGui.QLineEdit(self.newp_p2)
+        self.newp_video_email_input.setMinimumSize(QtCore.QSize(0, 21))
         self.newp_video_email_input.setObjectName(_fromUtf8("newp_video_email_input"))
         self.newp_p2_video_layout.setWidget(3, QtGui.QFormLayout.FieldRole, self.newp_video_email_input)
         self.verticalLayout_2.addLayout(self.newp_p2_video_layout)
