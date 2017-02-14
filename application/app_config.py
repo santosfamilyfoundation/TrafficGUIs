@@ -36,6 +36,9 @@ def get_project_video_path():
             print("ERR: project_video(): Couldn't get video")
     return None
 
+def projects_exist():
+    return (len(os.listdir(get_base_project_dir())) > 0)
+
 def update_config_with_sections(config_path, section, option, value):
     """
     Updates a single value in the current open project's configuration file.
