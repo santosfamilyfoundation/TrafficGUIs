@@ -27,7 +27,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -394,41 +394,6 @@
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout">
-          <item row="1" column="1">
-           <widget class="QWidget" name="feature_tracking_run_panel" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_6">
-             <item>
-              <widget class="QProgressBar" name="feature_tracking_run_test_progress">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="value">
-                <number>0</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="invertedAppearance">
-                <bool>false</bool>
-               </property>
-               <property name="format">
-                <string>%p%</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="button_feature_tracking_test">
-               <property name="text">
-                <string>Test on Sample</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="QScrollArea" name="feature_tracking_parameter_area">
             <property name="sizePolicy">
@@ -457,8 +422,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>468</width>
-               <height>425</height>
+               <width>613</width>
+               <height>578</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -484,6 +449,19 @@
              <enum>QLayout::SetNoConstraint</enum>
             </property>
            </layout>
+          </item>
+          <item row="1" column="1">
+           <widget class="QWidget" name="feature_tracking_run_panel" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <item>
+              <widget class="QPushButton" name="button_feature_tracking_test">
+               <property name="text">
+                <string>Test on Sample</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </item>
          </layout>
         </item>
@@ -545,28 +523,6 @@
            <widget class="QWidget" name="roadusers_tracking_run_panel" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_15">
              <item>
-              <widget class="QProgressBar" name="roadusers_tracking_run_test_progress">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="value">
-                <number>0</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="invertedAppearance">
-                <bool>false</bool>
-               </property>
-               <property name="format">
-                <string>%p%</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QPushButton" name="button_roadusers_tracking_test">
                <property name="text">
                 <string>Test on Sample</string>
@@ -605,8 +561,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>597</width>
-               <height>541</height>
+               <width>613</width>
+               <height>578</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -702,8 +658,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>920</width>
-               <height>545</height>
+               <width>1234</width>
+               <height>681</height>
               </rect>
              </property>
              <widget class="QWidget" name="formLayoutWidget">
@@ -781,7 +737,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuTraffic_Analysis">
