@@ -3,7 +3,7 @@ Project management classes and functions
 """
 
 from PyQt4 import QtGui, QtCore
-from new_project import Ui_create_new_project
+from views.new_project import Ui_create_new_project
 import os
 from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
 import time
