@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'safety_main.ui'
+# Form implementation generated from reading ui file 'application/safety_main.ui'
 #
-# Created: Fri Feb 10 16:44:49 2017
+# Created: Mon Feb 13 16:16:49 2017
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_TransportationSafety(object):
     def setupUi(self, TransportationSafety):
         TransportationSafety.setObjectName(_fromUtf8("TransportationSafety"))
-        TransportationSafety.resize(1129, 691)
+        TransportationSafety.resize(1280, 800)
         self.centralWidget = QtGui.QWidget(TransportationSafety)
         self.centralWidget.setObjectName(_fromUtf8("centralWidget"))
         self.gridLayout_2 = QtGui.QGridLayout(self.centralWidget)
@@ -216,7 +216,7 @@ class Ui_TransportationSafety(object):
         self.feature_tracking_parameter_area.setWidgetResizable(True)
         self.feature_tracking_parameter_area.setObjectName(_fromUtf8("feature_tracking_parameter_area"))
         self.feature_tracking_parameter_widget = QtGui.QWidget()
-        self.feature_tracking_parameter_widget.setGeometry(QtCore.QRect(0, 0, 521, 432))
+        self.feature_tracking_parameter_widget.setGeometry(QtCore.QRect(0, 0, 468, 425))
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -278,9 +278,6 @@ class Ui_TransportationSafety(object):
         self.button_roadusers_tracking_test = QtGui.QPushButton(self.roadusers_tracking_run_panel)
         self.button_roadusers_tracking_test.setObjectName(_fromUtf8("button_roadusers_tracking_test"))
         self.horizontalLayout_15.addWidget(self.button_roadusers_tracking_test)
-        self.button_roadusers_tracking_run = QtGui.QPushButton(self.roadusers_tracking_run_panel)
-        self.button_roadusers_tracking_run.setObjectName(_fromUtf8("button_roadusers_tracking_run"))
-        self.horizontalLayout_15.addWidget(self.button_roadusers_tracking_run)
         self.gridLayout_14.addWidget(self.roadusers_tracking_run_panel, 1, 1, 1, 1)
         self.roadusers_tracking_video_layout = QtGui.QVBoxLayout()
         self.roadusers_tracking_video_layout.setSizeConstraint(QtGui.QLayout.SetNoConstraint)
@@ -296,7 +293,7 @@ class Ui_TransportationSafety(object):
         self.roadusers_tracking_parameter_area.setWidgetResizable(True)
         self.roadusers_tracking_parameter_area.setObjectName(_fromUtf8("roadusers_tracking_parameter_area"))
         self.roadusers_tracking_parameter_widget = QtGui.QWidget()
-        self.roadusers_tracking_parameter_widget.setGeometry(QtCore.QRect(0, 0, 521, 432))
+        self.roadusers_tracking_parameter_widget.setGeometry(QtCore.QRect(0, 0, 597, 541))
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -305,8 +302,11 @@ class Ui_TransportationSafety(object):
         self.roadusers_tracking_parameter_widget.setObjectName(_fromUtf8("roadusers_tracking_parameter_widget"))
         self.formLayout_9 = QtGui.QFormLayout(self.roadusers_tracking_parameter_widget)
         self.formLayout_9.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+        self.formLayout_9.setLabelAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.formLayout_9.setObjectName(_fromUtf8("formLayout_9"))
         self.roadusers_tracking_parameter_layout = QtGui.QHBoxLayout()
+        self.roadusers_tracking_parameter_layout.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
+        self.roadusers_tracking_parameter_layout.setContentsMargins(-1, -1, 0, -1)
         self.roadusers_tracking_parameter_layout.setObjectName(_fromUtf8("roadusers_tracking_parameter_layout"))
         self.formLayout_9.setLayout(0, QtGui.QFormLayout.LabelRole, self.roadusers_tracking_parameter_layout)
         self.roadusers_tracking_parameter_area.setWidget(self.roadusers_tracking_parameter_widget)
@@ -339,7 +339,7 @@ class Ui_TransportationSafety(object):
         self.results_parameter_area.setWidgetResizable(True)
         self.results_parameter_area.setObjectName(_fromUtf8("results_parameter_area"))
         self.results_parameter_widget = QtGui.QWidget()
-        self.results_parameter_widget.setGeometry(QtCore.QRect(0, 0, 1055, 552))
+        self.results_parameter_widget.setGeometry(QtCore.QRect(0, 0, 920, 545))
         self.results_parameter_widget.setObjectName(_fromUtf8("results_parameter_widget"))
         self.formLayoutWidget = QtGui.QWidget(self.results_parameter_widget)
         self.formLayoutWidget.setGeometry(QtCore.QRect(10, 10, 261, 111))
@@ -368,9 +368,9 @@ class Ui_TransportationSafety(object):
         self.results_parameter_layout = QtGui.QHBoxLayout()
         self.results_parameter_layout.setObjectName(_fromUtf8("results_parameter_layout"))
         self.results_parameter_form.setLayout(1, QtGui.QFormLayout.LabelRole, self.results_parameter_layout)
-        self.runResultsButton = QtGui.QPushButton(self.results_parameter_widget)
-        self.runResultsButton.setGeometry(QtCore.QRect(160, 130, 113, 32))
-        self.runResultsButton.setObjectName(_fromUtf8("runResultsButton"))
+        self.runAnalysisButton = QtGui.QPushButton(self.results_parameter_widget)
+        self.runAnalysisButton.setGeometry(QtCore.QRect(12, 130, 261, 32))
+        self.runAnalysisButton.setObjectName(_fromUtf8("runAnalysisButton"))
         self.results_parameter_area.setWidget(self.results_parameter_widget)
         self.results_grid.addWidget(self.results_parameter_area, 0, 0, 1, 1)
         self.verticalLayout_5.addLayout(self.results_grid)
@@ -378,7 +378,7 @@ class Ui_TransportationSafety(object):
         self.gridLayout_2.addWidget(self.main_tab_widget, 0, 0, 1, 1)
         TransportationSafety.setCentralWidget(self.centralWidget)
         self.menuBar = QtGui.QMenuBar(TransportationSafety)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1129, 22))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1280, 22))
         self.menuBar.setObjectName(_fromUtf8("menuBar"))
         self.menuTraffic_Analysis = QtGui.QMenu(self.menuBar)
         self.menuTraffic_Analysis.setObjectName(_fromUtf8("menuTraffic_Analysis"))
@@ -438,7 +438,7 @@ class Ui_TransportationSafety(object):
         self.menuBar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(TransportationSafety)
-        self.main_tab_widget.setCurrentIndex(3)
+        self.main_tab_widget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(TransportationSafety)
 
     def retranslateUi(self, TransportationSafety):
@@ -460,14 +460,13 @@ class Ui_TransportationSafety(object):
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_features), _translate("TransportationSafety", "Track Features", None))
         self.roadusers_tracking_run_test_progress.setFormat(_translate("TransportationSafety", "%p%", None))
         self.button_roadusers_tracking_test.setText(_translate("TransportationSafety", "Test on Sample", None))
-        self.button_roadusers_tracking_run.setText(_translate("TransportationSafety", "Run", None))
         self.roadusers_tracking_back_button.setText(_translate("TransportationSafety", "<Track Features", None))
         self.roadusers_tracking_continue_button.setText(_translate("TransportationSafety", " Continue >", None))
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.roadusers_tab), _translate("TransportationSafety", "Track Road Users", None))
         self.speedLimitLabel.setText(_translate("TransportationSafety", "speed limit", None))
         self.timeToCollisionLabel.setText(_translate("TransportationSafety", "time to collision", None))
         self.vehiclesOnlyLabel.setText(_translate("TransportationSafety", "vehicles only", None))
-        self.runResultsButton.setText(_translate("TransportationSafety", "Run Results", None))
+        self.runAnalysisButton.setText(_translate("TransportationSafety", "Run Video Analysis", None))
         self.main_tab_widget.setTabText(self.main_tab_widget.indexOf(self.tab_results), _translate("TransportationSafety", "Results", None))
         self.menuTraffic_Analysis.setTitle(_translate("TransportationSafety", "File", None))
         self.menuProject.setTitle(_translate("TransportationSafety", "Project", None))

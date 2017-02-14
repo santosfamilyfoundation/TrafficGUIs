@@ -6,6 +6,7 @@ from custom.video_frame_player import VideoFramePlayer
 from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 import subprocess
+import zipfile
 
 
 ##############################################3
@@ -29,6 +30,7 @@ from app_config import get_base_project_dir, get_project_path, update_config_wit
 
 import pm
 from cloud_api import api
+from cloud_api import StatusPoller
 
 cvBlue = (0,0,255)
 cvRed = (255,0,0)
@@ -94,11 +96,8 @@ class MainGUI(QtGui.QMainWindow):
         # test button
         self.ui.button_roadusers_tracking_test.clicked.connect(self.test_object)
 
-        # runAnalysis button
-        self.ui.button_roadusers_tracking_run.clicked.connect(self.runAnalysis)
-
         # runResults button
-        self.ui.runResultsButton.clicked.connect(self.runResults)
+        self.ui.runAnalysisButton.clicked.connect(self.runAnalysis)
 
 
 ###########################################################################################################################################
@@ -140,13 +139,34 @@ class MainGUI(QtGui.QMainWindow):
         email = get_config_with_sections(get_config_path(), 'info', 'email')
         api.analysis(get_identifier(), email=email)
 
+        StatusPoller(get_identifier(), 'safety_analysis', 15, self.runResults).start()
+
     def runResults(self):
         """Runs server methods that generate safety metric results and visualizations"""
-        identifier = get_config_with_sections(get_config_path(), 'info', 'identifier')
+        identifier = get_identifier()
         ttc_threshold = self.ui.timeToCollisionLineEdit.text()
         vehicle_only = self.ui.vehiclesOnlyCheckBox.isChecked()
         speed_limit = self.ui.speedLimitLineEdit.text()
         api.results(identifier, ttc_threshold, vehicle_only, speed_limit)
+
+        StatusPoller(identifier, 'highlight_video', 15, self.retrieveResults).start()
+
+    def retrieveResults(self):
+        api.retrieveResults(get_identifier(), get_project_path())
+
+        results_dir = os.path.join(get_project_path(), "results")
+
+        with zipfile.ZipFile(os.path.join(results_dir, "results.zip"), "r") as zip_file:
+            zip_file.extractall(results_dir)
+
+        # Open the file location
+        if sys.platform == 'darwin':
+            subprocess.Popen(['open', '--', results_dir])
+        elif sys.platform == 'linux2':
+            subprocess.Popen(['xdg-open', '--', results_dir])
+        elif sys.platform == 'win32':
+            subprocess.Popen(['explorer', results_dir])
+
 
 ################################################################################################
 
