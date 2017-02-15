@@ -289,6 +289,8 @@ class CloudWizard:
             'identifier': identifier,
         }
         path = os.path.join(project_path, 'results', 'results.zip')
+        if os.path.exists(path):
+            os.remove(path)
         r = requests.get(self.server_addr + 'retrieveResults', data = payload, stream=True)
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
