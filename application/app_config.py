@@ -37,6 +37,8 @@ def get_project_video_path():
     return None
 
 def projects_exist():
+    if not os.path.exists(get_base_project_dir()):
+        return False
     return (len(os.listdir(get_base_project_dir())) > 0)
 
 def update_config_with_sections(config_path, section, option, value):

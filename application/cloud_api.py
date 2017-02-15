@@ -268,7 +268,7 @@ class CloudWizard:
 
         # sync calls
         self.roadUserCounts(identifier)
-        self.speedCDF(identifier, speed_limit, vehicle_only)
+        self.speedDistribution(identifier, speed_limit, vehicle_only)
 
         self.makeReport(identifier)
 
@@ -318,6 +318,8 @@ class CloudWizard:
             'identifier': identifier,
         }
         path = os.path.join(project_path, 'results', 'results.zip')
+        if os.path.exists(path):
+            os.remove(path)
         r = requests.get(self.server_addr + 'retrieveResults', data = payload, stream=True)
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
@@ -337,8 +339,8 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def speedCDF(self, identifier, speed_limit = None, vehicle_only = None):
-        print "speedCDF called with identifier = {}, speed_limit = {} and vehicle_only = {}"\
+    def speedDistribution(self, identifier, speed_limit = None, vehicle_only = None):
+        print "speedDistribution called with identifier = {}, speed_limit = {} and vehicle_only = {}"\
                 .format(identifier, speed_limit, vehicle_only)
 
         payload = {
@@ -347,7 +349,7 @@ class CloudWizard:
             'vehicle_only': vehicle_only
         }
 
-        r = requests.post(self.server_addr + 'speedCDF', data = payload)
+        r = requests.post(self.server_addr + 'speedDistribution', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
