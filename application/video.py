@@ -7,7 +7,7 @@ def convert_video_to_frames(video_path, images_dir, prefix, image_extension):
 		return False
 
 	if not os.path.exists(images_dir):
-        os.makedirs(images_dir)
+		os.makedirs(images_dir)
 
 	vidcap = cv2.VideoCapture(video_path)
 	success,image = vidcap.read()
