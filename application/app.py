@@ -8,7 +8,6 @@ from views.safety_main import Ui_TransportationSafety
 import subprocess
 import zipfile
 
-
 ##############################################3
 # testing feature objects
 # import display-trajectories
@@ -45,7 +44,6 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.newp = pm.ProjectWizard(self)
         self.pselector = project_selector.ProjectSelectionWizard(self)
-        self.message_helper = message_helper.MessageHelper(self)
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
@@ -131,6 +129,8 @@ class MainGUI(QtGui.QMainWindow):
                             frame_start = frame_start,\
                             num_frames = num_frames)
 
+        self.show_message('Your test of feature tracking has begun. When it has completed, a video will be shown in the window on the left. Please wait, this will only take about a minute.')
+
     def test_object(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
         num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
@@ -138,6 +138,8 @@ class MainGUI(QtGui.QMainWindow):
                             get_identifier(),\
                             frame_start = frame_start,\
                             num_frames = num_frames)
+
+        self.show_message('Your test of object tracking has begun. When it has completed, a video will be shown in the window on the left. Please wait, this will only take about a minute.')
 
 
     # for the runAnalysis button
@@ -150,6 +152,8 @@ class MainGUI(QtGui.QMainWindow):
 
         StatusPoller(get_identifier(), 'safety_analysis', 15, self.runResults).start()
 
+        self.show_message('Object tracking and safety analysis is now running. This will take a few minutes. After it is done, creating a safety report will run, which will take some additional time. \n\nPlease keep the application open during analysis. If it is closed, a safety report will not be generated.\n\nIf you entered an email on the first screen, you will be notified when each step has been completed.')
+
     def runResults(self):
         """Runs server methods that generate safety metric results and visualizations"""
         identifier = get_identifier()
@@ -160,6 +164,8 @@ class MainGUI(QtGui.QMainWindow):
 
         StatusPoller(identifier, 'highlight_video', 15, self.retrieveResults).start()
 
+        self.show_message('Creating a safety report now. This will take around five minutes.\n\nPlease keep the application open during this. If you close the application, your results will not be automatically downloaded')
+
     def retrieveResults(self):
         api.retrieveResults(get_identifier(), get_project_path())
 
@@ -167,6 +173,8 @@ class MainGUI(QtGui.QMainWindow):
 
         with zipfile.ZipFile(os.path.join(results_dir, "results.zip"), "r") as zip_file:
             zip_file.extractall(results_dir)
+
+        self.show_message('Results have been retrieved! This program will now open the folder containing the results.')
 
         # Open the file location
         if sys.platform == 'darwin':
@@ -188,6 +196,11 @@ class MainGUI(QtGui.QMainWindow):
     def show_prev_tab(self):
         curr_i = self.ui.main_tab_widget.currentIndex()
         self.ui.main_tab_widget.setCurrentIndex(curr_i - 1)
+
+    def show_message(self, message):
+        print("message")
+        helper = message_helper.MessageHelper(self)
+        helper.show_message(message)
 
     def open_project(self):
         fname = str(QtGui.QFileDialog.getExistingDirectory(self, "Open Existing Project Folder...", get_base_project_dir()))
