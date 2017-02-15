@@ -159,12 +159,13 @@ class CloudWizard:
             'identifier': identifier
         }
 
-        if not os.path.exists(os.path.join(project_path, 'test_videos')):
-            os.mkdir(os.path.join(project_path, 'test_video'))
-
         if test_flag == 'feature':
+            if not os.path.exists(os.path.join(project_path, 'feature_video')):
+                os.mkdir(os.path.join(project_path, 'feature_video'))
             path = os.path.join(project_path, 'feature_video', 'feature_video.mp4')
         elif test_flag == 'object':
+            if not os.path.exists(os.path.join(project_path, 'object_video')):
+                os.mkdir(os.path.join(project_path, 'object_video'))
             path = os.path.join(project_path, 'object_video', 'object_video.mp4')
         else:
             print "ERROR: Invalid flag"

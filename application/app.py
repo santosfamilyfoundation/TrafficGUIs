@@ -127,7 +127,7 @@ class MainGUI(QtGui.QMainWindow):
         api.getTestConfig('feature', get_identifier(), project_path)
 
         images_folder = os.path.join(project_path, 'feature_video', 'images')
-        video_path - os.path.join(project_path, 'feature_video')
+        video_path = os.path.join(project_path, 'feature_video', 'feature_video.mp4')
 
         convert_video_to_frames(video_path, images_folder, 'feature_images', 'jpg')
 
@@ -149,7 +149,7 @@ class MainGUI(QtGui.QMainWindow):
         api.getTestConfig('object', get_identifier(), project_path)
 
         images_folder = os.path.join(project_path, 'object_video', 'images')
-        video_path - os.path.join(project_path, 'object_video')
+        video_path = os.path.join(project_path, 'object_video', 'object_video.mp4')
 
         convert_video_to_frames(video_path, images_folder, 'object_images', 'jpg')
         
