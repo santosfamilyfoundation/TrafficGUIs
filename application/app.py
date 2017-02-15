@@ -129,12 +129,11 @@ class MainGUI(QtGui.QMainWindow):
         images_folder = os.path.join(project_path, 'feature_video', 'images')
         video_path - os.path.join(project_path, 'feature_video')
 
-        #TODO: The code is on an un-PR'ed branch
-        convert_video_to_frames(video_path, images_folder, 'feature_images', 'JPEG')
-        
-        #TODO: This should be done automatically
-        frame_rate = 30;
-        self.feature_tracking_video_player.loadFrames(images_folder,frame_rate) 
+        convert_video_to_frames(video_path, images_folder, 'feature_images', 'jpg')
+
+        video = cv2.VideoCapture(video_path)
+        fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
+        self.feature_tracking_video_player.loadFrames(images_folder,fps) 
 
     def test_object(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
@@ -152,12 +151,11 @@ class MainGUI(QtGui.QMainWindow):
         images_folder = os.path.join(project_path, 'object_video', 'images')
         video_path - os.path.join(project_path, 'object_video')
 
-        #TODO: The code is on an un-PR'ed branch
-        convert_video_to_frames(video_path, images_folder, 'object_images', 'JPEG')
+        convert_video_to_frames(video_path, images_folder, 'object_images', 'jpg')
         
-        #TODO: This should be done automatically
-        frame_rate = 30;
-        self.feature_tracking_video_player.loadFrames(images_folder,frame_rate)        
+        video = cv2.VideoCapture(video_path)
+        fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
+        self.object_tracking_video_player.loadFrames(images_folder,fps)       
         
 
     # for the runAnalysis button
