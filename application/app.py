@@ -26,9 +26,10 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import numpy as np
-from app_config import get_base_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path, get_identifier
+from app_config import get_base_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path, get_identifier, projects_exist
 
 import pm
+import project_selector
 from cloud_api import api
 from cloud_api import StatusPoller
 
@@ -42,6 +43,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui = Ui_TransportationSafety()
         self.ui.setupUi(self)
         self.newp = pm.ProjectWizard(self)
+        self.pselector = project_selector.ProjectSelectionWizard(self)
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
@@ -111,6 +113,11 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.homography_aerialview.status_label = self.ui.homography_aerial_status_label
         self.ui.homography_compute_button.clicked.connect(self.homography_compute)
         self.show()
+
+        if projects_exist():
+            self.pselector.show()
+        else:
+            self.newp.show()
 
 ######################################################################################################
 
