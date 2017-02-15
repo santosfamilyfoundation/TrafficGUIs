@@ -157,7 +157,7 @@ class MainGUI(QtGui.QMainWindow):
                             get_identifier(),\
                             frame_start = frame_start,\
                             num_frames = num_frames)
-        StatusPoller(get_identifier(), 'object_test', 5, self.getObjectVideo).start()
+        StatusPoller(get_identifier(), 'object_test', 5, self.test_object_callback).start()
 
     def test_object_callback(self):
         # Emitting the signal will call get_object_video on the main thread
