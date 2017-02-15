@@ -188,7 +188,7 @@ class MainGUI(QtGui.QMainWindow):
 
         video = cv2.VideoCapture(video_path)
         fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
-        self.object_tracking_video_player.loadFrames(images_folder, fps, prefix=images_prefix, extension=extension)
+        self.roadusers_tracking_video_player.loadFrames(images_folder, fps, prefix=images_prefix, extension=extension)
 
     # for the runAnalysis button
     def runAnalysis(self):
