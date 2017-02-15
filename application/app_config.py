@@ -4,7 +4,7 @@ import os
 
 
 class AppConfig(object):
-    PROJECT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "project_dir"))
+    PROJECT_DIR = os.path.realpath(os.path.join(os.path.expanduser('~'),"Documents" , "TrafficAnalysis", "project_dir"))
     CURRENT_PROJECT_NAME = None
 
 def get_base_project_dir():
