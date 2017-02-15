@@ -4,7 +4,7 @@ import shutil
 import cv2
 from custom.video_frame_player import VideoFramePlayer
 from PyQt4 import QtGui, QtCore
-from safety_main import Ui_TransportationSafety
+from views.safety_main import Ui_TransportationSafety
 import subprocess
 import zipfile
 
@@ -29,6 +29,7 @@ import numpy as np
 from app_config import get_base_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path, get_identifier, projects_exist
 
 import pm
+import message_helper
 import project_selector
 from cloud_api import api
 from cloud_api import StatusPoller
@@ -44,6 +45,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.newp = pm.ProjectWizard(self)
         self.pselector = project_selector.ProjectSelectionWizard(self)
+        self.message_helper = message_helper.MessageHelper(self)
 
         # Connect Menu actions
         self.ui.actionOpen_Project.triggered.connect(self.open_project)
