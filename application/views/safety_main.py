@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'application/safety_main.ui'
 #
-# Created: Mon Feb 13 16:16:49 2017
+# Created: Mon Feb 13 17:43:32 2017
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -32,6 +32,11 @@ class Ui_TransportationSafety(object):
         self.gridLayout_2 = QtGui.QGridLayout(self.centralWidget)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
         self.main_tab_widget = QtGui.QTabWidget(self.centralWidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.main_tab_widget.sizePolicy().hasHeightForWidth())
+        self.main_tab_widget.setSizePolicy(sizePolicy)
         self.main_tab_widget.setAcceptDrops(False)
         self.main_tab_widget.setAutoFillBackground(False)
         self.main_tab_widget.setTabShape(QtGui.QTabWidget.Rounded)
@@ -205,6 +210,10 @@ class Ui_TransportationSafety(object):
         self.button_feature_tracking_test.setObjectName(_fromUtf8("button_feature_tracking_test"))
         self.horizontalLayout_6.addWidget(self.button_feature_tracking_test)
         self.gridLayout.addWidget(self.feature_tracking_run_panel, 1, 1, 1, 1)
+        self.feature_tracking_video_layout = QtGui.QVBoxLayout()
+        self.feature_tracking_video_layout.setSizeConstraint(QtGui.QLayout.SetNoConstraint)
+        self.feature_tracking_video_layout.setObjectName(_fromUtf8("feature_tracking_video_layout"))
+        self.gridLayout.addLayout(self.feature_tracking_video_layout, 0, 0, 2, 1)
         self.feature_tracking_parameter_area = QtGui.QScrollArea(self.tab_features)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -216,8 +225,8 @@ class Ui_TransportationSafety(object):
         self.feature_tracking_parameter_area.setWidgetResizable(True)
         self.feature_tracking_parameter_area.setObjectName(_fromUtf8("feature_tracking_parameter_area"))
         self.feature_tracking_parameter_widget = QtGui.QWidget()
-        self.feature_tracking_parameter_widget.setGeometry(QtCore.QRect(0, 0, 468, 425))
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
+        self.feature_tracking_parameter_widget.setGeometry(QtCore.QRect(0, 0, 597, 541))
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.feature_tracking_parameter_widget.sizePolicy().hasHeightForWidth())
@@ -231,10 +240,6 @@ class Ui_TransportationSafety(object):
         self.formLayout_2.setLayout(0, QtGui.QFormLayout.LabelRole, self.feature_tracking_parameter_layout)
         self.feature_tracking_parameter_area.setWidget(self.feature_tracking_parameter_widget)
         self.gridLayout.addWidget(self.feature_tracking_parameter_area, 0, 1, 1, 1)
-        self.feature_tracking_video_layout = QtGui.QVBoxLayout()
-        self.feature_tracking_video_layout.setSizeConstraint(QtGui.QLayout.SetNoConstraint)
-        self.feature_tracking_video_layout.setObjectName(_fromUtf8("feature_tracking_video_layout"))
-        self.gridLayout.addLayout(self.feature_tracking_video_layout, 0, 0, 2, 1)
         self.gridLayout_3.addLayout(self.gridLayout, 0, 0, 1, 1)
         self.feature_tracking_flow_control = QtGui.QFrame(self.tab_features)
         self.feature_tracking_flow_control.setMinimumSize(QtCore.QSize(0, 50))
@@ -294,7 +299,7 @@ class Ui_TransportationSafety(object):
         self.roadusers_tracking_parameter_area.setObjectName(_fromUtf8("roadusers_tracking_parameter_area"))
         self.roadusers_tracking_parameter_widget = QtGui.QWidget()
         self.roadusers_tracking_parameter_widget.setGeometry(QtCore.QRect(0, 0, 597, 541))
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.roadusers_tracking_parameter_widget.sizePolicy().hasHeightForWidth())
@@ -339,7 +344,7 @@ class Ui_TransportationSafety(object):
         self.results_parameter_area.setWidgetResizable(True)
         self.results_parameter_area.setObjectName(_fromUtf8("results_parameter_area"))
         self.results_parameter_widget = QtGui.QWidget()
-        self.results_parameter_widget.setGeometry(QtCore.QRect(0, 0, 920, 545))
+        self.results_parameter_widget.setGeometry(QtCore.QRect(0, 0, 1206, 661))
         self.results_parameter_widget.setObjectName(_fromUtf8("results_parameter_widget"))
         self.formLayoutWidget = QtGui.QWidget(self.results_parameter_widget)
         self.formLayoutWidget.setGeometry(QtCore.QRect(10, 10, 261, 111))
@@ -438,7 +443,7 @@ class Ui_TransportationSafety(object):
         self.menuBar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(TransportationSafety)
-        self.main_tab_widget.setCurrentIndex(0)
+        self.main_tab_widget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(TransportationSafety)
 
     def retranslateUi(self, TransportationSafety):
