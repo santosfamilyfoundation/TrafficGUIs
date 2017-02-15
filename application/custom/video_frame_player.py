@@ -23,6 +23,7 @@ class VideoFramePlayer(QtGui.QWidget):
             QtCore.Qt.AlignVCenter)
 
         # Sets the image frames for this player to display
+        self.frame_rate = 30
         self.max_frame_rate = 5.0
         self.currentFrame = 0
         self.frames = []
