@@ -31,9 +31,8 @@ from app_config import get_base_project_dir, get_project_path, update_config_wit
 import pm
 from cloud_api import api
 from cloud_api import StatusPoller
+from video import convert_video_to_frames
 
-cvBlue = (0,0,255)
-cvRed = (255,0,0)
 
 class MainGUI(QtGui.QMainWindow):
 
@@ -121,6 +120,21 @@ class MainGUI(QtGui.QMainWindow):
                             get_identifier(),\
                             frame_start = frame_start,\
                             num_frames = num_frames)
+        StatusPoller(get_identifier(), 'feature_test', 5, self.getFeatureVideo).start()
+
+    def getFeatureVideo(self):
+        project_path = get_project_path()
+        api.getTestConfig('feature', get_identifier(), project_path)
+
+        images_folder = os.path.join(project_path, 'feature_video', 'images')
+        video_path - os.path.join(project_path, 'feature_video')
+
+        #TODO: The code is on an un-PR'ed branch
+        convert_video_to_frames(video_path, images_folder, 'feature_images', 'JPEG')
+        
+        #TODO: This should be done automatically
+        frame_rate = 30;
+        self.feature_tracking_video_player.loadFrames(images_folder,frame_rate) 
 
     def test_object(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
@@ -129,7 +143,22 @@ class MainGUI(QtGui.QMainWindow):
                             get_identifier(),\
                             frame_start = frame_start,\
                             num_frames = num_frames)
+        StatusPoller(get_identifier(), 'object_test', 5, self.getObjectVideo).start()
 
+    def getObjectVideo(self):
+        project_path = get_project_path()
+        api.getTestConfig('object', get_identifier(), project_path)
+
+        images_folder = os.path.join(project_path, 'object_video', 'images')
+        video_path - os.path.join(project_path, 'object_video')
+
+        #TODO: The code is on an un-PR'ed branch
+        convert_video_to_frames(video_path, images_folder, 'object_images', 'JPEG')
+        
+        #TODO: This should be done automatically
+        frame_rate = 30;
+        self.feature_tracking_video_player.loadFrames(images_folder,frame_rate)        
+        
 
     # for the runAnalysis button
     def runAnalysis(self):
@@ -301,6 +330,8 @@ class MainGUI(QtGui.QMainWindow):
         self.homography_display_results()
 
     def homography_display_results(self):
+        cvBlue = (0,0,255)
+        cvRed = (255,0,0)
         homography_path = os.path.join(get_project_path(), "homography")
         worldImg = cv2.imread(os.path.join(homography_path, "aerial.png"))
         videoImg = cv2.imread(os.path.join(homography_path, "camera.png"))
