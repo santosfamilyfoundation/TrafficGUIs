@@ -167,14 +167,16 @@ class MainGUI(QtGui.QMainWindow):
         project_path = get_project_path()
         api.getTestConfig('object', get_identifier(), project_path)
 
+        images_prefix = 'object_images-'
+        extension = 'png'
         images_folder = os.path.join(project_path, 'object_video', 'images')
         video_path = os.path.join(project_path, 'object_video', 'object_video.mp4')
 
-        convert_video_to_frames(video_path, images_folder, 'object_images', 'jpg')
+        convert_video_to_frames(video_path, images_folder, prefix=images_prefix, extension=extension)
 
         video = cv2.VideoCapture(video_path)
         fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
-        self.object_tracking_video_player.loadFrames(images_folder,fps)
+        self.object_tracking_video_player.loadFrames(images_folder, fps, prefix=images_prefix, extension=extension)
 
 
     # for the runAnalysis button
