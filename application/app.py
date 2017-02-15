@@ -8,7 +8,6 @@ from safety_main import Ui_TransportationSafety
 import subprocess
 import zipfile
 
-
 ##############################################3
 # testing feature objects
 # import display-trajectories
@@ -35,6 +34,10 @@ from video import convert_video_to_frames
 
 
 class MainGUI(QtGui.QMainWindow):
+    test_feature_callback_signal = QtCore.pyqtSignal()
+    test_object_callback_signal = QtCore.pyqtSignal()
+    analysis_callback_signal = QtCore.pyqtSignal()
+    results_callback_signal = QtCore.pyqtSignal()
 
     def __init__(self):
         super(MainGUI, self).__init__()
@@ -58,6 +61,12 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.homography_continue_button.clicked.connect(self.show_next_tab)
         self.ui.feature_tracking_continue_button.clicked.connect(self.show_next_tab)
         self.ui.feature_tracking_back_button.clicked.connect(self.show_prev_tab)
+
+        # Connect callback signals
+        self.test_feature_callback_signal.connect(self.get_feature_video)
+        self.test_object_callback_signal.connect(self.get_object_video)
+        self.analysis_callback_signal.connect(self.runResults)
+        self.results_callback_signal.connect(self.retrieveResults)
 
 ###########################################################################################################################################
 
@@ -120,20 +129,26 @@ class MainGUI(QtGui.QMainWindow):
                             get_identifier(),\
                             frame_start = frame_start,\
                             num_frames = num_frames)
-        StatusPoller(get_identifier(), 'feature_test', 5, self.getFeatureVideo).start()
+        StatusPoller(get_identifier(), 'feature_test', 5, self.test_feature_callback).start()
 
-    def getFeatureVideo(self):
+    def test_feature_callback(self):
+        # Emitting the signal will call get_feature_video on the main thread
+        self.test_feature_callback_signal.emit()
+
+    def get_feature_video(self):
         project_path = get_project_path()
         api.getTestConfig('feature', get_identifier(), project_path)
 
+        images_prefix = 'feature_images-'
+        extension = 'png'
         images_folder = os.path.join(project_path, 'feature_video', 'images')
         video_path = os.path.join(project_path, 'feature_video', 'feature_video.mp4')
 
-        convert_video_to_frames(video_path, images_folder, 'feature_images', 'jpg')
+        convert_video_to_frames(video_path, images_folder, prefix=images_prefix, extension=extension)
 
         video = cv2.VideoCapture(video_path)
         fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
-        self.feature_tracking_video_player.loadFrames(images_folder,fps) 
+        self.feature_tracking_video_player.loadFrames(images_folder, fps, prefix=images_prefix, extension=extension)
 
     def test_object(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
@@ -142,21 +157,27 @@ class MainGUI(QtGui.QMainWindow):
                             get_identifier(),\
                             frame_start = frame_start,\
                             num_frames = num_frames)
-        StatusPoller(get_identifier(), 'object_test', 5, self.getObjectVideo).start()
+        StatusPoller(get_identifier(), 'object_test', 5, self.test_object_callback).start()
 
-    def getObjectVideo(self):
+    def test_object_callback(self):
+        # Emitting the signal will call get_object_video on the main thread
+        self.test_object_callback_signal.emit()
+
+    def get_object_video(self):
         project_path = get_project_path()
         api.getTestConfig('object', get_identifier(), project_path)
 
+        images_prefix = 'object_images-'
+        extension = 'png'
         images_folder = os.path.join(project_path, 'object_video', 'images')
         video_path = os.path.join(project_path, 'object_video', 'object_video.mp4')
 
-        convert_video_to_frames(video_path, images_folder, 'object_images', 'jpg')
-        
+        convert_video_to_frames(video_path, images_folder, prefix=images_prefix, extension=extension)
+
         video = cv2.VideoCapture(video_path)
         fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
-        self.object_tracking_video_player.loadFrames(images_folder,fps)       
-        
+        self.roadusers_tracking_video_player.loadFrames(images_folder, fps, prefix=images_prefix, extension=extension)
+
 
     # for the runAnalysis button
     def runAnalysis(self):
@@ -166,7 +187,11 @@ class MainGUI(QtGui.QMainWindow):
         email = get_config_with_sections(get_config_path(), 'info', 'email')
         api.analysis(get_identifier(), email=email)
 
-        StatusPoller(get_identifier(), 'safety_analysis', 15, self.runResults).start()
+        StatusPoller(get_identifier(), 'safety_analysis', 15, self.analysisCallback).start()
+
+    def analysisCallback(self):
+        # Emitting this signal will call self.runResults on the main thread
+        self.analysis_callback_signal.emit()
 
     def runResults(self):
         """Runs server methods that generate safety metric results and visualizations"""
@@ -176,7 +201,11 @@ class MainGUI(QtGui.QMainWindow):
         speed_limit = self.ui.speedLimitLineEdit.text()
         api.results(identifier, ttc_threshold, vehicle_only, speed_limit)
 
-        StatusPoller(identifier, 'highlight_video', 15, self.retrieveResults).start()
+        StatusPoller(identifier, 'highlight_video', 15, self.resultsCallback).start()
+
+    def resultsCallback(self):
+        # Emitting this signal will call self.runResults on the main thread
+        self.results_callback_signal.emit()
 
     def retrieveResults(self):
         api.retrieveResults(get_identifier(), get_project_path())

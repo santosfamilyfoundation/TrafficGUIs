@@ -2,7 +2,7 @@
 import cv2
 import os
 
-def convert_video_to_frames(video_path, images_dir, prefix, image_extension):
+def convert_video_to_frames(video_path, images_dir, prefix='image-', extension='png'):
 	if not os.path.exists(video_path):
 		return False
 
@@ -10,18 +10,16 @@ def convert_video_to_frames(video_path, images_dir, prefix, image_extension):
 		os.makedirs(images_dir)
 
 	vidcap = cv2.VideoCapture(video_path)
-	success,image = vidcap.read()
 	count = 0
 	success = True
 	while success:
 		success, image = vidcap.read()
-		print 'Read a new frame: ', success
 		if success:
-			if '.' in image_extension:
+			if '.' in extension:
 				format_string = "%d"
 			else:
 				format_string = "%d."
-			filename = prefix + format_string + image_extension
+			filename = prefix + format_string + extension
 			cv2.imwrite(os.path.join(images_dir, filename % count), image)     # save frame as JPEG file
 			count += 1
 
