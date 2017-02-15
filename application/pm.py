@@ -109,6 +109,10 @@ class ProjectWizard(QtGui.QWizard):
         directory_names = ["homography", "results"]
         pr_path = get_project_path()
         if not os.path.exists(pr_path):
+            # Set URL to use before doing anything
+            server = str(self.ui.newp_video_server_input.text())
+            update_api(server)
+
             progress_msg.setText("Creating project directories...")
             for new_dir in directory_names:
                 progress_bar.setValue(progress_bar.value() + 5)
@@ -117,7 +121,6 @@ class ProjectWizard(QtGui.QWizard):
             progress_bar.setValue(progress_bar.value() + 5)
             progress_msg.setText("Writing configuration files...")
             self._write_to_project_config()
-            update_api()
 
             progress_msg.setText("Copying video file...")
             video_extension = self.videopath.split('.')[-1]
@@ -193,7 +196,11 @@ def load_project(project_name, main_window):
     ac.CURRENT_PROJECT_NAME = project_name
 
     load_homography(main_window)
-    update_api()
+
+    # Reload the URL for the project
+    addr = get_config_with_sections(get_config_path(), "info", "server")
+    update_api(addr)
+
     load_config(main_window)
 
 def loadPointCorrespondences(filename):
@@ -248,8 +255,7 @@ def load_homography(main_window):
     else:
         print ("{} does not exist. No points loaded.".format(corr_path))
 
-def update_api():
-    addr = get_config_with_sections(get_config_path(), "info", "server")
+def update_api(addr):
     if addr:
         api.set_url(addr)
     else:
