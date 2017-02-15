@@ -7,7 +7,6 @@ from PyQt4 import QtGui, QtCore
 from safety_main import Ui_TransportationSafety
 import subprocess
 import zipfile
-import threading
 
 ##############################################3
 # testing feature objects
