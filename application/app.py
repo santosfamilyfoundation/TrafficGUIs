@@ -254,7 +254,6 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.main_tab_widget.setCurrentIndex(curr_i - 1)
 
     def show_message(self, message):
-        print("message")
         helper = message_helper.MessageHelper(self)
         helper.show_message(message)
 
