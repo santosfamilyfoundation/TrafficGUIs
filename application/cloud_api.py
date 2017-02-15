@@ -151,6 +151,35 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
+    def getTestConfig(self, test_flag, identifier, project_path):
+        print "getTestConfig called with identifier = {} and test_flag = {}".format(identifier,test_flag)
+
+        payload = {
+            'test_flag': test_flag,
+            'identifier': identifier
+        }
+
+        if test_flag == 'feature':
+            if not os.path.exists(os.path.join(project_path, 'feature_video')):
+                os.mkdir(os.path.join(project_path, 'feature_video'))
+            path = os.path.join(project_path, 'feature_video', 'feature_video.mp4')
+        elif test_flag == 'object':
+            if not os.path.exists(os.path.join(project_path, 'object_video')):
+                os.mkdir(os.path.join(project_path, 'object_video'))
+            path = os.path.join(project_path, 'object_video', 'object_video.mp4')
+        else:
+            print "ERROR: Invalid flag"
+            return
+
+        r = requests.get(self.server_addr + 'testConfig', data = payload, stream=True)
+
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
+            for chunk in r.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
+        print "Status Code: {}".format(r.status_code)
+
     def defaultConfig(self):
         r = requests.get(self.server_addr + 'defaultConfig')
         return r.json()
