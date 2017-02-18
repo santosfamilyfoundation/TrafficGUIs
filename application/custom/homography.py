@@ -24,10 +24,12 @@ class HomographyView(QtGui.QGraphicsView):
         """
         self.scene_image = image
         new_scene = HomographyScene(self)
-        pmap = new_scene.addPixmap(QtGui.QPixmap().fromImage(image))
-        new_scene.register_pixmap(pmap)
+        pmap = QtGui.QPixmap().fromImage(image)
+        pmapitem = new_scene.addPixmap(pmap)
+        new_scene.register_pixmap(pmapitem)
         new_scene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
         self.setScene(new_scene)
+        self.fitInView(0, 0, pmap.width(), pmap.height(), Qt.KeepAspectRatio)
         self.show()
         self.image_loaded = True
 
@@ -76,9 +78,11 @@ class HomographyResultView(QtGui.QGraphicsView):
         """
         self.scene_image = image
         new_scene = QtGui.QGraphicsScene(self)
-        pmap = new_scene.addPixmap(QtGui.QPixmap().fromImage(image))
+        pmap = QtGui.QPixmap().fromImage(image)
+        pmapitem = new_scene.addPixmap(pmap)
         new_scene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
         self.setScene(new_scene)
+        self.fitInView(0, 0, pmap.width(), pmap.height(), Qt.KeepAspectRatio)
         self.show()
         self.image_loaded = True
 
