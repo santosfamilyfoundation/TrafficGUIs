@@ -3,7 +3,7 @@ Project management classes and functions
 """
 
 from PyQt4 import QtGui, QtCore
-from new_project import Ui_create_new_project
+from views.new_project import Ui_create_new_project
 import os
 from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
 import time
@@ -14,13 +14,11 @@ try:
     from PIL import Image
 except:
     import Image
-import cvutils
 import numpy as np
 
 from app_config import AppConfig as ac
-from app_config import check_project_cfg_option, update_project_cfg, check_project_cfg_section
-from qt_plot import plot_results
-
+from app_config import get_project_path, get_config_path, config_section_exists, get_config_with_sections, update_config_with_sections
+from cloud_api import api
 
 class ProjectWizard(QtGui.QWizard):
 
@@ -33,8 +31,9 @@ class ProjectWizard(QtGui.QWizard):
         self.aerial_image_selected = False
         self.video_selected = False
 
-        # self.DEFAULT_PROJECT_DIR = os.path.join(os.getcwd(), os.pardir, "project_dir")
-        self.DEFAULT_PROJECT_DIR = ac.PROJECT_DIR
+        # Remove '?' icon
+        flags = self.windowFlags() & (~QtCore.Qt.WindowContextHelpButtonHint)
+        self.setWindowFlags(flags)
 
         self.ui.newp_start_creation.clicked.connect(self.start_create_project)
         self.config_parser = SafeConfigParser()
@@ -45,7 +44,11 @@ class ProjectWizard(QtGui.QWizard):
 
         self.ui.newp_p2.registerField("video_path*", self.ui.newp_video_input)
         self.ui.newp_p2.registerField("video_start_datetime", self.ui.newp_video_start_time_input)
-        self.ui.newp_p2.registerField("video_fps*", self.ui.newp_video_fps_input)
+        self.ui.newp_p2.registerField("video_server_input*", self.ui.newp_video_server_input)
+        self.ui.newp_p2.registerField("video_email", self.ui.newp_video_email_input)
+
+        # Set default server
+        self.ui.newp_video_server_input.setText("http://localhost:8088")
 
         self.ui.newp_p2.registerField("aerial_image*", self.ui.newp_aerial_image_input)
 
@@ -100,13 +103,16 @@ class ProjectWizard(QtGui.QWizard):
             self.create_project_dir()
 
     def create_project_dir(self):
-        self.project_name = str(self.ui.newp_projectname_input.text())
+        ac.CURRENT_PROJECT_NAME = str(self.ui.newp_projectname_input.text())
         progress_bar = self.ui.newp_creation_progress
         progress_msg = self.ui.newp_creation_status
-        directory_names = ["homography", ".temp", "run", "results"]
-        pr_path = os.path.join(self.DEFAULT_PROJECT_DIR, self.project_name)
+        directory_names = ["homography", "results"]
+        pr_path = get_project_path()
         if not os.path.exists(pr_path):
-            self.PROJECT_PATH = pr_path
+            # Set URL to use before doing anything
+            server = str(self.ui.newp_video_server_input.text())
+            update_api(server)
+
             progress_msg.setText("Creating project directories...")
             for new_dir in directory_names:
                 progress_bar.setValue(progress_bar.value() + 5)
@@ -115,29 +121,15 @@ class ProjectWizard(QtGui.QWizard):
             progress_bar.setValue(progress_bar.value() + 5)
             progress_msg.setText("Writing configuration files...")
             self._write_to_project_config()
-            copy("default/tracking.cfg", os.path.join(pr_path, "tracking.cfg"))
-	    copy("default/classifier.cfg", os.path.join(pr_path, "classifier.cfg"))
-	    with open(os.path.join(pr_path, 'tracking.cfg') ,'r+') as trkcfg:
-                old = trkcfg.read()
-                trkcfg.seek(0)
-		newline = 'classifier-filename = ../project_dir/{}/classifier.cfg'.format(self.project_name)
-                trkcfg.write(newline+old)
-	    with open(os.path.join(pr_path, 'classifier.cfg'),'r+') as newcfg:
-	        old = newcfg.read()
-                newcfg.seek(0)
- 		nline1 = 'pbv-svm-filename = ../project_dir/{}/modelPBV.xml\n'.format(self.project_name)
-		nline2 = 'bv-svm-filename = ../project_dir/{}/modelBV.xml\n'.format(self.project_name)
-		newcfg.write(nline1+nline2+old)
-
-            progress_msg.setText("Copying object classification files...")
-            svms = ["modelBV.xml", "modelPB.xml", "modelPBV.xml", "modelPV.xml"]
-            for svm in svms:
-                copy("default/{}".format(svm), os.path.join(pr_path, svm))
-                progress_bar.setValue(progress_bar.value() + 5)
 
             progress_msg.setText("Copying video file...")
-            video_dest = os.path.join(pr_path, os.path.basename(self.videopath))
+            video_extension = self.videopath.split('.')[-1]
+            video_dest = os.path.join(pr_path, 'video.' + video_extension)
             copy(self.videopath, video_dest)
+
+            progress_msg.setText("Uploading video file...")
+            identifier = api.uploadVideo(self.videopath)
+            update_config_with_sections(get_config_path(), 'info', 'identifier', identifier)
             progress_bar.setValue(80)
 
             progress_msg.setText("Extracting camera image...")
@@ -158,7 +150,7 @@ class ProjectWizard(QtGui.QWizard):
             progress_bar.setValue(95)
             progress_msg.setText("Complete.")
 
-            progress_msg.setText("Opening {} project...".format(self.project_name))
+            progress_msg.setText("Opening {} project...".format(ac.CURRENT_PROJECT_NAME))
             self.load_new_project()
             progress_bar.setValue(100)
             progress_msg.setText("Complete.")
@@ -169,43 +161,58 @@ class ProjectWizard(QtGui.QWizard):
     def _write_to_project_config(self):
         ts = time.time()
         vid_ts = self.ui.newp_video_start_time_input.dateTime().toPyDateTime()
+        email = str(self.ui.newp_video_email_input.text())
+        server = str(self.ui.newp_video_server_input.text())
+
         timestamp = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y %H:%M:%S %Z')
         video_timestamp = vid_ts.strftime('%d-%m-%Y %H:%M:%S %Z')
         self.config_parser.add_section("info")
-        self.config_parser.set("info", "project_name", self.project_name)
+        self.config_parser.set("info", "project_name", ac.CURRENT_PROJECT_NAME)
         self.config_parser.set("info", "creation_date", timestamp)
+        self.config_parser.set("info", "server", server)
+        self.config_parser.set("info", "email", email)
         self.config_parser.add_section("video")
-        self.config_parser.set("video", "name", os.path.basename(self.videopath))
+        video_extension = self.videopath.split('.')[-1]
+        self.config_parser.set("video", "name", 'video.'+video_extension)
         self.config_parser.set("video", "source", self.videopath)
-        self.config_parser.set("video", "framerate", str(self.ui.newp_video_fps_input.text()))
         self.config_parser.set("video", "start", video_timestamp)
 
-        with open(os.path.join(self.PROJECT_PATH, "{}.cfg".format(self.project_name)), 'wb') as configfile:
+        self.config_parser.add_section("config")
+        try:
+            config = api.defaultConfig()
+            for (key, value) in config.iteritems():
+                self.config_parser.set("config", key, str(value))
+        except Exception as e:
+            print("Failed to get default configuration")
+            print(str(e))
+
+        with open(os.path.join(get_config_path()), 'wb') as configfile:
             self.config_parser.write(configfile)
 
     def load_new_project(self):
-        load_project(self.PROJECT_PATH, self.parent())
+        load_project(ac.CURRENT_PROJECT_NAME, self.parent())
 
-
-def load_project(folder_path, main_window):
-    path = os.path.normpath(folder_path)  # Clean path. May not be necessary.
-    project_name = os.path.basename(path)
-    project_cfg = os.path.join(path, "{}.cfg".format(project_name))
-    ac.CURRENT_PROJECT_PATH = path  # Set application-level variables indicating the currently open project
+def load_project(project_name, main_window):
     ac.CURRENT_PROJECT_NAME = project_name
-    ac.CURRENT_PROJECT_CONFIG = project_cfg
-    config_parser = SafeConfigParser()
-    config_parser.read(project_cfg)  # Read project config file.
-    ac.CURRENT_PROJECT_VIDEO_PATH = os.path.join(ac.CURRENT_PROJECT_PATH, config_parser.get("video", "name"))
-    load_homography(main_window)
-    load_results(main_window)
 
+    load_homography(main_window)
+
+    # Reload the URL for the project
+    addr = get_config_with_sections(get_config_path(), "info", "server")
+    update_api(addr)
+
+    load_config(main_window)
+
+def loadPointCorrespondences(filename):
+    '''Loads and returns the corresponding points in world (first 2 lines) and image spaces (last 2 lines)'''
+    points = np.loadtxt(filename, dtype=np.float32)
+    return  (points[:2,:].T, points[2:,:].T) # (world points, image points)
 
 def load_homography(main_window):
     """
     Loads homography information into the specified main window.
     """
-    path = ac.CURRENT_PROJECT_PATH
+    path = get_project_path()
     aerial_path = os.path.join(path, "homography", "aerial.png")
     camera_path = os.path.join(path, "homography", "camera.png")
     # TODO: Handle if above two paths do not exist
@@ -226,13 +233,13 @@ def load_homography(main_window):
         corr_path = pt_corrs_path
 
     # Has a homography been previously computed?
-    if check_project_cfg_section("homography"):  # If we can load homography unit-pix ratio load it
+    if config_section_exists(get_config_path(), "homography"):  # If we can load homography unit-pix ratio load it
         # load unit-pixel ratio
-        upr_exists, upr = check_project_cfg_option("homography", "unitpixelratio")
-        if upr_exists:
+        upr = get_config_with_sections(get_config_path(), "homography", "unitpixelratio")
+        if upr:
             gui.unit_px_input.setText(upr)
     if os.path.exists(corr_path):  # If points have been previously selected
-        worldPts, videoPts = cvutils.loadPointCorrespondences(corr_path)
+        worldPts, videoPts = loadPointCorrespondences(corr_path)
         main_window.homography = np.loadtxt(homo_path)
         if load_from is "image_pts":
             for point in worldPts:
@@ -248,7 +255,14 @@ def load_homography(main_window):
     else:
         print ("{} does not exist. No points loaded.".format(corr_path))
 
-def load_results(main_window):
-    if os.path.exists(os.path.join(ac.CURRENT_PROJECT_PATH, "homography", "homography.txt")):
-        if os.path.exists(os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")):
-            plot_results(main_window)
+def update_api(addr):
+    if addr:
+        api.set_url(addr)
+    else:
+        print("No server, resorting to localhost")
+        api.set_url('localhost')
+
+def load_config(main_window):
+    main_window.configGui_features.loadConfig_features()
+    main_window.configGui_object.loadConfig_objects()
+

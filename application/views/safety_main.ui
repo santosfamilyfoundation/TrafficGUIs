@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1129</width>
-    <height>808</height>
+    <width>1280</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,6 +17,12 @@
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
      <widget class="QTabWidget" name="main_tab_widget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="acceptDrops">
        <bool>false</bool>
       </property>
@@ -27,7 +33,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -429,6 +435,13 @@
             </layout>
            </widget>
           </item>
+          <item row="0" column="0" rowspan="2">
+           <layout class="QVBoxLayout" name="feature_tracking_video_layout">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetNoConstraint</enum>
+            </property>
+           </layout>
+          </item>
           <item row="0" column="1">
            <widget class="QScrollArea" name="feature_tracking_parameter_area">
             <property name="sizePolicy">
@@ -457,12 +470,12 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>538</width>
-               <height>568</height>
+               <width>597</width>
+               <height>541</height>
               </rect>
              </property>
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -477,13 +490,6 @@
              </layout>
             </widget>
            </widget>
-          </item>
-          <item row="0" column="0" rowspan="2">
-           <layout class="QVBoxLayout" name="feature_tracking_video_layout">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetNoConstraint</enum>
-            </property>
-           </layout>
           </item>
          </layout>
         </item>
@@ -573,13 +579,6 @@
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="button_roadusers_tracking_run">
-               <property name="text">
-                <string>Run</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
           </item>
@@ -612,12 +611,12 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>538</width>
-               <height>568</height>
+               <width>597</width>
+               <height>541</height>
               </rect>
              </property>
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -626,8 +625,18 @@
               <property name="fieldGrowthPolicy">
                <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
               </property>
+              <property name="labelAlignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
               <item row="0" column="0">
-               <layout class="QHBoxLayout" name="roadusers_tracking_parameter_layout"/>
+               <layout class="QHBoxLayout" name="roadusers_tracking_parameter_layout">
+                <property name="sizeConstraint">
+                 <enum>QLayout::SetDefaultConstraint</enum>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+               </layout>
               </item>
              </layout>
             </widget>
@@ -689,17 +698,80 @@
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <layout class="QGridLayout" name="results_grid">
-          <item row="1" column="1">
-           <widget class="MatplotlibWidget" name="results_plot2" native="true"/>
-          </item>
-          <item row="0" column="1">
-           <widget class="MatplotlibWidget" name="results_plot1" native="true"/>
-          </item>
           <item row="0" column="0">
-           <widget class="MatplotlibWidget" name="results_plot0" native="true"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="MatplotlibWidget" name="results_plot3" native="true"/>
+           <widget class="QScrollArea" name="results_parameter_area">
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="results_parameter_widget">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>1206</width>
+               <height>661</height>
+              </rect>
+             </property>
+             <widget class="QWidget" name="formLayoutWidget">
+              <property name="geometry">
+               <rect>
+                <x>10</x>
+                <y>10</y>
+                <width>261</width>
+                <height>111</height>
+               </rect>
+              </property>
+              <layout class="QFormLayout" name="results_parameter_form">
+               <item row="0" column="0">
+                <widget class="QLabel" name="speedLimitLabel">
+                 <property name="text">
+                  <string>speed limit</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="speedLimitLineEdit"/>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="timeToCollisionLabel">
+                 <property name="text">
+                  <string>time to collision</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QLineEdit" name="timeToCollisionLineEdit"/>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="vehiclesOnlyLabel">
+                 <property name="text">
+                  <string>vehicles only</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QCheckBox" name="vehiclesOnlyCheckBox"/>
+               </item>
+               <item row="1" column="0">
+                <layout class="QHBoxLayout" name="results_parameter_layout"/>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QPushButton" name="runAnalysisButton">
+              <property name="geometry">
+               <rect>
+                <x>12</x>
+                <y>130</y>
+                <width>261</width>
+                <height>32</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Run Video Analysis</string>
+              </property>
+             </widget>
+            </widget>
+           </widget>
           </item>
          </layout>
         </item>
@@ -714,8 +786,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1129</width>
-     <height>25</height>
+     <width>1280</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuTraffic_Analysis">
@@ -822,14 +894,14 @@
     <string>About</string>
    </property>
   </action>
+  <action name="actionFeedback">
+   <property name="text">
+    <string>Send Feedback</string>
+   </property>
+  </action>
   <action name="actionOpen_Video">
    <property name="text">
     <string>Open Video</string>
-   </property>
-  </action>
-  <action name="actionOpen_Config">
-   <property name="text">
-    <string>Open Config </string>
    </property>
   </action>
   <action name="actionNew_Project">
@@ -857,12 +929,6 @@
    <class>HomographyResultView</class>
    <extends>QGraphicsView</extends>
    <header>custom/homography.h</header>
-  </customwidget>
-  <customwidget>
-   <class>MatplotlibWidget</class>
-   <extends>QWidget</extends>
-   <header>qt_plot.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

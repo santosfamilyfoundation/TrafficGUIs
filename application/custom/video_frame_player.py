@@ -23,6 +23,7 @@ class VideoFramePlayer(QtGui.QWidget):
             QtCore.Qt.AlignVCenter)
 
         # Sets the image frames for this player to display
+        self.frame_rate = 30
         self.max_frame_rate = 5.0
         self.currentFrame = 0
         self.frames = []
@@ -40,8 +41,8 @@ class VideoFramePlayer(QtGui.QWidget):
 
         self.reconfigurePlayer()
 
-    def setImage(self, imageFilename):
-        scaledImage = QtGui.QPixmap(os.path.join(os.getcwd(), imageFilename)).scaled(self.label.size(), QtCore.Qt.KeepAspectRatio)
+    def setImage(self, image_path):
+        scaledImage = QtGui.QPixmap(image_path).scaled(self.label.size(), QtCore.Qt.KeepAspectRatio)
         self.label.setPixmap(scaledImage)
 
     def playPause(self):
@@ -73,7 +74,7 @@ class VideoFramePlayer(QtGui.QWidget):
                 # We have to use a signal to redraw so that the redraw happens on the main thread
                 self.redraw_signal.emit()
 
-        threading.Thread(target=stepForward).start()    
+        threading.Thread(target=stepForward).start()
         self.timer = event.set
 
     def updateImage(self):
@@ -105,17 +106,31 @@ class VideoFramePlayer(QtGui.QWidget):
         endTime = (endMinutes*60+endSeconds)
         self.player.seek(startTime*1000)
 
-    def loadFrames(self, directory, frame_rate):
+    def loadFrames(self, directory, frame_rate, prefix='image-', extension='png'):
         '''
         This function takes a directory that holds a set of images, named 'image-001.png', 'image-002.png', etc.
         and loads them into the frame player
         '''
         self.frame_rate = frame_rate
         frames = []
-        for file in os.listdir(directory):
-            if file[0:6] == 'image-' and file[-4:] == '.png':
-                frames.append(os.path.join(directory, file))
-        self.frames = sorted(frames)
+        count = 0
+        success = True
+        while success:
+            if '.' in extension:
+                format_string = "%d"
+            else:
+                format_string = "%d."
+            filename = prefix + format_string + extension
+            path = os.path.join(directory, filename % count)
+
+            if os.path.exists(path):
+                frames.append(path)
+            else:
+                success = False
+
+            count += 1
+
+        self.frames = frames
         self.reconfigurePlayer()
 
     def reconfigurePlayer(self):

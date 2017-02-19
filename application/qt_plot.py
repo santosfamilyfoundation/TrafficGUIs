@@ -6,14 +6,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
-# # from application_config import AppConfig as ac
-# import application
-
-from app_config import AppConfig as ac
-from app_config import check_project_cfg_option
-# from .. import pm 
-# from .. import app_config
-# ac = app_config.AppConfig
+from app_config import get_project_path
 from plotting import visualization
 import random
 
@@ -84,12 +77,12 @@ class MatplotlibWidget(QtGui.QWidget):
 
 
 def plot_results(main_window):
-    if ac.CURRENT_PROJECT_PATH:
-        database_filename = os.path.join(ac.CURRENT_PROJECT_PATH, "run", "results.sqlite")
-        homography_filename = os.path.join(ac.CURRENT_PROJECT_PATH, "homography", "homography.txt")
-        camera_image = os.path.join(ac.CURRENT_PROJECT_PATH, "homography", "camera.png")
-        fps_exists, video_fps = check_project_cfg_option("video", "framerate")
-        video_fps = float(video_fps)
+    project_path = get_project_path()
+    if project_path:
+        database_filename = os.path.join(project_path, "run", "results.sqlite")
+        homography_filename = os.path.join(project_path, "homography", "homography.txt")
+        camera_image = os.path.join(project_path, "homography", "camera.png")
+        video_fps = 30 # TODO: What?
 
         plot0 = main_window.ui.results_plot0
         fig0 = plot0.getFigure()
