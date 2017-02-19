@@ -1,6 +1,7 @@
 # zoomslider.py
 from PyQt4 import QtGui
 
+slider_start = 50.
 
 class ZoomSlider(QtGui.QSlider):
     """Slider used for zooming a HomographyView or a HomographyResultView.
@@ -15,13 +16,13 @@ class ZoomSlider(QtGui.QSlider):
 
     def valueChanged_handler(self):
         if self.zoom_target is None:
-            self.setValue(100)  # If no target set, do not manipulate slider.
+            self.setValue(slider_start)  # If no target set, do not manipulate slider.
             return
         elif not self.zoom_target.image_loaded:
-            self.setValue(100)
+            self.setValue(slider_start)
             return
         slider_val = self.value()
-        desired_percentage = slider_val / 100.
+        desired_percentage = slider_val / slider_start 
         scale = desired_percentage / self.zoom_percentage
         self.zoom_percentage = desired_percentage
         self.zoom_target.scale(scale, scale)

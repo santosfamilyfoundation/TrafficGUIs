@@ -87,8 +87,8 @@ if __name__ == '__main__':
     remote.roadUserCounts(identifier)
     raw_input('Generating User Counts, please wait...\n Press Enter to Continue')
 
-    remote.speedCDF(identifier)
-    raw_input('Generating Speed CDF, please wait...\n Press Enter to Continue')
+    remote.speedDistribution(identifier)
+    raw_input('Generating Speed Distribution, please wait...\n Press Enter to Continue')
 
     remote.makeReport(identifier)
     raw_input('Generating Report, please wait...\n Press Enter to Continue')
