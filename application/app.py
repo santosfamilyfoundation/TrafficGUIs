@@ -62,8 +62,6 @@ class MainGUI(QtGui.QMainWindow):
 
         # Connect back + continue buttons
         self.ui.homography_continue_button.clicked.connect(self.show_next_tab)
-        self.ui.feature_tracking_continue_button.clicked.connect(self.show_next_tab)
-        self.ui.feature_tracking_back_button.clicked.connect(self.show_prev_tab)
 
         # Connect callback signals
         self.test_feature_callback_signal.connect(self.get_feature_video)
@@ -72,9 +70,6 @@ class MainGUI(QtGui.QMainWindow):
         self.results_callback_signal.connect(self.retrieveResults)
 
 ###########################################################################################################################################
-
-        self.ui.roadusers_tracking_back_button.clicked.connect(self.show_prev_tab)
-        self.ui.roadusers_tracking_continue_button.clicked.connect(self.show_next_tab)
 
 ##########################################################################################################################################
 
@@ -88,8 +83,18 @@ class MainGUI(QtGui.QMainWindow):
         self.configGui_features = configGui_features()
         self.ui.feature_tracking_parameter_layout.addWidget(self.configGui_features)
 
+        # config prev/next buttons
+        self.ui.feature_tracking_continue_button.clicked.connect(
+            lambda: self.do_on_click(self.show_next_tab, self.configGui_features.saveConfig_features)
+            )
+        self.ui.feature_tracking_back_button.clicked.connect(
+            lambda: self.do_on_click(self.show_prev_tab, self.configGui_features.saveConfig_features)
+            )
+
         # test button
-        self.ui.button_feature_tracking_test.clicked.connect(self.test_feature)
+        self.ui.button_feature_tracking_test.clicked.connect(
+            lambda: self.do_on_click(self.configGui_features.saveConfig_features, self.test_feature)
+            )
 
 ##########################################################################################################################################
 
@@ -104,8 +109,18 @@ class MainGUI(QtGui.QMainWindow):
         self.configGui_object = configGui_object()
         self.ui.roadusers_tracking_parameter_layout.addWidget(self.configGui_object)
 
+        # connect prev/next buttons
+        self.ui.roadusers_tracking_back_button.clicked.connect(
+            lambda: self.do_on_click(self.show_prev_tab, self.configGui_object.saveConfig_objects)
+            )
+        self.ui.roadusers_tracking_continue_button.clicked.connect(
+            lambda: self.do_on_click(self.show_next_tab, self.configGui_object.saveConfig_objects)
+            )
+
         # test button
-        self.ui.button_roadusers_tracking_test.clicked.connect(self.test_object)
+        self.ui.button_roadusers_tracking_test.clicked.connect(
+            lambda: self.do_on_click(self.configGui_object.saveConfig_objects, self.test_object)
+            )
 
         # runResults button
         self.ui.runAnalysisButton.clicked.connect(self.runAnalysis)
@@ -252,6 +267,10 @@ class MainGUI(QtGui.QMainWindow):
     def show_prev_tab(self):
         curr_i = self.ui.main_tab_widget.currentIndex()
         self.ui.main_tab_widget.setCurrentIndex(curr_i - 1)
+
+    def do_on_click(self, *methods):
+        for method in methods:
+            method()
 
     def show_message(self, message):
         helper = message_helper.MessageHelper(self)
@@ -418,10 +437,6 @@ class configGui_features(QtGui.QWidget):
     def initUI(self):
         # lbl1.move(15, 10)
 
-        self.btn = QtGui.QPushButton('Set Config', self)
-        # self.btn.move(20, 20)
-        self.btn.clicked.connect(self.saveConfig_features)
-
         self.label1 = QtGui.QLabel("first frame to process")
         # input box
         self.input1 = QtGui.QLineEdit()
@@ -486,8 +501,6 @@ class configGui_features(QtGui.QWidget):
 
         grid.addWidget(self.label10, 11, 0)
         grid.addWidget(self.input10, 11, 1)
-
-        grid.addWidget(self.btn, 12, 0)
 
         self.setLayout(grid)
 
@@ -579,11 +592,6 @@ class configGui_object(QtGui.QWidget):
     def initUI(self):
         # lbl1.move(15, 10)
 
-        self.btn = QtGui.QPushButton('Set Config', self)
-        # self.btn.move(20, 20)
-        self.btn.clicked.connect(self.saveConfig_objects)
-
-
         self.label1 = QtGui.QLabel("first frame to process")
         # input box
         self.input1 = QtGui.QLineEdit()
@@ -616,8 +624,6 @@ class configGui_object(QtGui.QWidget):
 
         grid.addWidget(self.label4, 5, 0)
         grid.addWidget(self.input4, 5, 1)
-
-        grid.addWidget(self.btn, 6, 0)
 
         # path1 = "3"
 
