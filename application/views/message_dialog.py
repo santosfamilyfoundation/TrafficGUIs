@@ -2,7 +2,8 @@
 
 # Form implementation generated from reading ui file 'message_dialog.ui'
 #
-# Created by: PyQt4 UI code generator 4.11.4
+# Created: Mon Feb 20 13:11:19 2017
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -25,18 +26,25 @@ except AttributeError:
 class Ui_message_dialog(object):
     def setupUi(self, message_dialog):
         message_dialog.setObjectName(_fromUtf8("message_dialog"))
-        message_dialog.resize(400, 150)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Preferred)
+        message_dialog.resize(400, 292)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(message_dialog.sizePolicy().hasHeightForWidth())
         message_dialog.setSizePolicy(sizePolicy)
         message_dialog.setMaximumSize(QtCore.QSize(400, 16777215))
         self.gridLayout = QtGui.QGridLayout(message_dialog)
+        self.gridLayout.setSizeConstraint(QtGui.QLayout.SetFixedSize)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.verticalLayout = QtGui.QVBoxLayout()
+        self.verticalLayout.setSizeConstraint(QtGui.QLayout.SetFixedSize)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.label = QtGui.QLabel(message_dialog)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy)
         self.label.setText(_fromUtf8(""))
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setWordWrap(True)

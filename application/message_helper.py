@@ -20,5 +20,6 @@ class MessageHelper(QtGui.QDialog):
 
     def show_message(self, message):
         self.ui.label.setText(message)
+        self.adjustSize()
         self.show()
 
