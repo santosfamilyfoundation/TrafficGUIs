@@ -2,6 +2,7 @@
 import sys
 import shutil
 import cv2
+import qtawesome as qta # must be imported before any other qt imports
 from custom.video_frame_player import VideoFramePlayer
 from PyQt4 import QtGui, QtCore
 from views.safety_main import Ui_TransportationSafety
@@ -80,7 +81,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.feature_tracking_video_layout.addWidget(self.feature_tracking_video_player)
 
         # config
-        self.configGui_features = configGui_features()
+        self.configGui_features = configGui_features(self)
         self.ui.feature_tracking_parameter_layout.addWidget(self.configGui_features)
 
         # config prev/next buttons
@@ -106,7 +107,7 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.roadusers_tracking_video_layout.addWidget(self.roadusers_tracking_video_player)
 
         # config
-        self.configGui_object = configGui_object()
+        self.configGui_object = configGui_object(self)
         self.ui.roadusers_tracking_parameter_layout.addWidget(self.configGui_object)
 
         # connect prev/next buttons
@@ -428,47 +429,62 @@ class MainGUI(QtGui.QMainWindow):
 
 ##########################################################################################################################
 
-class configGui_features(QtGui.QWidget):
+class configGuiWidget(QtGui.QWidget):
 
-    def __init__(self):
-        super(configGui_features, self).__init__()
+    def __init__(self, parent):
+        """ parent is an instance of MainGUI """
+        super(configGuiWidget, self).__init__()
+        self.parent = parent
+
+    def gridRowHelper(self, label_txt, info_txt=None):
+        """Helper to construct the widgets that make up the config UI
+        grid rows.
+        Returns (label, info, line_edit) elements.
+        """
+        label = QtGui.QLabel(label_txt)
+        if info_txt:
+            info = QtGui.QToolButton()
+            info.setIcon(qta.icon('fa.question'))
+            info.clicked.connect(lambda: self.parent.show_message(info_txt)) 
+        else:
+            info = None
+        line_edit = QtGui.QLineEdit()
+        return label, info, line_edit
+    
+class configGui_features(configGuiWidget):
+
+    def __init__(self, parent):
+        """ parent is an instance of MainGUI """
+        super(configGui_features, self).__init__(parent)
         self.initUI()
 
     def initUI(self):
-        # lbl1.move(15, 10)
 
-        self.label1 = QtGui.QLabel("first frame to process")
-        # input box
-        self.input1 = QtGui.QLineEdit()
-        # self.input1.setMaximumWidth(10)
+        self.label1, _, self.input1 = self.gridRowHelper("first frame to process")
 
-        self.label2 = QtGui.QLabel("number of frames to process")
-        # self.label1.move(130, 22)
-        self.input2 = QtGui.QLineEdit()
-        # self.le.move(150, 22)
+        self.label2, _, self.input2 = self.gridRowHelper("number of frames to process")
 
-        self.label3 = QtGui.QLabel("Max number of features added at each frame")
-        self.input3 = QtGui.QLineEdit()
+        self.label3, self.info3, self.input3 = self.gridRowHelper("Max number of features added at each frame",
+            "The maximum number of features added at each frame. Note if that there are many moving objects in each frame, and those objects take up a large portion of the frame, this number may be higher. If you find that not enough features are being tracked, increase this parameter.")
+
         self.label4 = QtGui.QLabel("Number of deplacement to test")
-        # self.input4 = QtGui.QLineEdit()
+        self.label5, self.info5, self.input5 = self.gridRowHelper("minimum feature motion",
+            "Number of displacement to test minimum feature motion. Determines how long features will be tracked. Increase this parameter if you find that your features are disappearing very quickly (i.e., after a few frames)")
 
-        self.label5 = QtGui.QLabel("minimum feature motion")
-        self.input5 = QtGui.QLineEdit()
-
-        self.label6 = QtGui.QLabel("Minimum displacement to keep features (px)")
-        self.input6 = QtGui.QLineEdit()
+        self.label6, self.info6, self.input6 = self.gridRowHelper("Minimum displacement to keep features (px)",
+            "Minimum displacement to keep features. Describes the minimum required displacement to keep a feature (in pixels). If you have lots of slow-moving (or far-away) objects in your video, and find that not enough features are being tracked, decrease this parameter. On the other hand, if too many non-road- user features are being tracked (i.e., trees swaying in the wind) it may be useful to increase this parameter to capture the faster-moving features, which are more likely to belong to road users.")
 
         self.label7 = QtGui.QLabel("Max number of iterations")
         # self.input7 = QtGui.QLineEdit()
 
-        self.label8 = QtGui.QLabel("to stop feature tracking")
-        self.input8 = QtGui.QLineEdit()
+        self.label8, self.info8, self.input8 = self.gridRowHelper("to stop feature tracking",
+            "Max number of iterations to stop feature tracking. Changes how long after a feature continues to persist after the feature stops moving. If your video features many slow-moving objects, or objects that start and stop frequently, you may want to increase this parameter.")
 
         self.label9 = QtGui.QLabel("Minimum number of frames to consider")
         # self.input7 = QtGui.QLineEdit()
 
-        self.label10 = QtGui.QLabel("a feature for grouping")
-        self.input10 = QtGui.QLineEdit()
+        self.label10, self.info10, self.input10 = self.gridRowHelper("a feature for grouping",
+            "The minimum amount of time (in video frames) for which a feature must persist before it is considered in the next steps of the tracking process. You may want to keep this parameter value fairly high to filter out some of the shorter-lived features (which often belong to non-road-user objects, such as moving plants in the video).")
 
         self.loadConfig_features()
 
@@ -476,31 +492,36 @@ class configGui_features(QtGui.QWidget):
         grid.setSpacing(10)
 
         grid.addWidget(self.label1, 2, 0)
-        grid.addWidget(self.input1, 2, 1)
+        grid.addWidget(self.input1, 2, 2)
 
         grid.addWidget(self.label2, 3, 0)
-        grid.addWidget(self.input2, 3, 1)
+        grid.addWidget(self.input2, 3, 2)
 
         grid.addWidget(self.label3, 4, 0)
-        grid.addWidget(self.input3, 4, 1)
+        grid.addWidget(self.info3, 4, 1)
+        grid.addWidget(self.input3, 4, 2)
 
         grid.addWidget(self.label4, 5, 0)
 
         grid.addWidget(self.label5, 6, 0)
-        grid.addWidget(self.input5, 6, 1)
+        grid.addWidget(self.info5, 6, 1)
+        grid.addWidget(self.input5, 6, 2)
 
         grid.addWidget(self.label6, 7, 0)
-        grid.addWidget(self.input6, 7, 1)
+        grid.addWidget(self.info6, 7, 1)
+        grid.addWidget(self.input6, 7, 2)
 
         grid.addWidget(self.label7, 8, 0)
 
         grid.addWidget(self.label8, 9, 0)
-        grid.addWidget(self.input8, 9, 1)
+        grid.addWidget(self.info8, 9, 1)
+        grid.addWidget(self.input8, 9, 2)
 
         grid.addWidget(self.label9, 10, 0)
 
         grid.addWidget(self.label10, 11, 0)
-        grid.addWidget(self.input10, 11, 1)
+        grid.addWidget(self.info10, 11, 1)
+        grid.addWidget(self.input10, 11, 2)
 
         self.setLayout(grid)
 
@@ -583,30 +604,21 @@ class configGui_features(QtGui.QWidget):
 
 ##########################################################################################################################
 
-class configGui_object(QtGui.QWidget):
+class configGui_object(configGuiWidget):
 
-    def __init__(self):
-        super(configGui_object, self).__init__()
+    def __init__(self, parent):
+        """ parent is an instance of MainGUI """
+        super(configGui_object, self).__init__(parent)
         self.initUI()
 
     def initUI(self):
-        # lbl1.move(15, 10)
+        self.label1, _, self.input1 = self.gridRowHelper("first frame to process")
+        self.label2, _, self.input2 = self.gridRowHelper("number of frames to process")
+        self.label3, self.info3, self.input3 = self.gridRowHelper("Max Connection Distance",
+            "Maximum connection distance for feature-grouping. Connection-distance is a threshold; it is the maximum world distance at which two features can be connected to the same object. Note that in this example, this does not mean that the maximum size of an object is 1 meter! Rather, this means that a feature greater than 1 meter away from this object cannot be considered a part of this object.")
 
-        self.label1 = QtGui.QLabel("first frame to process")
-        # input box
-        self.input1 = QtGui.QLineEdit()
-        # self.input1.setMaximumWidth(10)
-
-        self.label2 = QtGui.QLabel("number of frames to process")
-        # self.label1.move(130, 22)
-        self.input2 = QtGui.QLineEdit()
-        # self.le.move(150, 22)
-
-        self.label3 = QtGui.QLabel("maximum connection-distance")
-        self.input3 = QtGui.QLineEdit()
-
-        self.label4 = QtGui.QLabel("maximum segmentation-distance")
-        self.input4 = QtGui.QLineEdit()
+        self.label4, self.info4, self.input4 = self.gridRowHelper("Max Segmentation Distance",
+            "Maximum segmentation distance. Segmentation-distance is a threshold; it is the maximum world distance at which two features that are moving relative to each other can be connected to the same object. Again, note that this does not relate to the maximum size of an object! Rather, this means that two features that are moving at different speeds cannot be connected to the same object if they are more than 0.7 meters away from each other.")
 
         self.loadConfig_objects()
 
@@ -614,16 +626,18 @@ class configGui_object(QtGui.QWidget):
         grid.setSpacing(10)
 
         grid.addWidget(self.label1, 2, 0)
-        grid.addWidget(self.input1, 2, 1)
+        grid.addWidget(self.input1, 2, 2)
 
         grid.addWidget(self.label2, 3, 0)
-        grid.addWidget(self.input2, 3, 1)
+        grid.addWidget(self.input2, 3, 2)
 
         grid.addWidget(self.label3, 4, 0)
-        grid.addWidget(self.input3, 4, 1)
+        grid.addWidget(self.info3, 4, 1)
+        grid.addWidget(self.input3, 4, 2)
 
         grid.addWidget(self.label4, 5, 0)
-        grid.addWidget(self.input4, 5, 1)
+        grid.addWidget(self.info4, 5, 1)
+        grid.addWidget(self.input4, 5, 2)
 
         # path1 = "3"
 
