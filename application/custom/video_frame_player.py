@@ -1,24 +1,24 @@
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 import os, threading, time
 
 
-class VideoFramePlayer(QtGui.QWidget):
+class VideoFramePlayer(QtWidgets.QWidget):
     redraw_signal = QtCore.pyqtSignal()
 
     def __init__(self, parent = None):
-        QtGui.QWidget.__init__(self, parent)
-        self.setSizePolicy(QtGui.QSizePolicy.Expanding,
-            QtGui.QSizePolicy.Preferred)
+        QtWidgets.QWidget.__init__(self, parent)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Preferred)
 
-        self.label = QtGui.QLabel(self)
+        self.label = QtWidgets.QLabel(self)
 
-        self.pause = QtGui.QPushButton('Play/Pause',self)
+        self.pause = QtWidgets.QPushButton('Play/Pause',self)
         self.pause.clicked.connect(self.playPause)
 
-        self.slider = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+        self.slider = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.slider.valueChanged.connect(self.sliderChanged)
 
-        self.status = QtGui.QLabel(self)
+        self.status = QtWidgets.QLabel(self)
         self.status.setAlignment(QtCore.Qt.AlignRight |
             QtCore.Qt.AlignVCenter)
 
@@ -31,9 +31,9 @@ class VideoFramePlayer(QtGui.QWidget):
 
         self.redraw_signal.connect(self.updateImage)
 
-        topLayout = QtGui.QVBoxLayout(self)
+        topLayout = QtWidgets.QVBoxLayout(self)
         topLayout.addWidget(self.label)
-        layout = QtGui.QHBoxLayout(self)
+        layout = QtWidgets.QHBoxLayout(self)
         layout.addWidget(self.pause)
         layout.addWidget(self.slider)
         topLayout.addLayout(layout)
@@ -42,7 +42,7 @@ class VideoFramePlayer(QtGui.QWidget):
         self.reconfigurePlayer()
 
     def setImage(self, image_path):
-        scaledImage = QtGui.QPixmap(image_path).scaled(self.label.size(), QtCore.Qt.KeepAspectRatio)
+        scaledImage = QtWidgets.QPixmap(image_path).scaled(self.label.size(), QtCore.Qt.KeepAspectRatio)
         self.label.setPixmap(scaledImage)
 
     def playPause(self):

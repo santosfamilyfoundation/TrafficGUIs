@@ -1,9 +1,9 @@
 # homography.py
-from PyQt4 import QtGui
-from PyQt4.QtCore import Qt
+from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtCore import Qt
 
 
-class HomographyView(QtGui.QGraphicsView):
+class HomographyView(QtWidgets.QGraphicsView):
     """QGraphicsView used for manipulating and computing image-based homographies.
     """
     def __init__(self, parent):
@@ -24,7 +24,7 @@ class HomographyView(QtGui.QGraphicsView):
         """
         self.scene_image = image
         new_scene = HomographyScene(self)
-        pmap = QtGui.QPixmap().fromImage(image)
+        pmap = QtWidgets.QPixmap().fromImage(image)
         pmapitem = new_scene.addPixmap(pmap)
         new_scene.register_pixmap(pmapitem)
         new_scene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
@@ -34,7 +34,7 @@ class HomographyView(QtGui.QGraphicsView):
         self.image_loaded = True
 
     def load_image_from_path(self, path):
-        im = QtGui.QImage(path)
+        im = QtWidgets.QImage(path)
         self.load_image(im)
 
     def list_points(self):
@@ -55,7 +55,7 @@ class HomographyView(QtGui.QGraphicsView):
         self.status_label.setText("{} points selected.".format(len(point_list)))
 
 
-class HomographyResultView(QtGui.QGraphicsView):
+class HomographyResultView(QtWidgets.QGraphicsView):
     """QGraphicsView used for viewing the result of image-based homographies.
     """
     def __init__(self, parent):
@@ -63,9 +63,9 @@ class HomographyResultView(QtGui.QGraphicsView):
         self.cursor_default = QtGui.QCursor(Qt.CrossCursor)
         self.image_loaded = False
 
-        new_scene = QtGui.QGraphicsScene(self)
+        new_scene = QtWidgets.QGraphicsScene(self)
         new_scene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(124, 124, 124)))
-        txt = QtGui.QGraphicsSimpleTextItem("Compute homography to see results here.")
+        txt = QtWidgets.QGraphicsSimpleTextItem("Compute homography to see results here.")
         new_scene.addItem(txt)
         self.setScene(new_scene)
         self.show()
@@ -77,8 +77,8 @@ class HomographyResultView(QtGui.QGraphicsView):
         be placed at (0,0) in the scene.
         """
         self.scene_image = image
-        new_scene = QtGui.QGraphicsScene(self)
-        pmap = QtGui.QPixmap().fromImage(image)
+        new_scene = QtWidgets.QGraphicsScene(self)
+        pmap = QtWidgets.QPixmap().fromImage(image)
         pmapitem = new_scene.addPixmap(pmap)
         new_scene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
         self.setScene(new_scene)
@@ -87,7 +87,7 @@ class HomographyResultView(QtGui.QGraphicsView):
         self.image_loaded = True
 
     def load_image_from_path(self, path):
-        im = QtGui.QImage(path)
+        im = QtWidgets.QImage(path)
         self.load_image(im)
 
     def clear_image(self):
@@ -95,15 +95,15 @@ class HomographyResultView(QtGui.QGraphicsView):
         Call this to clear the image from this HomographyView's scene.
         The scene will be filled with a placeholder grey background and message.
         """
-        new_scene = QtGui.QGraphicsScene(self)
+        new_scene = QtWidgets.QGraphicsScene(self)
         new_scene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(124, 124, 124)))
-        txt = QtGui.QGraphicsSimpleTextItem("Compute homography to see results here.")
+        txt = QtWidgets.QGraphicsSimpleTextItem("Compute homography to see results here.")
         new_scene.addItem(txt)
         self.setScene(new_scene)
         self.show()
 
 
-class HomographyScene(QtGui.QGraphicsScene):
+class HomographyScene(QtWidgets.QGraphicsScene):
     """QGraphicsScene derivative displayed in HomographyViews.
 
     Displays image. Places points on image on click.
@@ -116,18 +116,18 @@ class HomographyScene(QtGui.QGraphicsScene):
         # Point configuration
         self.point_rad = 4  # Radius, in pixels
         self.point_pen_color = QtGui.QColor(255, 74, 13, 230)  # R, G, B, A
-        self.point_pen = QtGui.QPen(self.point_pen_color, 2)
+        self.point_pen = QtWidgets.QPen(self.point_pen_color, 2)
         self.point_brush_color = QtGui.QColor(195, 13, 255, 20)  # R, G, B, A
         self.point_brush = QtGui.QBrush(self.point_brush_color)
         self.point_selected = False
         self.selected_point = None
 
-        font = QtGui.QFont()
+        font = QtWidgets.QFont()
         font.setPixelSize(12)
         font.setBold(False)
         self.label_font = font
         self.label_pen_color = QtGui.QColor(0, 0, 0)  # R, G, B
-        self.label_pen = QtGui.QPen(self.label_pen_color, .1)
+        self.label_pen = QtWidgets.QPen(self.label_pen_color, .1)
         self.label_brush_color = QtGui.QColor(255, 255, 255)  # R, G, B
         self.label_brush = QtGui.QBrush(self.label_brush_color)
 
@@ -142,7 +142,7 @@ class HomographyScene(QtGui.QGraphicsScene):
         new_point.setPos(loc[0] - self.point_rad, loc[1] - self.point_rad)
         new_point.homography_index = len(self.points)
 
-        new_text = QtGui.QGraphicsSimpleTextItem()
+        new_text = QtWidgets.QGraphicsSimpleTextItem()
         new_text.setPos(-10, -10)
         new_text.setFont(self.label_font)
         new_text.setBrush(self.label_brush)
@@ -152,7 +152,7 @@ class HomographyScene(QtGui.QGraphicsScene):
         self.addItem(new_text)
         new_text.setParentItem(new_point)
         new_point.setCursor(self.parent().cursor_hover)
-        new_point.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+        new_point.setFlag(QtWidgets.QGraphicsItem.ItemIsMovable)
 
         self.points.append(new_point)
         self.update_point_list_status()

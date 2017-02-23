@@ -2,7 +2,7 @@
 Project management classes and functions
 """
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 from views.new_project import Ui_create_new_project
 import os
 from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
@@ -20,7 +20,7 @@ from app_config import AppConfig as ac
 from app_config import get_project_path, get_config_path, config_section_exists, get_config_with_sections, update_config_with_sections
 from cloud_api import api
 
-class ProjectWizard(QtGui.QWizard):
+class ProjectWizard(QtWidgets.QWizard):
 
     def __init__(self, parent):
         super(ProjectWizard, self).__init__(parent)
@@ -94,7 +94,7 @@ class ProjectWizard(QtGui.QWizard):
         Returns:
             str: Filename selected. Null string ("") if no file selected.
         """
-        fname = QtGui.QFileDialog.getOpenFileName(self, dialog_text, default_dir, file_filter)  # TODO: Filter to show only image files
+        fname = QtWidgets.QFileDialog.getOpenFileName(self, dialog_text, default_dir, file_filter)  # TODO: Filter to show only image files
         return str(fname)
 
     def start_create_project(self):
