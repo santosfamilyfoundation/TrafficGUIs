@@ -325,7 +325,7 @@ class MainGUI(QtWidgets.QMainWindow):
         """
         fname = QtWidgets.QFileDialog.getOpenFileName(self, dialog_text, default_folder)  # TODO: Filter to show only image files
         if fname:
-            image = QtWidgets.QImage(fname)
+            image = QtGui.QImage(fname)
         else:
             image = None
         return image
@@ -417,7 +417,7 @@ class MainGUI(QtWidgets.QMainWindow):
         cv2.imwrite(aerial_goodness_path, worldImg)  # Save aerial goodness image
         cv2.imwrite(camera_goodness_path, videoImg)  # Save camera goodness image
 
-        self.ui.homography_results.load_image(QtWidgets.QImage(aerial_goodness_path))  # Load aerial goodness image into gui
+        self.ui.homography_results.load_image(QtGui.QImage(aerial_goodness_path))  # Load aerial goodness image into gui
 
 ##########################################################################################################################
 

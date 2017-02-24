@@ -42,7 +42,7 @@ class VideoFramePlayer(QtWidgets.QWidget):
         self.reconfigurePlayer()
 
     def setImage(self, image_path):
-        scaledImage = QtWidgets.QPixmap(image_path).scaled(self.label.size(), QtCore.Qt.KeepAspectRatio)
+        scaledImage = QtGui.QPixmap(image_path).scaled(self.label.size(), QtCore.Qt.KeepAspectRatio)
         self.label.setPixmap(scaledImage)
 
     def playPause(self):

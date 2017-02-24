@@ -24,7 +24,7 @@ class HomographyView(QtWidgets.QGraphicsView):
         """
         self.scene_image = image
         new_scene = HomographyScene(self)
-        pmap = QtWidgets.QPixmap().fromImage(image)
+        pmap = QtGui.QPixmap().fromImage(image)
         pmapitem = new_scene.addPixmap(pmap)
         new_scene.register_pixmap(pmapitem)
         new_scene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
@@ -34,7 +34,7 @@ class HomographyView(QtWidgets.QGraphicsView):
         self.image_loaded = True
 
     def load_image_from_path(self, path):
-        im = QtWidgets.QImage(path)
+        im = QtGui.QImage(path)
         self.load_image(im)
 
     def list_points(self):
@@ -78,7 +78,7 @@ class HomographyResultView(QtWidgets.QGraphicsView):
         """
         self.scene_image = image
         new_scene = QtWidgets.QGraphicsScene(self)
-        pmap = QtWidgets.QPixmap().fromImage(image)
+        pmap = QtGui.QPixmap().fromImage(image)
         pmapitem = new_scene.addPixmap(pmap)
         new_scene.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
         self.setScene(new_scene)
@@ -87,7 +87,7 @@ class HomographyResultView(QtWidgets.QGraphicsView):
         self.image_loaded = True
 
     def load_image_from_path(self, path):
-        im = QtWidgets.QImage(path)
+        im = QtGui.QImage(path)
         self.load_image(im)
 
     def clear_image(self):
@@ -116,18 +116,18 @@ class HomographyScene(QtWidgets.QGraphicsScene):
         # Point configuration
         self.point_rad = 4  # Radius, in pixels
         self.point_pen_color = QtGui.QColor(255, 74, 13, 230)  # R, G, B, A
-        self.point_pen = QtWidgets.QPen(self.point_pen_color, 2)
+        self.point_pen = QtGui.QPen(self.point_pen_color, 2)
         self.point_brush_color = QtGui.QColor(195, 13, 255, 20)  # R, G, B, A
         self.point_brush = QtGui.QBrush(self.point_brush_color)
         self.point_selected = False
         self.selected_point = None
 
-        font = QtWidgets.QFont()
+        font = QtGui.QFont()
         font.setPixelSize(12)
         font.setBold(False)
         self.label_font = font
         self.label_pen_color = QtGui.QColor(0, 0, 0)  # R, G, B
-        self.label_pen = QtWidgets.QPen(self.label_pen_color, .1)
+        self.label_pen = QtGui.QPen(self.label_pen_color, .1)
         self.label_brush_color = QtGui.QColor(255, 255, 255)  # R, G, B
         self.label_brush = QtGui.QBrush(self.label_brush_color)
 
