@@ -2,8 +2,8 @@
 import sys
 import cv2
 import qtawesome as qta # must be imported before any other qt imports
-from custom.video_frame_player import VideoFramePlayer
-from PyQt5 import QtWidgets, QtCore
+from custom.videographicsitem import VideoPlayer
+from PyQt5 import QtGui, QtWidgets, QtCore
 from views.safety_main import Ui_TransportationSafety
 import subprocess
 import zipfile
@@ -54,7 +54,9 @@ class MainGUI(QtWidgets.QMainWindow):
         self.ui.homography_button_open_camera_image.clicked.connect(self.homography_open_image_camera)
 
         # Connect back + continue buttons
-        self.ui.homography_continue_button.clicked.connect(self.show_next_tab)
+        self.ui.homography_continue_button.clicked.connect(
+            lambda: self.do_on_click(self.show_next_tab, self.open_feature_video)
+            )
 
         # Connect callback signals
         self.test_feature_callback_signal.connect(self.get_feature_video)
@@ -68,7 +70,8 @@ class MainGUI(QtWidgets.QMainWindow):
 
         # Track features page
 
-        self.feature_tracking_video_player = VideoFramePlayer()
+        self.feature_tracking_video_player = VideoPlayer()
+
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer.openVideo)
         self.ui.feature_tracking_video_layout.addWidget(self.feature_tracking_video_player)
 
@@ -78,7 +81,7 @@ class MainGUI(QtWidgets.QMainWindow):
 
         # config prev/next buttons
         self.ui.feature_tracking_continue_button.clicked.connect(
-            lambda: self.do_on_click(self.show_next_tab, self.configGui_features.saveConfig_features)
+            lambda: self.do_on_click(self.show_next_tab, self.configGui_features.saveConfig_features, self.open_object_video)
             )
         self.ui.feature_tracking_back_button.clicked.connect(
             lambda: self.do_on_click(self.show_prev_tab, self.configGui_features.saveConfig_features)
@@ -94,7 +97,8 @@ class MainGUI(QtWidgets.QMainWindow):
         # roadusers page
 
         # video play
-        self.roadusers_tracking_video_player = VideoFramePlayer()
+        self.roadusers_tracking_video_player = VideoPlayer()
+
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer3.openVideo)
         self.ui.roadusers_tracking_video_layout.addWidget(self.roadusers_tracking_video_player)
 
@@ -153,20 +157,16 @@ class MainGUI(QtWidgets.QMainWindow):
         # Emitting the signal will call get_feature_video on the main thread
         self.test_feature_callback_signal.emit()
 
-    def get_feature_video(self):
+    def open_feature_video(self):
         project_path = get_project_path()
-        api.getTestConfig('feature', get_identifier(), project_path)
+        if project_path != '':
+            video_path = os.path.join(project_path, 'feature_video', 'feature_video.mp4')
+            if os.path.exists(video_path):
+                self.feature_tracking_video_player.openFile(video_path)
 
-        images_prefix = 'feature_images-'
-        extension = 'png'
-        images_folder = os.path.join(project_path, 'feature_video', 'images')
-        video_path = os.path.join(project_path, 'feature_video', 'feature_video.mp4')
-
-        convert_video_to_frames(video_path, images_folder, prefix=images_prefix, extension=extension)
-
-        video = cv2.VideoCapture(video_path)
-        fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
-        self.feature_tracking_video_player.loadFrames(images_folder, fps, prefix=images_prefix, extension=extension)
+    def get_feature_video(self):
+        api.getTestConfig('feature', get_identifier(), get_project_path())
+        self.open_feature_video()
 
     def test_object(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
@@ -183,20 +183,19 @@ class MainGUI(QtWidgets.QMainWindow):
         # Emitting the signal will call get_object_video on the main thread
         self.test_object_callback_signal.emit()
 
-    def get_object_video(self):
+    def open_object_video(self):
         project_path = get_project_path()
-        api.getTestConfig('object', get_identifier(), project_path)
+        if project_path != '':
+            video_path = os.path.join(project_path, 'object_video', 'object_video.mp4')
+            if os.path.exists(video_path):
+                self.roadusers_tracking_video_player.openFile(video_path)
 
-        images_prefix = 'object_images-'
-        extension = 'png'
-        images_folder = os.path.join(project_path, 'object_video', 'images')
+    def get_object_video(self):
+        api.getTestConfig('object', get_identifier(), get_project_path())
         video_path = os.path.join(project_path, 'object_video', 'object_video.mp4')
 
-        convert_video_to_frames(video_path, images_folder, prefix=images_prefix, extension=extension)
-
-        video = cv2.VideoCapture(video_path)
-        fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
-        self.roadusers_tracking_video_player.loadFrames(images_folder, fps, prefix=images_prefix, extension=extension)
+        if os.path.exists(video_path):
+            self.roadusers_tracking_video_player.openFile(video_path)
 
     # for the runAnalysis button
     def runAnalysis(self):
