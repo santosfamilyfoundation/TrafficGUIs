@@ -65,14 +65,12 @@ class CloudWizard:
 # Upload Functions
 ###############################################################################
 
-    def uploadVideo(self,  video_path, identifier = None):
-        print "uploadVideo called with identifier = {}".format(identifier)
+    def uploadVideo(self,  video_path):
+        print "uploadVideo called"
         with open(video_path, 'rb') as video:
             files = {'video' : video}
-            payload = {'identifier': identifier}
             r = requests.post(\
-                self.server_addr + 'uploadVideo',\
-                data = payload, files = files, stream = True)
+                self.server_addr + 'uploadVideo', files = files, stream = True)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         print "Response JSON: {}".format(r.json())
