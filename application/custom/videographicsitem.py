@@ -42,7 +42,7 @@
 #############################################################################
 
 
-from PyQt5.QtCore import QDir, QSize, QSizeF, Qt, QUrl
+from PyQt5.QtCore import QDir, QSize, QSizeF, Qt, QUrl, QRectF
 from PyQt5.QtGui import QTransform
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
@@ -50,6 +50,14 @@ from PyQt5.QtWidgets import (QApplication, QFileDialog, QGraphicsScene,
         QGraphicsView, QHBoxLayout, QPushButton, QSlider, QStyle, QVBoxLayout,
         QWidget, QSizePolicy)
 
+import os
+import sys
+# add parent folder to python path
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+from video import get_video_resolution
+
+WIDTH = 600.0
+WIGGLE = 40.0
 
 class VideoPlayer(QWidget):
 
@@ -62,7 +70,6 @@ class VideoPlayer(QWidget):
 
         scene = QGraphicsScene(self)
         graphicsView = QGraphicsView(scene)
-        self.size = graphicsView.size()
 
         scene.addItem(self.videoItem)
 
@@ -83,6 +90,7 @@ class VideoPlayer(QWidget):
         layout = QVBoxLayout()
         layout.addWidget(graphicsView)
         layout.addLayout(controlLayout)
+        self.setFixedWidth(WIDTH + WIGGLE)
 
         self.setLayout(layout)
 
@@ -91,14 +99,17 @@ class VideoPlayer(QWidget):
         self.mediaPlayer.positionChanged.connect(self.positionChanged)
         self.mediaPlayer.durationChanged.connect(self.durationChanged)
 
-    def sizeHint(self):
-        return QSize(800, 600)
-
     def openFile(self, fileName):
         if fileName != '' or fileName is not None:
             self.mediaPlayer.setMedia(
                     QMediaContent(QUrl.fromLocalFile(fileName)))
-            self.videoItem.setSize(QSizeF(self.size))
+
+            # set resolution
+            res_orig = get_video_resolution(fileName)
+            self.aspect_ratio = float(res_orig[0]) / res_orig[1]
+            self.videoItem.setSize(QSizeF(WIDTH,
+                                          WIDTH / self.aspect_ratio))
+            self.setFixedHeight(WIDTH / self.aspect_ratio + 2*WIGGLE)
 
             self.playButton.setEnabled(True)
 
