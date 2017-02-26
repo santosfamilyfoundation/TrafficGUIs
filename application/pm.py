@@ -5,6 +5,7 @@ Project management classes and functions
 from PyQt5 import QtWidgets, QtCore
 from views.new_project import Ui_create_new_project
 import os
+import re
 from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
 import time
 import datetime
@@ -59,9 +60,10 @@ class ProjectWizard(QtWidgets.QWizard):
         # default_dir =
         fname = self.open_fd(dialog_text="Select aerial image", file_filter=filt)
         if fname:
-            self.ui.newp_aerial_image_input.setText(fname)
+            filepath = self.get_filepath(fname)
+            self.ui.newp_aerial_image_input.setText(filepath)
             self.aerial_image_selected = True
-            self.aerialpath = fname
+            self.aerialpath = filepath
         else:
             self.ui.newp_aerial_image_input.setText("NO FILE SELECTED")
 
@@ -70,11 +72,26 @@ class ProjectWizard(QtWidgets.QWizard):
         # default_dir =
         fname = self.open_fd(dialog_text="Select video for analysis", file_filter=filt)
         if fname:
-            self.ui.newp_video_input.setText(fname)
+            filepath = self.get_filepath(fname)
+            self.ui.newp_video_input.setText(filepath)
             self.video_selected = True
-            self.videopath = fname
+            self.videopath = filepath
         else:
             self.ui.newp_video_input.setText("NO VIDEO SELECTED")
+
+    def get_filepath(self, filepath):
+        """Cleans the filepath to only include the path, not file options.
+
+        Returns the selected filepath only, found between the ''.
+
+        Args:
+            filepath: uncleaned filename and file types.
+
+        Returns:
+            str: Cleaned string of only the location of video/image file.
+        """
+        return re.findall(r"'(.*?)'", filepath, re.DOTALL)[0]
+
 
     # def move_video
     def open_fd(self, dialog_text="Open", file_filter="", default_dir=""):
@@ -265,4 +282,3 @@ def update_api(addr):
 def load_config(main_window):
     main_window.configGui_features.loadConfig_features()
     main_window.configGui_object.loadConfig_objects()
-
