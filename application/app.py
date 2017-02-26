@@ -192,10 +192,7 @@ class MainGUI(QtWidgets.QMainWindow):
 
     def get_object_video(self):
         api.getTestConfig('object', get_identifier(), get_project_path())
-        video_path = os.path.join(project_path, 'object_video', 'object_video.mp4')
-
-        if os.path.exists(video_path):
-            self.roadusers_tracking_video_player.openFile(video_path)
+        self.open_object_video()
 
     # for the runAnalysis button
     def runAnalysis(self):
