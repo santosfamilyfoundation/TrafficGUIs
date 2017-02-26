@@ -102,6 +102,10 @@ class VideoPlayer(QWidget):
 
             self.playButton.setEnabled(True)
 
+            # trick to show screenshot of the first frame of video
+            self.mediaPlayer.play()
+            self.mediaPlayer.pause()
+
     def play(self):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.mediaPlayer.pause()
@@ -135,3 +139,4 @@ if __name__ == '__main__':
     player.show()
 
     sys.exit(app.exec_())
+
