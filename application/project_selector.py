@@ -3,7 +3,7 @@ Project management classes and functions
 """
 
 from PyQt5 import QtWidgets, QtCore
-from choose_project import Ui_choose_project
+from views.choose_project import Ui_choose_project
 
 class ProjectSelectionWizard(QtWidgets.QDialog):
 
