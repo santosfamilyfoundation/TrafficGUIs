@@ -3,6 +3,7 @@ import os
 import pickle
 import uuid
 import requests
+from requests_toolbelt import MultipartEncoder
 from app_config import AppConfig as ac
 from app_config import get_project_path
 import json
@@ -68,9 +69,25 @@ class CloudWizard:
     def uploadVideo(self,  video_path):
         print "uploadVideo called"
         with open(video_path, 'rb') as video:
-            files = {'video' : video}
-            r = requests.post(\
-                self.server_addr + 'uploadVideo', files = files, stream = True)
+            # We set the content-disposition 'filename' parameter manually
+            # incase we need to do streaming
+            files = {'video' : (os.path.basename(video_path), video)}
+
+            #Use a multipartencoder to stream the file data as just data
+            m = MultipartEncoder(fields = files)
+
+            # Get file size in MB's and check if it is greater than a 100 MB
+            # We use a 100MB size limit for transitioning to streaming rather
+            # than loading into memory
+            if m.len/(2**20) >= 100:
+                # We need to set the Content-Type header
+                r = requests.post(\
+                    self.server_addr + 'uploadVideo', data = m,\
+                    headers = {'Content-Type': m.content_type})
+            else:
+                r = requests.post(\
+                    self.server_addr + 'uploadVideo', files = files)
+
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         print "Response JSON: {}".format(r.json())
