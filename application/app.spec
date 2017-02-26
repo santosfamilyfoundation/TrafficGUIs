@@ -2,11 +2,13 @@
 
 block_cipher = None
 
+            
+
 a = Analysis(['app.py'],
              pathex=['/Users/user/Documents/SantosGUI/application'],
              binaries=[],
-             datas=[],
-             hiddenimports = ['sklearn.neighbors.typedefs'],
+             datas=[('/Users/user/Documents/SantosGUI/application/datas/fonts/*', '/qtawesome/fonts')],
+             hiddenimports = ['qtawesome','sklearn.neighbors.typedefs'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
