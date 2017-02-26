@@ -1,13 +1,18 @@
 # -*- mode: python -*-
 
+import os
+
+print os.getcwd()
+path = os.getcwd()
+
 block_cipher = None
 
             
 
 a = Analysis(['app.py'],
-             pathex=['/Users/user/Documents/SantosGUI/application'],
+             pathex=[path],
              binaries=[],
-             datas=[('/Users/user/Documents/SantosGUI/application/datas/fonts/*', '/qtawesome/fonts')],
+             datas=[(path+ '/datas/fonts/*', '/qtawesome/fonts')],
              hiddenimports = ['qtawesome','sklearn.neighbors.typedefs'],
              hookspath=[],
              runtime_hooks=[],
