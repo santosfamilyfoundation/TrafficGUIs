@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 import matplotlib
 import os
 
@@ -44,7 +44,7 @@ def example():
     a_plot.show()
 
 
-class MatplotlibWidget(QtGui.QWidget):
+class MatplotlibWidget(QtWidgets.QWidget):
     """
     Implements a Matplotlib figure inside a QWidget.
     Use getFigure() and draw() to interact with matplotlib.
@@ -63,7 +63,7 @@ class MatplotlibWidget(QtGui.QWidget):
         self.canvas.setParent(self)
         self.toolbar = NavigationToolbar(self.canvas, self)
 
-        self.vbox = QtGui.QVBoxLayout()
+        self.vbox = QtWidgets.QVBoxLayout()
         self.vbox.addWidget(self.toolbar)
         self.vbox.addWidget(self.canvas)
 

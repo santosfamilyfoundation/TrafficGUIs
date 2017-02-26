@@ -22,5 +22,3 @@ def convert_video_to_frames(video_path, images_dir, prefix='image-', extension='
 			filename = prefix + format_string + extension
 			cv2.imwrite(os.path.join(images_dir, filename % count), image)     # save frame as JPEG file
 			count += 1
-
-

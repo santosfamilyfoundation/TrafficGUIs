@@ -1,9 +1,9 @@
 # zoomslider.py
-from PyQt4 import QtGui
+from PyQt5 import QtWidgets
 
 slider_start = 50.
 
-class ZoomSlider(QtGui.QSlider):
+class ZoomSlider(QtWidgets.QSlider):
     """Slider used for zooming a HomographyView or a HomographyResultView.
     """
     def __init__(self, parent):

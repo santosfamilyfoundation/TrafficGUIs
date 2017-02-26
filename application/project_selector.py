@@ -2,10 +2,10 @@
 Project management classes and functions
 """
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 from choose_project import Ui_choose_project
 
-class ProjectSelectionWizard(QtGui.QDialog):
+class ProjectSelectionWizard(QtWidgets.QDialog):
 
     def __init__(self, parent):
         super(ProjectSelectionWizard, self).__init__(parent)
