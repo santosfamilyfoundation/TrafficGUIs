@@ -57,7 +57,6 @@ class ProjectWizard(QtWidgets.QWizard):
 
     def open_aerial_image(self):
         filt = "Images (*.png *.jpg *.jpeg *.bmp *.tif *.gif)"  # Select only images
-        # default_dir =
         fname = self.open_fd(dialog_text="Select aerial image", file_filter=filt)
         if fname:
             filepath = self.get_filepath(fname)
@@ -69,7 +68,6 @@ class ProjectWizard(QtWidgets.QWizard):
 
     def open_video(self):
         filt = "Videos (*.mp4 *.avi *.mpg *mpeg)"  # Select only videos
-        # default_dir =
         fname = self.open_fd(dialog_text="Select video for analysis", file_filter=filt)
         if fname:
             filepath = self.get_filepath(fname)
@@ -93,7 +91,6 @@ class ProjectWizard(QtWidgets.QWizard):
         return re.findall(r"'(.*?)'", filepath, re.DOTALL)[0]
 
 
-    # def move_video
     def open_fd(self, dialog_text="Open", file_filter="", default_dir=""):
         """Opens a file dialog, allowing user to select a file.
 

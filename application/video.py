@@ -22,3 +22,11 @@ def convert_video_to_frames(video_path, images_dir, prefix='image-', extension='
 			filename = prefix + format_string + extension
 			cv2.imwrite(os.path.join(images_dir, filename % count), image)     # save frame as JPEG file
 			count += 1
+
+def get_video_resolution(video_path):
+    """Gets video resolution in (width, height)"""
+    if os.path.exists(video_path):
+       vidcap = cv2.VideoCapture(video_path)
+       success, image = vidcap.read()
+       if success:
+           return image.shape[1], image.shape[0]

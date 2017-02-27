@@ -15,8 +15,6 @@ import zipfile
 ###############################################
 
 import os
-from PyQt5.QtWidgets import *
-
 import numpy as np
 from app_config import get_base_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path, get_identifier, projects_exist
 
@@ -463,13 +461,11 @@ class configGui_features(configGuiWidget):
             "Minimum displacement to keep features. Describes the minimum required displacement to keep a feature (in pixels). If you have lots of slow-moving (or far-away) objects in your video, and find that not enough features are being tracked, decrease this parameter. On the other hand, if too many non-road- user features are being tracked (i.e., trees swaying in the wind) it may be useful to increase this parameter to capture the faster-moving features, which are more likely to belong to road users.")
 
         self.label7 = QtWidgets.QLabel("Max number of iterations")
-        # self.input7 = QtWidgets.QLineEdit()
 
         self.label8, self.info8, self.input8 = self.gridRowHelper("to stop feature tracking",
             "Max number of iterations to stop feature tracking. Changes how long after a feature continues to persist after the feature stops moving. If your video features many slow-moving objects, or objects that start and stop frequently, you may want to increase this parameter.")
 
         self.label9 = QtWidgets.QLabel("Minimum number of frames to consider")
-        # self.input7 = QtWidgets.QLineEdit()
 
         self.label10, self.info10, self.input10 = self.gridRowHelper("a feature for grouping",
             "The minimum amount of time (in video frames) for which a feature must persist before it is considered in the next steps of the tracking process. You may want to keep this parameter value fairly high to filter out some of the shorter-lived features (which often belong to non-road-user objects, such as moving plants in the video).")
@@ -514,7 +510,6 @@ class configGui_features(configGuiWidget):
         self.setLayout(grid)
 
         self.setWindowTitle('Input config')
-        # self.show()
 
     def saveConfig_features(self):
         """
@@ -627,12 +622,9 @@ class configGui_object(configGuiWidget):
         grid.addWidget(self.info4, 5, 1)
         grid.addWidget(self.input4, 5, 2)
 
-        # path1 = "3"
-
         self.setLayout(grid)
 
         self.setWindowTitle('Input config')
-        # self.show()
 
     def saveConfig_objects(self):
         """
