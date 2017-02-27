@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 import sys
-import shutil
 import cv2
 import qtawesome as qta # must be imported before any other qt imports
-from custom.video_frame_player import VideoFramePlayer
-from PyQt4 import QtGui, QtCore
+from custom.videographicsitem import VideoPlayer
+from PyQt5 import QtGui, QtWidgets, QtCore
 from views.safety_main import Ui_TransportationSafety
 import subprocess
 import zipfile
@@ -16,15 +15,6 @@ import zipfile
 ###############################################
 
 import os
-import ConfigParser
-from PyQt4.QtGui import *
-
-import random
-import os
-import requests
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import numpy as np
 from app_config import get_base_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path, get_identifier, projects_exist
 
@@ -36,7 +26,7 @@ from cloud_api import StatusPoller
 from video import convert_video_to_frames
 
 
-class MainGUI(QtGui.QMainWindow):
+class MainGUI(QtWidgets.QMainWindow):
     test_feature_callback_signal = QtCore.pyqtSignal()
     test_object_callback_signal = QtCore.pyqtSignal()
     analysis_callback_signal = QtCore.pyqtSignal()
@@ -62,7 +52,9 @@ class MainGUI(QtGui.QMainWindow):
         self.ui.homography_button_open_camera_image.clicked.connect(self.homography_open_image_camera)
 
         # Connect back + continue buttons
-        self.ui.homography_continue_button.clicked.connect(self.show_next_tab)
+        self.ui.homography_continue_button.clicked.connect(
+            lambda: self.do_on_click(self.show_next_tab, self.open_feature_video)
+            )
 
         # Connect callback signals
         self.test_feature_callback_signal.connect(self.get_feature_video)
@@ -76,7 +68,8 @@ class MainGUI(QtGui.QMainWindow):
 
         # Track features page
 
-        self.feature_tracking_video_player = VideoFramePlayer()
+        self.feature_tracking_video_player = VideoPlayer()
+
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer.openVideo)
         self.ui.feature_tracking_video_layout.addWidget(self.feature_tracking_video_player)
 
@@ -86,7 +79,7 @@ class MainGUI(QtGui.QMainWindow):
 
         # config prev/next buttons
         self.ui.feature_tracking_continue_button.clicked.connect(
-            lambda: self.do_on_click(self.show_next_tab, self.configGui_features.saveConfig_features)
+            lambda: self.do_on_click(self.show_next_tab, self.configGui_features.saveConfig_features, self.open_object_video)
             )
         self.ui.feature_tracking_back_button.clicked.connect(
             lambda: self.do_on_click(self.show_prev_tab, self.configGui_features.saveConfig_features)
@@ -102,7 +95,8 @@ class MainGUI(QtGui.QMainWindow):
         # roadusers page
 
         # video play
-        self.roadusers_tracking_video_player = VideoFramePlayer()
+        self.roadusers_tracking_video_player = VideoPlayer()
+
         # self.ui.actionOpen_Video.triggered.connect(self.videoplayer3.openVideo)
         self.ui.roadusers_tracking_video_layout.addWidget(self.roadusers_tracking_video_player)
 
@@ -161,20 +155,16 @@ class MainGUI(QtGui.QMainWindow):
         # Emitting the signal will call get_feature_video on the main thread
         self.test_feature_callback_signal.emit()
 
-    def get_feature_video(self):
+    def open_feature_video(self):
         project_path = get_project_path()
-        api.getTestConfig('feature', get_identifier(), project_path)
+        if project_path != '':
+            video_path = os.path.join(project_path, 'feature_video', 'feature_video.mp4')
+            if os.path.exists(video_path):
+                self.feature_tracking_video_player.openFile(video_path)
 
-        images_prefix = 'feature_images-'
-        extension = 'png'
-        images_folder = os.path.join(project_path, 'feature_video', 'images')
-        video_path = os.path.join(project_path, 'feature_video', 'feature_video.mp4')
-
-        convert_video_to_frames(video_path, images_folder, prefix=images_prefix, extension=extension)
-
-        video = cv2.VideoCapture(video_path)
-        fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
-        self.feature_tracking_video_player.loadFrames(images_folder, fps, prefix=images_prefix, extension=extension)
+    def get_feature_video(self):
+        api.getTestConfig('feature', get_identifier(), get_project_path())
+        self.open_feature_video()
 
     def test_object(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
@@ -191,20 +181,16 @@ class MainGUI(QtGui.QMainWindow):
         # Emitting the signal will call get_object_video on the main thread
         self.test_object_callback_signal.emit()
 
-    def get_object_video(self):
+    def open_object_video(self):
         project_path = get_project_path()
-        api.getTestConfig('object', get_identifier(), project_path)
+        if project_path != '':
+            video_path = os.path.join(project_path, 'object_video', 'object_video.mp4')
+            if os.path.exists(video_path):
+                self.roadusers_tracking_video_player.openFile(video_path)
 
-        images_prefix = 'object_images-'
-        extension = 'png'
-        images_folder = os.path.join(project_path, 'object_video', 'images')
-        video_path = os.path.join(project_path, 'object_video', 'object_video.mp4')
-
-        convert_video_to_frames(video_path, images_folder, prefix=images_prefix, extension=extension)
-
-        video = cv2.VideoCapture(video_path)
-        fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
-        self.roadusers_tracking_video_player.loadFrames(images_folder, fps, prefix=images_prefix, extension=extension)
+    def get_object_video(self):
+        api.getTestConfig('object', get_identifier(), get_project_path())
+        self.open_object_video()
 
     # for the runAnalysis button
     def runAnalysis(self):
@@ -278,7 +264,7 @@ class MainGUI(QtGui.QMainWindow):
         helper.show_message(message)
 
     def open_project(self):
-        fname = str(QtGui.QFileDialog.getExistingDirectory(self, "Open Existing Project Folder...", get_base_project_dir()))
+        fname = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Open Existing Project Folder...", get_base_project_dir()))
         # TODO: Instead of select folder, perhaps select config file?
         if fname:
             project_name = os.path.basename(fname)
@@ -288,8 +274,8 @@ class MainGUI(QtGui.QMainWindow):
 
     def open_feedback(self):
         url = QtCore.QUrl('https://docs.google.com/forms/d/e/1FAIpQLSeTRwZlMUwNrbv9Nw-BddsOBGrCQjR5YXHbloPirRzB3-QoFA/viewform')
-        if not QtGui.QDesktopServices.openUrl(url):
-            QtGui.QMessageBox.warning(self, 'Connecting to Feedback', 'Could not open feedback form')
+        if not QtWidgets.QDesktopServices.openUrl(url):
+            QtWidgets.QMessageBox.warning(self, 'Connecting to Feedback', 'Could not open feedback form')
 
     def create_new_project(self):
         self.newp.restart()
@@ -331,7 +317,7 @@ class MainGUI(QtGui.QMainWindow):
             QImage: Image object created from selected image file.
             None: Returns None if no file was selected in the dialog box.
         """
-        fname = QtGui.QFileDialog.getOpenFileName(self, dialog_text, default_folder)  # TODO: Filter to show only image files
+        fname = QtWidgets.QFileDialog.getOpenFileName(self, dialog_text, default_folder)  # TODO: Filter to show only image files
         if fname:
             image = QtGui.QImage(fname)
         else:
@@ -358,7 +344,7 @@ class MainGUI(QtGui.QMainWindow):
             if len(self.worldPts) == len(self.videoPts):
                 self.homography, self.mask = cv2.findHomography(self.videoPts, self.worldPts)
             else:
-                error = QtGui.QErrorMessage()
+                error = QtWidgets.QErrorMessage()
                 error.showMessage('''\
                 To compute the homography, please make sure you choose the same
                 number of points on each image.''')
@@ -366,7 +352,7 @@ class MainGUI(QtGui.QMainWindow):
                 return
 
         else:
-            error = QtGui.QErrorMessage()
+            error = QtWidgets.QErrorMessage()
             error.showMessage('''\
             To compute the homography, please choose at least 4 points on
             each image.''')
@@ -429,7 +415,7 @@ class MainGUI(QtGui.QMainWindow):
 
 ##########################################################################################################################
 
-class configGuiWidget(QtGui.QWidget):
+class configGuiWidget(QtWidgets.QWidget):
 
     def __init__(self, parent):
         """ parent is an instance of MainGUI """
@@ -441,14 +427,14 @@ class configGuiWidget(QtGui.QWidget):
         grid rows.
         Returns (label, info, line_edit) elements.
         """
-        label = QtGui.QLabel(label_txt)
+        label = QtWidgets.QLabel(label_txt)
         if info_txt:
-            info = QtGui.QToolButton()
+            info = QtWidgets.QToolButton()
             info.setIcon(qta.icon('fa.question'))
             info.clicked.connect(lambda: self.parent.show_message(info_txt)) 
         else:
             info = None
-        line_edit = QtGui.QLineEdit()
+        line_edit = QtWidgets.QLineEdit()
         return label, info, line_edit
     
 class configGui_features(configGuiWidget):
@@ -467,28 +453,26 @@ class configGui_features(configGuiWidget):
         self.label3, self.info3, self.input3 = self.gridRowHelper("Max number of features added at each frame",
             "The maximum number of features added at each frame. Note if that there are many moving objects in each frame, and those objects take up a large portion of the frame, this number may be higher. If you find that not enough features are being tracked, increase this parameter.")
 
-        self.label4 = QtGui.QLabel("Number of deplacement to test")
+        self.label4 = QtWidgets.QLabel("Number of deplacement to test")
         self.label5, self.info5, self.input5 = self.gridRowHelper("minimum feature motion",
             "Number of displacement to test minimum feature motion. Determines how long features will be tracked. Increase this parameter if you find that your features are disappearing very quickly (i.e., after a few frames)")
 
         self.label6, self.info6, self.input6 = self.gridRowHelper("Minimum displacement to keep features (px)",
             "Minimum displacement to keep features. Describes the minimum required displacement to keep a feature (in pixels). If you have lots of slow-moving (or far-away) objects in your video, and find that not enough features are being tracked, decrease this parameter. On the other hand, if too many non-road- user features are being tracked (i.e., trees swaying in the wind) it may be useful to increase this parameter to capture the faster-moving features, which are more likely to belong to road users.")
 
-        self.label7 = QtGui.QLabel("Max number of iterations")
-        # self.input7 = QtGui.QLineEdit()
+        self.label7 = QtWidgets.QLabel("Max number of iterations")
 
         self.label8, self.info8, self.input8 = self.gridRowHelper("to stop feature tracking",
             "Max number of iterations to stop feature tracking. Changes how long after a feature continues to persist after the feature stops moving. If your video features many slow-moving objects, or objects that start and stop frequently, you may want to increase this parameter.")
 
-        self.label9 = QtGui.QLabel("Minimum number of frames to consider")
-        # self.input7 = QtGui.QLineEdit()
+        self.label9 = QtWidgets.QLabel("Minimum number of frames to consider")
 
         self.label10, self.info10, self.input10 = self.gridRowHelper("a feature for grouping",
             "The minimum amount of time (in video frames) for which a feature must persist before it is considered in the next steps of the tracking process. You may want to keep this parameter value fairly high to filter out some of the shorter-lived features (which often belong to non-road-user objects, such as moving plants in the video).")
 
         self.loadConfig_features()
 
-        grid = QtGui.QGridLayout()
+        grid = QtWidgets.QGridLayout()
         grid.setSpacing(10)
 
         grid.addWidget(self.label1, 2, 0)
@@ -526,7 +510,6 @@ class configGui_features(configGuiWidget):
         self.setLayout(grid)
 
         self.setWindowTitle('Input config')
-        # self.show()
 
     def saveConfig_features(self):
         """
@@ -622,7 +605,7 @@ class configGui_object(configGuiWidget):
 
         self.loadConfig_objects()
 
-        grid = QtGui.QGridLayout()
+        grid = QtWidgets.QGridLayout()
         grid.setSpacing(10)
 
         grid.addWidget(self.label1, 2, 0)
@@ -639,12 +622,9 @@ class configGui_object(configGuiWidget):
         grid.addWidget(self.info4, 5, 1)
         grid.addWidget(self.input4, 5, 2)
 
-        # path1 = "3"
-
         self.setLayout(grid)
 
         self.setWindowTitle('Input config')
-        # self.show()
 
     def saveConfig_objects(self):
         """
@@ -712,6 +692,6 @@ def main():
     app.exec_()
 
 if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     ex = MainGUI()
     sys.exit(main())
