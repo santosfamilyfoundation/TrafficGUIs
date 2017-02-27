@@ -76,10 +76,11 @@ class CloudWizard:
             #Use a multipartencoder to stream the file data as just data
             m = MultipartEncoder(fields = files)
 
-            # Get file size in MB's and check if it is greater than a 100 MB
-            # We use a 100MB size limit for transitioning to streaming rather
-            # than loading into memory
-            if m.len/(2**20) >= 100:
+            # m.len returns the size of all of the encoded parts in bytes
+            # and 1024*1024 is MB in bytes. As such we can compare the size
+            # of all the files we want to send to a 100MB size limit for 
+            # transitioning to streaming rather than loading into memory
+            if m.len/(1024*1024) >= 100:
                 # We need to set the Content-Type header
                 r = requests.post(\
                     self.server_addr + 'uploadVideo', data = m,\
