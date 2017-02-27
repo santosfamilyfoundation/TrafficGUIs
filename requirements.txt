@@ -1,5 +1,0 @@
-Image==1.5.5
-Pillow==4.0.0
-numpy==1.7.0
-matplotlib==1.5.1
-opencv==2.4.8

@@ -2,9 +2,10 @@
 from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
 import os
 
+application_name = "SantosGUI"
 
 class AppConfig(object):
-    PROJECT_DIR = os.path.realpath(os.path.join(os.path.expanduser('~'),"Documents" , "TrafficAnalysis", "project_dir"))
+    PROJECT_DIR = os.path.realpath(os.path.join(os.path.expanduser('~'),"Documents" , application_name, "project_dir"))
     CURRENT_PROJECT_NAME = None
 
 def get_base_project_dir():

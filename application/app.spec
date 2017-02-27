@@ -2,7 +2,6 @@
 
 import os
 
-print os.getcwd()
 path = os.getcwd()
 
 block_cipher = None
