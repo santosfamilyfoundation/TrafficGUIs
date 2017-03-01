@@ -13,7 +13,7 @@ SantosGUI is currently supported on Ubuntu 14.04 and Windows 8,10.
 
 #### Conda Installation
 
-The recommended way to run this project is using Anaconda. You can install Anaconda from [here](https://www.continuum.io/downloads#windows). Be sure to install the Python 2.7 version.
+The recommended way to run this project is using Anaconda. You can install Anaconda from [here](https://www.continuum.io/downloads#windows). Be sure to install the Python 2.7 version. Install it to `C:\Anaconda2`.
 
 Run the following command to create a conda environment that we will use for this project:
 
