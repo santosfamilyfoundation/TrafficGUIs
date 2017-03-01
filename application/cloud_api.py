@@ -8,6 +8,7 @@ from app_config import AppConfig as ac
 from app_config import get_project_path
 import json
 from threading import Timer
+import numpy as np
 
 from pprint import pprint
 
@@ -115,6 +116,19 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
+    def getHomography(self, identifier, file_path = None):
+        payload = {'identifier': identifier}
+        r = requests.get(\
+            self.server_addr + 'configHomography', params = payload)
+
+        print "Response JSON: {}".format(r.json())
+        print "Status Code: {}".format(r.status_code)
+        homography = r.json()['homography']
+        if file_path:
+            path = os.path.join(file_path, 'homography', 'homography.txt')
+            np.savetxt(path, np.array(homography))
+        return homography
+
     def configFiles(self, identifier,
                     max_features_per_frame = None,\
                     num_displacement_frames = None,\
@@ -144,7 +158,7 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def testConfig(self, test_flag, identifier,
+    def testConfig(self, identifier, test_flag, 
                    frame_start = None,\
                    num_frames = None):
         print "testConfig called with identifier = {},\
@@ -152,7 +166,7 @@ class CloudWizard:
                 .format(identifier,test_flag,frame_start,num_frames)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -167,7 +181,7 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def getTestConfig(self, test_flag, identifier, project_path):
+    def getTestConfig(self, identifier, test_flag, project_path):
         print "getTestConfig called with identifier = {} and test_flag = {}".format(identifier,test_flag)
 
         payload = {
@@ -187,7 +201,7 @@ class CloudWizard:
             print "ERROR: Invalid flag"
             return
 
-        r = requests.get(self.server_addr + 'testConfig', data = payload, stream=True)
+        r = requests.get(self.server_addr + 'testConfig', params = payload, stream=True)
 
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
@@ -208,7 +222,7 @@ class CloudWizard:
         print "analysis called with identifier = {} and email = {}".format(identifier, email)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -225,7 +239,7 @@ class CloudWizard:
         print "objectTracking called with identifier = {} and email = {}".format(identifier, email)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -241,7 +255,7 @@ class CloudWizard:
         print "safetyAnalysis called with identifier = {} and email = {}".format(identifier, email)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
         elif status_dict["object_tracking"] != 2:
@@ -267,7 +281,7 @@ class CloudWizard:
             'identifier': identifier,
         }
 
-        r = requests.post(self.server_addr + 'status', data = payload)
+        r = requests.get(self.server_addr + 'status', params = payload)
         status_dict = r.json()
         status_dict = {k:int(v) for (k,v) in status_dict.iteritems()}
         print "Status Code: {}".format(r.status_code)
@@ -296,7 +310,7 @@ class CloudWizard:
                 .format(identifier, ttc_threshold, vehicle_only)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
         elif status_dict["object_tracking"] != 2:
@@ -336,7 +350,7 @@ class CloudWizard:
         path = os.path.join(project_path, 'results', 'results.zip')
         if os.path.exists(path):
             os.remove(path)
-        r = requests.get(self.server_addr + 'retrieveResults', data = payload, stream=True)
+        r = requests.get(self.server_addr + 'retrieveResults', params = payload, stream=True)
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
             for chunk in r.iter_content(chunk_size=2048):

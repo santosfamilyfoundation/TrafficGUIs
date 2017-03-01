@@ -140,8 +140,8 @@ class MainGUI(QtWidgets.QMainWindow):
     def test_feature(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
         num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
-        api.testConfig('feature',\
-                            get_identifier(),\
+        api.testConfig(get_identifier(),\
+                            'feature',\                            
                             frame_start = frame_start,\
                             num_frames = num_frames)
         StatusPoller(get_identifier(), 'feature_test', 5, self.test_feature_callback).start()
@@ -160,14 +160,14 @@ class MainGUI(QtWidgets.QMainWindow):
                 self.feature_tracking_video_player.openFile(video_path)
 
     def get_feature_video(self):
-        api.getTestConfig('feature', get_identifier(), get_project_path())
+        api.getTestConfig(get_identifier(), 'feature', get_project_path())
         self.open_feature_video()
 
     def test_object(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
         num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
-        api.testConfig('object',\
-                            get_identifier(),\
+        api.testConfig(get_identifier(),\
+                            'object',\
                             frame_start = frame_start,\
                             num_frames = num_frames)
         StatusPoller(get_identifier(), 'object_test', 5, self.test_object_callback).start()
@@ -186,7 +186,7 @@ class MainGUI(QtWidgets.QMainWindow):
                 self.roadusers_tracking_video_player.openFile(video_path)
 
     def get_object_video(self):
-        api.getTestConfig('object', get_identifier(), get_project_path())
+        api.getTestConfig(get_identifier(), 'object', get_project_path())
         self.open_object_video()
 
     # for the runAnalysis button
