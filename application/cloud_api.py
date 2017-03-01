@@ -7,6 +7,7 @@ from app_config import AppConfig as ac
 from app_config import get_project_path
 import json
 from threading import Timer
+import numpy as np
 
 from pprint import pprint
 
@@ -99,17 +100,22 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def getHomography(self, identifier, project_path):
+    def getHomography(self, identifier, write_to_file = False, project_path = None):
         payload = {'identifier': identifier}
         r = requests.get(\
             self.server_addr + 'configHomography', params = payload)
-        path = os.path.join(project_path, 'homography', 'homography.txt')
-        with open(path, 'wb') as f:
-            print('Dumping "{0}"...'.format(path))
-            for chunk in r.iter_content(chunk_size=2048):
-                if chunk:
-                    f.write(chunk)
+
+        print "Response JSON: {}".format(r.json())
         print "Status Code: {}".format(r.status_code)
+        homography = r.json()['homography']
+        print homography
+        if write_to_file:
+            if project_path:
+                path = os.path.join(project_path, 'homography', 'homography.txt')
+                np.savetxt(path, np.array(homography))
+            else:
+                "Error: If you want to write to a file, you must also specify a project_path"
+        return homography
 
     def configFiles(self, identifier,
                     max_features_per_frame = None,\
