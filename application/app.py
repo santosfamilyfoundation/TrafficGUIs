@@ -133,10 +133,7 @@ class MainGUI(QtWidgets.QMainWindow):
         self.ui.homography_compute_button.clicked.connect(self.homography_compute)
         self.show()
 
-        if projects_exist():
-            self.pselector.show()
-        else:
-            self.newp.show()
+        self.pselector.show()
 
 ######################################################################################################
 
