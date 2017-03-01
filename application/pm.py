@@ -29,6 +29,7 @@ class ProjectWizard(QtWidgets.QWizard):
         self.ui.setupUi(self)
         self.ui.newp_aerial_image_browse.clicked.connect(self.open_aerial_image)
         self.ui.newp_video_browse.clicked.connect(self.open_video)
+        self.aerial_image_selected = True
         self.video_selected = False
 
         # Remove '?' icon
@@ -50,6 +51,7 @@ class ProjectWizard(QtWidgets.QWizard):
         # Set default server
         self.ui.newp_video_server_input.setText("http://localhost:8088")
 
+        self.ui.newp_p2_5.registerField("aerial_image*", self.ui.newp_aerial_image_input)
         self.ui.newp_p3.registerField("create_project", self.ui.newp_start_creation)
 
     def open_aerial_image(self):
@@ -59,6 +61,7 @@ class ProjectWizard(QtWidgets.QWizard):
             filepath = self.get_filepath(fname)
             self.ui.newp_aerial_image_input.setText(filepath)
             self.aerialpath = filepath
+            self.aerial_image_selected = True
         else:
             self.ui.newp_aerial_image_input.setText("NO FILE SELECTED")
 
