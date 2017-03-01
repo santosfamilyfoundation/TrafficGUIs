@@ -112,14 +112,14 @@ class CloudWizard:
         }
 
         r = requests.post(\
-            self.server_addr + 'configHomography', data = payload)
+            self.server_addr + 'homography', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
     def getHomography(self, identifier, file_path = None):
         payload = {'identifier': identifier}
         r = requests.get(\
-            self.server_addr + 'configHomography', params = payload)
+            self.server_addr + 'homography', params = payload)
 
         print "Response JSON: {}".format(r.json())
         print "Status Code: {}".format(r.status_code)
