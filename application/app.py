@@ -149,8 +149,8 @@ class MainGUI(QtGui.QMainWindow):
     def test_feature(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
         num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
-        api.testConfig('feature',\
-                            get_identifier(),\
+        api.testConfig(get_identifier(),\
+                            'feature',\                            
                             frame_start = frame_start,\
                             num_frames = num_frames)
         StatusPoller(get_identifier(), 'feature_test', 5, self.test_feature_callback).start()
@@ -163,7 +163,7 @@ class MainGUI(QtGui.QMainWindow):
 
     def get_feature_video(self):
         project_path = get_project_path()
-        api.getTestConfig('feature', get_identifier(), project_path)
+        api.getTestConfig(get_identifier(), 'feature',  project_path)
 
         images_prefix = 'feature_images-'
         extension = 'png'
@@ -179,8 +179,8 @@ class MainGUI(QtGui.QMainWindow):
     def test_object(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
         num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
-        api.testConfig('object',\
-                            get_identifier(),\
+        api.testConfig(get_identifier(),\
+                            'object',\
                             frame_start = frame_start,\
                             num_frames = num_frames)
         StatusPoller(get_identifier(), 'object_test', 5, self.test_object_callback).start()
@@ -193,7 +193,7 @@ class MainGUI(QtGui.QMainWindow):
 
     def get_object_video(self):
         project_path = get_project_path()
-        api.getTestConfig('object', get_identifier(), project_path)
+        api.getTestConfig(get_identifier(), 'object', project_path)
 
         images_prefix = 'object_images-'
         extension = 'png'
