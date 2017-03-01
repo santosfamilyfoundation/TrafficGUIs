@@ -13,7 +13,7 @@ echo
 if [ "$(uname)" == "Darwin" ]; then
     echo "Mac OS X platform"  
     chmod 777 dist/SantosTrafficAnalysis
-    dmgbuild -s build_settings.py -D app=dist/SantosTrafficAnalysis "Santos Analysis" Santos.dmg
+    dmgbuild -s packaging/build_settings.py -D app=dist/SantosTrafficAnalysis "Santos Analysis" Santos.dmg
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     echo "GNU/Linux platform"
     chmod 777 dist/SantosTrafficAnalysis

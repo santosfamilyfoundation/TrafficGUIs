@@ -141,7 +141,7 @@ class MainGUI(QtWidgets.QMainWindow):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
         num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
         api.testConfig(get_identifier(),\
-                            'feature',\                            
+                            'feature',\
                             frame_start = frame_start,\
                             num_frames = num_frames)
         StatusPoller(get_identifier(), 'feature_test', 5, self.test_feature_callback).start()

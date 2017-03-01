@@ -17,7 +17,7 @@ import os.path
 
 # .. Useful stuff ..............................................................
 
-application = defines.get('SantosAnalysis', 'SantosTrafficAnalysis')
+application = defines.get('SantosAnalysis', 'dist/SantosTrafficAnalysis')
 appname = os.path.basename(application)
 print appname
 
@@ -34,7 +34,7 @@ def icon_from_app(app_path):
 # .. Basics ....................................................................
 
 # Uncomment to override the output filename
-filename = 'SantosTrafficAnalysis.dmg'
+filename = 'dist/SantosTrafficAnalysis.dmg'
 
 # Uncomment to override the output volume name
 # volume_name = 'Test'
