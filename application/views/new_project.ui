@@ -75,6 +75,91 @@
     </item>
    </layout>
   </widget>
+  <widget class="QWizardPage" name="newp_p1_5">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QLabel" name="newp_add_server_title">
+ 	 <property name="font">
+ 	  <font>
+ 	   <pointsize>14</pointsize>
+ 	   <weight>75</weight>
+ 	   <bold>true</bold>
+ 	  </font>
+ 	 </property>
+ 	 <property name="text">
+ 	  <string>Add server address</string>
+ 	 </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="newp_p2_add_server_description">
+      <property name="text">
+       <string>Browse and select a server address to run processing.
+(Optional) Add an email address for status messages.</string>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QFormLayout" name="newp_p2_video_layout">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
+      <property name="topMargin">
+       <number>8</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="newp_video_server_label">
+        <property name="text">
+         <string>Server IP or URL</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="newp_video_server_input">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>21</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="newp_video_email_label">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>21</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Email</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="newp_video_email_input">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>21</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
   <widget class="QWizardPage" name="newp_p2">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -100,7 +185,8 @@
     <item>
      <widget class="QLabel" name="newp_p2_add_vido_description">
       <property name="text">
-       <string>Browse and select a video file to analyze. Please input the time when the video recording occurred. You may optionally enter an email that should be notified when long-running analysis is finished. You should also enter the IP address or URL of the server that should be used for analysis.</string>
+       <string>Browse and select a video file to analyze.
+Input the time when the video recording occurred.</string>
       </property>
       <property name="wordWrap">
        <bool>true</bool>
@@ -184,54 +270,18 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="newp_video_server_label">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>21</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Server IP or URL</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="newp_video_server_input">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>21</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="newp_video_email_label">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>21</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Email</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="newp_video_email_input">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>21</height>
-         </size>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
+   </layout>
+  </widget>
+  <widget class="QWizardPage" name="newp_p2_5">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <widget class="QLabel" name="newp_add_aerial_image_title">
       <property name="font">

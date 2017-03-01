@@ -51,8 +51,7 @@ class ProjectWizard(QtWidgets.QWizard):
         # Set default server
         self.ui.newp_video_server_input.setText("http://localhost:8088")
 
-        self.ui.newp_p2.registerField("aerial_image*", self.ui.newp_aerial_image_input)
-
+        self.ui.newp_p2_5.registerField("aerial_image*", self.ui.newp_aerial_image_input)
         self.ui.newp_p3.registerField("create_project", self.ui.newp_start_creation)
 
     def open_aerial_image(self):
@@ -61,8 +60,8 @@ class ProjectWizard(QtWidgets.QWizard):
         if fname:
             filepath = self.get_filepath(fname)
             self.ui.newp_aerial_image_input.setText(filepath)
-            self.aerial_image_selected = True
             self.aerialpath = filepath
+            self.aerial_image_selected = True
         else:
             self.ui.newp_aerial_image_input.setText("NO FILE SELECTED")
 

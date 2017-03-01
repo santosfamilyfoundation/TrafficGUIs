@@ -10,3 +10,4 @@ conda install -n $YOURENVNAME nomkl scikit-learn=0.18.1
 conda install -n $YOURENVNAME nomkl numexpr=2.6.2
 conda remove -n $YOURENVNAME mkl mkl-service
 conda install -n $YOURENVNAME -c conda-forge requests-toolbelt=0.7.1
+conda install -n $YOURENVNAME libpng=1.6.22
