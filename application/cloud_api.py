@@ -170,7 +170,7 @@ class CloudWizard:
                 .format(identifier,test_flag,frame_start,num_frames)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -226,7 +226,7 @@ class CloudWizard:
         print "analysis called with identifier = {} and email = {}".format(identifier, email)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -243,7 +243,7 @@ class CloudWizard:
         print "objectTracking called with identifier = {} and email = {}".format(identifier, email)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -259,7 +259,7 @@ class CloudWizard:
         print "safetyAnalysis called with identifier = {} and email = {}".format(identifier, email)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
         elif status_dict["object_tracking"] != 2:
@@ -314,7 +314,7 @@ class CloudWizard:
                 .format(identifier, ttc_threshold, vehicle_only)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
         elif status_dict["object_tracking"] != 2:
