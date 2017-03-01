@@ -17,8 +17,9 @@ import os.path
 
 # .. Useful stuff ..............................................................
 
-application = defines.get('app', 'app.py')
+application = defines.get('SantosAnalysis', 'SantosTrafficAnalysis')
 appname = os.path.basename(application)
+print appname
 
 def icon_from_app(app_path):
     plist_path = os.path.join(app_path, 'Contents', 'Info.plist')
@@ -33,7 +34,7 @@ def icon_from_app(app_path):
 # .. Basics ....................................................................
 
 # Uncomment to override the output filename
-filename = 'test.dmg'
+filename = 'SantosTrafficAnalysis.dmg'
 
 # Uncomment to override the output volume name
 # volume_name = 'Test'
