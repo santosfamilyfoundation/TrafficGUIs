@@ -319,7 +319,7 @@ class MainGUI(QtWidgets.QMainWindow):
         """
         fname = QtWidgets.QFileDialog.getOpenFileName(self, dialog_text, default_folder)  # TODO: Filter to show only image files
         if fname:
-            image = QtGui.QImage(fname)
+            image = QtGui.QImage(fname[0])
         else:
             image = None
         return image
@@ -431,12 +431,12 @@ class configGuiWidget(QtWidgets.QWidget):
         if info_txt:
             info = QtWidgets.QToolButton()
             info.setIcon(qta.icon('fa.question'))
-            info.clicked.connect(lambda: self.parent.show_message(info_txt)) 
+            info.clicked.connect(lambda: self.parent.show_message(info_txt))
         else:
             info = None
         line_edit = QtWidgets.QLineEdit()
         return label, info, line_edit
-    
+
 class configGui_features(configGuiWidget):
 
     def __init__(self, parent):
