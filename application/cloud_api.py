@@ -116,7 +116,7 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def getHomography(self, identifier, write_to_file = False, project_path = None):
+    def getHomography(self, identifier, file_path = None):
         payload = {'identifier': identifier}
         r = requests.get(\
             self.server_addr + 'configHomography', params = payload)
@@ -124,13 +124,9 @@ class CloudWizard:
         print "Response JSON: {}".format(r.json())
         print "Status Code: {}".format(r.status_code)
         homography = r.json()['homography']
-        print homography
-        if write_to_file:
-            if project_path:
-                path = os.path.join(project_path, 'homography', 'homography.txt')
-                np.savetxt(path, np.array(homography))
-            else:
-                "Error: If you want to write to a file, you must also specify a project_path"
+        if file_path:
+            path = os.path.join(file_path, 'homography', 'homography.txt')
+            np.savetxt(path, np.array(homography))
         return homography
 
     def configFiles(self, identifier,
