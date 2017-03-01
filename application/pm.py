@@ -29,7 +29,7 @@ class ProjectWizard(QtWidgets.QWizard):
         self.ui.setupUi(self)
         self.ui.newp_aerial_image_browse.clicked.connect(self.open_aerial_image)
         self.ui.newp_video_browse.clicked.connect(self.open_video)
-        self.aerial_image_selected = True
+        self.aerial_image_selected = False
         self.video_selected = False
 
         # Remove '?' icon
