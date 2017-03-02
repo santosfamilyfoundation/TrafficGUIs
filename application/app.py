@@ -267,7 +267,6 @@ class MainGUI(QtWidgets.QMainWindow):
         fname = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Open Existing Project Folder...", get_default_project_dir()))
         # TODO: Instead of select folder, perhaps select config file?
         if fname:
-            print(fname)
             pm.load_project(fname, self)
         else:
             pass  # If no folder selected, don't load anything.
