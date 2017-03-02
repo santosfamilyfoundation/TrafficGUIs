@@ -79,7 +79,7 @@ class CloudWizard:
 
             # m.len returns the size of all of the encoded parts in bytes
             # and 1024*1024 is MB in bytes. As such we can compare the size
-            # of all the files we want to send to a 100MB size limit for 
+            # of all the files we want to send to a 100MB size limit for
             # transitioning to streaming rather than loading into memory
             if m.len/(1024*1024) >= 100:
                 # We need to set the Content-Type header
@@ -158,7 +158,7 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def testConfig(self, identifier, test_flag, 
+    def testConfig(self, identifier, test_flag,
                    frame_start = None,\
                    num_frames = None):
         print "testConfig called with identifier = {},\

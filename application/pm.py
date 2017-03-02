@@ -18,7 +18,7 @@ except:
 import numpy as np
 
 from app_config import AppConfig as ac
-from app_config import get_project_path, get_config_path, config_section_exists, get_config_with_sections, update_config_with_sections
+from app_config import get_default_project_dir, get_project_path, get_config_path, config_section_exists, get_config_with_sections, update_config_with_sections
 from cloud_api import api
 
 class ProjectWizard(QtWidgets.QWizard):
@@ -56,7 +56,8 @@ class ProjectWizard(QtWidgets.QWizard):
 
     def open_aerial_image(self):
         filt = "Images (*.png *.jpg *.jpeg *.bmp *.tif *.gif)"  # Select only images
-        fname = self.open_fd(dialog_text="Select aerial image", file_filter=filt)
+        documents_folder = os.path.realpath(os.path.join(os.path.expanduser('~'), "Documents"))
+        fname = self.open_fd(dialog_text="Select aerial image", file_filter=filt, default_dir=documents_folder)
         if fname:
             filepath = self.get_filepath(fname)
             self.ui.newp_aerial_image_input.setText(filepath)
@@ -66,8 +67,9 @@ class ProjectWizard(QtWidgets.QWizard):
             self.ui.newp_aerial_image_input.setText("NO FILE SELECTED")
 
     def open_video(self):
-        filt = "Videos (*.mp4 *.avi *.mpg *mpeg)"  # Select only videos
-        fname = self.open_fd(dialog_text="Select video for analysis", file_filter=filt)
+        filt = "Videos (*.mp4 *.avi *.mpg *.mpeg *.mov *.ogg *.wmv *.m4v *.m4p *.mp2 *.mpe *.mpv *.m2v)"  # Select only videos
+        documents_folder = os.path.realpath(os.path.join(os.path.expanduser('~'), "Documents"))
+        fname = self.open_fd(dialog_text="Select video for analysis", file_filter=filt, default_dir=documents_folder)
         if fname:
             filepath = self.get_filepath(fname)
             self.ui.newp_video_input.setText(filepath)
@@ -116,7 +118,8 @@ class ProjectWizard(QtWidgets.QWizard):
             self.create_project_dir()
 
     def create_project_dir(self):
-        ac.CURRENT_PROJECT_NAME = str(self.ui.newp_projectname_input.text())
+        project_name = str(self.ui.newp_projectname_input.text())
+        ac.CURRENT_PROJECT_PATH = os.path.join(get_default_project_dir(), project_name)
         progress_bar = self.ui.newp_creation_progress
         progress_msg = self.ui.newp_creation_status
         directory_names = ["homography", "results"]
@@ -163,7 +166,7 @@ class ProjectWizard(QtWidgets.QWizard):
             progress_bar.setValue(95)
             progress_msg.setText("Complete.")
 
-            progress_msg.setText("Opening {} project...".format(ac.CURRENT_PROJECT_NAME))
+            progress_msg.setText("Opening {} project...".format(project_name))
             self.load_new_project()
             progress_bar.setValue(100)
             progress_msg.setText("Complete.")
@@ -180,7 +183,7 @@ class ProjectWizard(QtWidgets.QWizard):
         timestamp = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y %H:%M:%S %Z')
         video_timestamp = vid_ts.strftime('%d-%m-%Y %H:%M:%S %Z')
         self.config_parser.add_section("info")
-        self.config_parser.set("info", "project_name", ac.CURRENT_PROJECT_NAME)
+        self.config_parser.set("info", "project_name", os.path.basename(ac.CURRENT_PROJECT_PATH))
         self.config_parser.set("info", "creation_date", timestamp)
         self.config_parser.set("info", "server", server)
         self.config_parser.set("info", "email", email)
@@ -203,10 +206,10 @@ class ProjectWizard(QtWidgets.QWizard):
             self.config_parser.write(configfile)
 
     def load_new_project(self):
-        load_project(ac.CURRENT_PROJECT_NAME, self.parent())
+        load_project(ac.CURRENT_PROJECT_PATH, self.parent())
 
-def load_project(project_name, main_window):
-    ac.CURRENT_PROJECT_NAME = project_name
+def load_project(project_path, main_window):
+    ac.CURRENT_PROJECT_PATH = project_path
 
     load_homography(main_window)
 
