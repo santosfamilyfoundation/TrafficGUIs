@@ -5,20 +5,22 @@ import os
 application_name = "SantosGUI"
 
 class AppConfig(object):
-    PROJECT_DIR = os.path.realpath(os.path.join(os.path.expanduser('~'),"Documents" , application_name, "project_dir"))
-    CURRENT_PROJECT_NAME = None
+    DEFAULT_PROJECT_DIR = os.path.realpath(os.path.join(os.path.expanduser('~'), "Documents", application_name, "project_dir"))
+    CURRENT_PROJECT_PATH = None
 
-def get_base_project_dir():
-    return AppConfig.PROJECT_DIR
+def get_default_project_dir():
+    return AppConfig.DEFAULT_PROJECT_DIR
+
+def create_default_project_dir():
+    if not os.path.exists(AppConfig.DEFAULT_PROJECT_DIR):
+        os.makedirs(AppConfig.DEFAULT_PROJECT_DIR)
 
 def get_project_path():
-    if AppConfig.CURRENT_PROJECT_NAME:
-        return os.path.join(AppConfig.PROJECT_DIR, AppConfig.CURRENT_PROJECT_NAME)
-    return None
+    return AppConfig.CURRENT_PROJECT_PATH
 
 def get_config_path():
-    if AppConfig.CURRENT_PROJECT_NAME:
-        return os.path.join(AppConfig.PROJECT_DIR, AppConfig.CURRENT_PROJECT_NAME, "config.cfg")
+    if AppConfig.CURRENT_PROJECT_PATH:
+        return os.path.join(AppConfig.CURRENT_PROJECT_PATH, "config.cfg")
     return None
 
 def get_identifier():
@@ -36,11 +38,6 @@ def get_project_video_path():
         else:
             print("ERR: project_video(): Couldn't get video")
     return None
-
-def projects_exist():
-    if not os.path.exists(get_base_project_dir()):
-        return False
-    return (len(os.listdir(get_base_project_dir())) > 0)
 
 def update_config_with_sections(config_path, section, option, value):
     """

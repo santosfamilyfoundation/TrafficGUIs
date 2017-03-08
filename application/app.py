@@ -16,7 +16,7 @@ import zipfile
 
 import os
 import numpy as np
-from app_config import get_base_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path, get_identifier, projects_exist
+from app_config import get_default_project_dir, create_default_project_dir, get_project_path, update_config_with_sections, get_config_with_sections, get_config_path, get_identifier
 
 import pm
 import message_helper
@@ -132,6 +132,9 @@ class MainGUI(QtWidgets.QMainWindow):
         self.ui.homography_aerialview.status_label = self.ui.homography_aerial_status_label
         self.ui.homography_compute_button.clicked.connect(self.homography_compute)
         self.show()
+
+        # Create default project dir if it doesn't exist
+        create_default_project_dir()
 
         self.pselector.show()
 
@@ -261,11 +264,10 @@ class MainGUI(QtWidgets.QMainWindow):
         helper.show_message(message)
 
     def open_project(self):
-        fname = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Open Existing Project Folder...", get_base_project_dir()))
+        fname = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Open Existing Project Folder...", get_default_project_dir()))
         # TODO: Instead of select folder, perhaps select config file?
         if fname:
-            project_name = os.path.basename(fname)
-            pm.load_project(project_name, self)
+            pm.load_project(fname, self)
         else:
             pass  # If no folder selected, don't load anything.
 
