@@ -7,7 +7,39 @@ SantosGUI is currently supported on Ubuntu 14.04 and Windows 8,10.
 
 ### Ubuntu Installation
 
+### Mac Installation
 
+#### Conda Installation
+
+The recommended way to run this project is using Miniconda. You can install Miniconda from [here](https://conda.io/miniconda.html). Be sure to install the Python 2.7 version. Install it to `~/miniconda2` when prompted and let the installer prepend the location to your PATH.
+
+##### Install from YML
+
+Run the following command to create and activate the conda environment for the project:
+
+```
+bash install_conda_deps.sh santosgui
+```
+
+##### Install from Script
+
+Run the following command to create a conda environment that we will use for this project:
+
+```
+conda create -n santosgui
+```
+
+Then use 
+
+```
+source activate santosgui
+```
+
+to enter the environment. Run the following command to begin installing the various dependencies of the project.
+
+```
+bash build_conda_deps.sh santosgui
+```
 
 ### Windows Installation
 
