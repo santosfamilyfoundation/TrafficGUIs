@@ -24,7 +24,7 @@
    <enum>QWizard::ClassicStyle</enum>
   </property>
   <property name="options">
-   <set>QWizard::NoBackButtonOnLastPage|QWizard::NoBackButtonOnStartPage</set>
+   <set>QWizard::NoBackButtonOnStartPage</set>
   </property>
   <widget class="QWizardPage" name="newp_p1">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -351,7 +351,7 @@ Input the time when the video recording occurred.</string>
        </font>
       </property>
       <property name="text">
-       <string>Creating new project</string>
+       <string>Confirm project settings</string>
       </property>
      </widget>
     </item>
@@ -363,9 +363,12 @@ Input the time when the video recording occurred.</string>
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="newp_start_creation">
+     <widget class="QLabel" name="newp_p3_add_server_description">
       <property name="text">
-       <string>Click to create project.</string>
+       <string>If complete, create your project. Otherwise, go back to make any necessary changes.</string>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
       </property>
      </widget>
     </item>
@@ -374,12 +377,25 @@ Input the time when the video recording occurred.</string>
       <property name="value">
        <number>0</number>
       </property>
+      <property name="visible">
+        <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="newp_start_creation">
+      <property name="text">
+       <string>Click to send project to server</string>
+      </property>
      </widget>
     </item>
     <item>
      <widget class="QLabel" name="newp_creation_status">
       <property name="text">
        <string>Beginning project creation...</string>
+      </property>
+      <property name="visible">
+        <bool>false</bool>
       </property>
      </widget>
     </item>

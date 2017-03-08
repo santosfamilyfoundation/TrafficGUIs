@@ -118,7 +118,11 @@ class ProjectWizard(QtWidgets.QWizard):
     def create_project_dir(self):
         ac.CURRENT_PROJECT_NAME = str(self.ui.newp_projectname_input.text())
         progress_bar = self.ui.newp_creation_progress
+        progress_bar.setHidden(False)
         progress_msg = self.ui.newp_creation_status
+        progress_msg.setHidden(False)
+        creation_button = self.ui.newp_start_creation
+        creation_button.setHidden(True)
         directory_names = ["homography", "results"]
         pr_path = get_project_path()
         if not os.path.exists(pr_path):
@@ -127,6 +131,7 @@ class ProjectWizard(QtWidgets.QWizard):
             update_api(server)
 
             progress_msg.setText("Creating project directories...")
+            progress_bar.show()
             for new_dir in directory_names:
                 progress_bar.setValue(progress_bar.value() + 5)
                 os.makedirs(os.path.join(pr_path, new_dir))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'application/views/new_project.ui'
+# Form implementation generated from reading ui file 'views/new_project.ui'
 #
 # Created by: PyQt5 UI code generator 5.6
 #
@@ -16,7 +16,7 @@ class Ui_create_new_project(object):
         create_new_project.setAutoFillBackground(False)
         create_new_project.setModal(True)
         create_new_project.setWizardStyle(QtWidgets.QWizard.ClassicStyle)
-        create_new_project.setOptions(QtWidgets.QWizard.NoBackButtonOnLastPage|QtWidgets.QWizard.NoBackButtonOnStartPage)
+        create_new_project.setOptions(QtWidgets.QWizard.NoBackButtonOnStartPage)
         self.newp_p1 = QtWidgets.QWizardPage()
         self.newp_p1.setObjectName("newp_p1")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.newp_p1)
@@ -197,14 +197,20 @@ class Ui_create_new_project(object):
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line.setObjectName("line")
         self.verticalLayout_3.addWidget(self.line)
+        self.newp_p3_add_server_description = QtWidgets.QLabel(self.newp_p3)
+        self.newp_p3_add_server_description.setWordWrap(True)
+        self.newp_p3_add_server_description.setObjectName("newp_p3_add_server_description")
+        self.verticalLayout_3.addWidget(self.newp_p3_add_server_description)
+        self.newp_creation_progress = QtWidgets.QProgressBar(self.newp_p3)
+        self.newp_creation_progress.setProperty("value", 0)
+        self.newp_creation_progress.setVisible(False)
+        self.newp_creation_progress.setObjectName("newp_creation_progress")
+        self.verticalLayout_3.addWidget(self.newp_creation_progress)
         self.newp_start_creation = QtWidgets.QPushButton(self.newp_p3)
         self.newp_start_creation.setObjectName("newp_start_creation")
         self.verticalLayout_3.addWidget(self.newp_start_creation)
-        self.newp_creation_progress = QtWidgets.QProgressBar(self.newp_p3)
-        self.newp_creation_progress.setProperty("value", 0)
-        self.newp_creation_progress.setObjectName("newp_creation_progress")
-        self.verticalLayout_3.addWidget(self.newp_creation_progress)
         self.newp_creation_status = QtWidgets.QLabel(self.newp_p3)
+        self.newp_creation_status.setVisible(False)
         self.newp_creation_status.setObjectName("newp_creation_status")
         self.verticalLayout_3.addWidget(self.newp_creation_status)
         create_new_project.addPage(self.newp_p3)
@@ -232,7 +238,8 @@ class Ui_create_new_project(object):
         self.newp_p2_add_aerial_image_description.setText(_translate("create_new_project", "Browse and select an aerial image of the video\'s target. "))
         self.newp_aerial_image_label.setText(_translate("create_new_project", "Aerial image"))
         self.newp_aerial_image_browse.setText(_translate("create_new_project", "Browse..."))
-        self.newp_p2_add_video_title_2.setText(_translate("create_new_project", "Creating new project"))
-        self.newp_start_creation.setText(_translate("create_new_project", "Click to create project."))
+        self.newp_p2_add_video_title_2.setText(_translate("create_new_project", "Confirm project settings"))
+        self.newp_p3_add_server_description.setText(_translate("create_new_project", "If complete, create your project. Otherwise, go back to make any necessary changes."))
+        self.newp_start_creation.setText(_translate("create_new_project", "Click to send project to server"))
         self.newp_creation_status.setText(_translate("create_new_project", "Beginning project creation..."))
 
