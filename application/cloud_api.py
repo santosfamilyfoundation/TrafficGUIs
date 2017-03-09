@@ -14,12 +14,6 @@ from pprint import pprint
 
 class CloudWizard:
     def __init__(self, ip_addr, port=8088):
-        #TODO: Needs to be done in sync with server
-        #   not a uuid creation
-        #self._ids = self.readIds()
-        #self.project_path = project_path
-        #self._ids[self.project_path] = uuid.uuid4()
-        #self._writeIds()
         self.set_url(ip_addr, port=port)
 
     def set_url(self, ip_addr, port=8088):
@@ -36,32 +30,6 @@ class CloudWizard:
             p = port
 
         self.server_addr = protocol + addr + ':{}/'.format(port)
-
-
-###############################################################################
-# ID Storage Functions
-###############################################################################
-
-    def _initializeIds(self):
-        with open('.IDdict','wb') as blank_dict_file:
-                pickle.dump({},blank_dict_file)
-        return {}
-
-    def readIds(self):
-        if os.path.isfile('.IDdict'):
-            with open('.IDdict','rb') as dict_file:
-                ids = pickle.loads(dict_file.read())
-            return ids
-        else:
-            return self._initializeIds()
-
-    def _writeIds(self):
-        if os.path.isfile('.IDdict'):
-            with open('.IDdict','wb') as dict_file:
-                pickle.dump(self._ids,dict_file)
-            return
-        else:
-            return self._initializeIds()
 
 ###############################################################################
 # Upload Functions

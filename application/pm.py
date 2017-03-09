@@ -149,8 +149,12 @@ class ProjectWizard(QtWidgets.QWizard):
             copy(self.videopath, video_dest)
 
             progress_msg.setText("Uploading video file...")
-            identifier = api.uploadVideo(self.videopath)
-            update_config_with_sections(get_config_path(), 'info', 'identifier', identifier)
+            try:
+                identifier = api.uploadVideo(self.videopath)
+                update_config_with_sections(get_config_path(), 'info', 'identifier', identifier)
+            except Exception as e:
+                print("Failed to upload the Video")
+                print(str(e))
             progress_bar.setValue(80)
 
             progress_msg.setText("Extracting camera image...")
