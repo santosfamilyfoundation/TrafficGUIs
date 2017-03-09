@@ -2,9 +2,10 @@
 Project management classes and functions
 """
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 from views.new_project import Ui_create_new_project
 import os
+import re
 from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
 import time
 import datetime
@@ -17,10 +18,10 @@ except:
 import numpy as np
 
 from app_config import AppConfig as ac
-from app_config import get_project_path, get_config_path, config_section_exists, get_config_with_sections, update_config_with_sections
+from app_config import get_default_project_dir, get_project_path, get_config_path, config_section_exists, get_config_with_sections, update_config_with_sections
 from cloud_api import api
 
-class ProjectWizard(QtGui.QWizard):
+class ProjectWizard(QtWidgets.QWizard):
 
     def __init__(self, parent):
         super(ProjectWizard, self).__init__(parent)
@@ -50,33 +51,47 @@ class ProjectWizard(QtGui.QWizard):
         # Set default server
         self.ui.newp_video_server_input.setText("http://localhost:8088")
 
-        self.ui.newp_p2.registerField("aerial_image*", self.ui.newp_aerial_image_input)
-
+        self.ui.newp_p2_5.registerField("aerial_image*", self.ui.newp_aerial_image_input)
         self.ui.newp_p3.registerField("create_project", self.ui.newp_start_creation)
 
     def open_aerial_image(self):
         filt = "Images (*.png *.jpg *.jpeg *.bmp *.tif *.gif)"  # Select only images
-        # default_dir =
-        fname = self.open_fd(dialog_text="Select aerial image", file_filter=filt)
+        documents_folder = os.path.realpath(os.path.join(os.path.expanduser('~'), "Documents"))
+        fname = self.open_fd(dialog_text="Select aerial image", file_filter=filt, default_dir=documents_folder)
         if fname:
-            self.ui.newp_aerial_image_input.setText(fname)
+            filepath = self.get_filepath(fname)
+            self.ui.newp_aerial_image_input.setText(filepath)
+            self.aerialpath = filepath
             self.aerial_image_selected = True
-            self.aerialpath = fname
         else:
             self.ui.newp_aerial_image_input.setText("NO FILE SELECTED")
 
     def open_video(self):
-        filt = "Videos (*.mp4 *.avi *.mpg *mpeg)"  # Select only videos
-        # default_dir =
-        fname = self.open_fd(dialog_text="Select video for analysis", file_filter=filt)
+        filt = "Videos (*.mp4 *.avi *.mpg *.mpeg *.mov *.ogg *.wmv *.m4v *.m4p *.mp2 *.mpe *.mpv *.m2v)"  # Select only videos
+        documents_folder = os.path.realpath(os.path.join(os.path.expanduser('~'), "Documents"))
+        fname = self.open_fd(dialog_text="Select video for analysis", file_filter=filt, default_dir=documents_folder)
         if fname:
-            self.ui.newp_video_input.setText(fname)
+            filepath = self.get_filepath(fname)
+            self.ui.newp_video_input.setText(filepath)
             self.video_selected = True
-            self.videopath = fname
+            self.videopath = filepath
         else:
             self.ui.newp_video_input.setText("NO VIDEO SELECTED")
 
-    # def move_video
+    def get_filepath(self, filepath):
+        """Cleans the filepath to only include the path, not file options.
+
+        Returns the selected filepath only, found between the ''.
+
+        Args:
+            filepath: uncleaned filename and file types.
+
+        Returns:
+            str: Cleaned string of only the location of video/image file.
+        """
+        return re.findall(r"'(.*?)'", filepath, re.DOTALL)[0]
+
+
     def open_fd(self, dialog_text="Open", file_filter="", default_dir=""):
         """Opens a file dialog, allowing user to select a file.
 
@@ -94,7 +109,7 @@ class ProjectWizard(QtGui.QWizard):
         Returns:
             str: Filename selected. Null string ("") if no file selected.
         """
-        fname = QtGui.QFileDialog.getOpenFileName(self, dialog_text, default_dir, file_filter)  # TODO: Filter to show only image files
+        fname = QtWidgets.QFileDialog.getOpenFileName(self, dialog_text, default_dir, file_filter)  # TODO: Filter to show only image files
         return str(fname)
 
     def start_create_project(self):
@@ -103,9 +118,14 @@ class ProjectWizard(QtGui.QWizard):
             self.create_project_dir()
 
     def create_project_dir(self):
-        ac.CURRENT_PROJECT_NAME = str(self.ui.newp_projectname_input.text())
+        project_name = str(self.ui.newp_projectname_input.text())
+        ac.CURRENT_PROJECT_PATH = os.path.join(get_default_project_dir(), project_name)
         progress_bar = self.ui.newp_creation_progress
+        progress_bar.setHidden(False)
         progress_msg = self.ui.newp_creation_status
+        progress_msg.setHidden(False)
+        creation_button = self.ui.newp_start_creation
+        creation_button.setHidden(True)
         directory_names = ["homography", "results"]
         pr_path = get_project_path()
         if not os.path.exists(pr_path):
@@ -114,6 +134,7 @@ class ProjectWizard(QtGui.QWizard):
             update_api(server)
 
             progress_msg.setText("Creating project directories...")
+            progress_bar.show()
             for new_dir in directory_names:
                 progress_bar.setValue(progress_bar.value() + 5)
                 os.makedirs(os.path.join(pr_path, new_dir))
@@ -128,8 +149,12 @@ class ProjectWizard(QtGui.QWizard):
             copy(self.videopath, video_dest)
 
             progress_msg.setText("Uploading video file...")
-            identifier = api.uploadVideo(self.videopath)
-            update_config_with_sections(get_config_path(), 'info', 'identifier', identifier)
+            try:
+                identifier = api.uploadVideo(self.videopath)
+                update_config_with_sections(get_config_path(), 'info', 'identifier', identifier)
+            except Exception as e:
+                print("Failed to upload the Video")
+                print(str(e))
             progress_bar.setValue(80)
 
             progress_msg.setText("Extracting camera image...")
@@ -150,7 +175,7 @@ class ProjectWizard(QtGui.QWizard):
             progress_bar.setValue(95)
             progress_msg.setText("Complete.")
 
-            progress_msg.setText("Opening {} project...".format(ac.CURRENT_PROJECT_NAME))
+            progress_msg.setText("Opening {} project...".format(project_name))
             self.load_new_project()
             progress_bar.setValue(100)
             progress_msg.setText("Complete.")
@@ -167,7 +192,7 @@ class ProjectWizard(QtGui.QWizard):
         timestamp = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y %H:%M:%S %Z')
         video_timestamp = vid_ts.strftime('%d-%m-%Y %H:%M:%S %Z')
         self.config_parser.add_section("info")
-        self.config_parser.set("info", "project_name", ac.CURRENT_PROJECT_NAME)
+        self.config_parser.set("info", "project_name", os.path.basename(ac.CURRENT_PROJECT_PATH))
         self.config_parser.set("info", "creation_date", timestamp)
         self.config_parser.set("info", "server", server)
         self.config_parser.set("info", "email", email)
@@ -190,10 +215,10 @@ class ProjectWizard(QtGui.QWizard):
             self.config_parser.write(configfile)
 
     def load_new_project(self):
-        load_project(ac.CURRENT_PROJECT_NAME, self.parent())
+        load_project(ac.CURRENT_PROJECT_PATH, self.parent())
 
-def load_project(project_name, main_window):
-    ac.CURRENT_PROJECT_NAME = project_name
+def load_project(project_path, main_window):
+    ac.CURRENT_PROJECT_PATH = project_path
 
     load_homography(main_window)
 
@@ -265,4 +290,3 @@ def update_api(addr):
 def load_config(main_window):
     main_window.configGui_features.loadConfig_features()
     main_window.configGui_object.loadConfig_objects()
-

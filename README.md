@@ -5,9 +5,7 @@ SantosGUI is currently supported on Ubuntu 14.04 and Windows 8,10.
 
 ## Installation
 
-### Ubuntu Installation
-
-### Mac Installation
+### Unix Installation
 
 #### Conda Installation
 
@@ -77,4 +75,3 @@ conda install -n santosgui -c conda-forge requests-toolbelt=0.7.1
 #### Video Codec Installation
 
 In order for Qt to play videos on Windows, you will need to install video codecs. This is a known problem and intended behavior of Qt, as seen [here](https://bugreports.qt.io/browse/QTBUG-51692). Installing the codec [here](http://www.codecguide.com/download_k-lite_codec_pack_basic.htm) will fix this issue. You can leave all of the default settings (but be sure not to install their bloatware!).
-

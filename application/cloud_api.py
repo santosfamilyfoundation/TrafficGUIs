@@ -3,21 +3,17 @@ import os
 import pickle
 import uuid
 import requests
+from requests_toolbelt import MultipartEncoder
 from app_config import AppConfig as ac
 from app_config import get_project_path
 import json
 from threading import Timer
+import numpy as np
 
 from pprint import pprint
 
 class CloudWizard:
     def __init__(self, ip_addr, port=8088):
-        #TODO: Needs to be done in sync with server
-        #   not a uuid creation
-        #self._ids = self.readIds()
-        #self.project_path = project_path
-        #self._ids[self.project_path] = uuid.uuid4()
-        #self._writeIds()
         self.set_url(ip_addr, port=port)
 
     def set_url(self, ip_addr, port=8088):
@@ -35,44 +31,33 @@ class CloudWizard:
 
         self.server_addr = protocol + addr + ':{}/'.format(port)
 
-
-###############################################################################
-# ID Storage Functions
-###############################################################################
-
-    def _initializeIds(self):
-        with open('.IDdict','wb') as blank_dict_file:
-                pickle.dump({},blank_dict_file)
-        return {}
-
-    def readIds(self):
-        if os.path.isfile('.IDdict'):
-            with open('.IDdict','rb') as dict_file:
-                ids = pickle.loads(dict_file.read())
-            return ids
-        else:
-            return self._initializeIds()
-
-    def _writeIds(self):
-        if os.path.isfile('.IDdict'):
-            with open('.IDdict','wb') as dict_file:
-                pickle.dump(self._ids,dict_file)
-            return
-        else:
-            return self._initializeIds()
-
 ###############################################################################
 # Upload Functions
 ###############################################################################
 
-    def uploadVideo(self,  video_path, identifier = None):
-        print "uploadVideo called with identifier = {}".format(identifier)
+    def uploadVideo(self,  video_path):
+        print "uploadVideo called"
         with open(video_path, 'rb') as video:
-            files = {'video' : video}
-            payload = {'identifier': identifier}
-            r = requests.post(\
-                self.server_addr + 'uploadVideo',\
-                data = payload, files = files, stream = True)
+            # We set the content-disposition 'filename' parameter manually
+            # incase we need to do streaming
+            files = {'video' : (os.path.basename(video_path), video)}
+
+            #Use a multipartencoder to stream the file data as just data
+            m = MultipartEncoder(fields = files)
+
+            # m.len returns the size of all of the encoded parts in bytes
+            # and 1024*1024 is MB in bytes. As such we can compare the size
+            # of all the files we want to send to a 100MB size limit for
+            # transitioning to streaming rather than loading into memory
+            if m.len/(1024*1024) >= 100:
+                # We need to set the Content-Type header
+                r = requests.post(\
+                    self.server_addr + 'uploadVideo', data = m,\
+                    headers = {'Content-Type': m.content_type})
+            else:
+                r = requests.post(\
+                    self.server_addr + 'uploadVideo', files = files)
+
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         print "Response JSON: {}".format(r.json())
@@ -95,9 +80,22 @@ class CloudWizard:
         }
 
         r = requests.post(\
-            self.server_addr + 'configHomography', data = payload)
+            self.server_addr + 'homography', data = payload)
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
+
+    def getHomography(self, identifier, file_path = None):
+        payload = {'identifier': identifier}
+        r = requests.get(\
+            self.server_addr + 'homography', params = payload)
+
+        print "Response JSON: {}".format(r.json())
+        print "Status Code: {}".format(r.status_code)
+        homography = r.json()['homography']
+        if file_path:
+            path = os.path.join(file_path, 'homography', 'homography.txt')
+            np.savetxt(path, np.array(homography))
+        return homography
 
     def configFiles(self, identifier,
                     max_features_per_frame = None,\
@@ -128,7 +126,7 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def testConfig(self, test_flag, identifier,
+    def testConfig(self, identifier, test_flag,
                    frame_start = None,\
                    num_frames = None):
         print "testConfig called with identifier = {},\
@@ -136,7 +134,7 @@ class CloudWizard:
                 .format(identifier,test_flag,frame_start,num_frames)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -151,7 +149,7 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
 
-    def getTestConfig(self, test_flag, identifier, project_path):
+    def getTestConfig(self, identifier, test_flag, project_path):
         print "getTestConfig called with identifier = {} and test_flag = {}".format(identifier,test_flag)
 
         payload = {
@@ -171,7 +169,7 @@ class CloudWizard:
             print "ERROR: Invalid flag"
             return
 
-        r = requests.get(self.server_addr + 'testConfig', data = payload, stream=True)
+        r = requests.get(self.server_addr + 'testConfig', params = payload, stream=True)
 
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
@@ -192,7 +190,7 @@ class CloudWizard:
         print "analysis called with identifier = {} and email = {}".format(identifier, email)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -209,7 +207,7 @@ class CloudWizard:
         print "objectTracking called with identifier = {} and email = {}".format(identifier, email)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -225,7 +223,7 @@ class CloudWizard:
         print "safetyAnalysis called with identifier = {} and email = {}".format(identifier, email)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
         elif status_dict["object_tracking"] != 2:
@@ -251,7 +249,7 @@ class CloudWizard:
             'identifier': identifier,
         }
 
-        r = requests.post(self.server_addr + 'status', data = payload)
+        r = requests.get(self.server_addr + 'status', params = payload)
         status_dict = r.json()
         status_dict = {k:int(v) for (k,v) in status_dict.iteritems()}
         print "Status Code: {}".format(r.status_code)
@@ -280,7 +278,7 @@ class CloudWizard:
                 .format(identifier, ttc_threshold, vehicle_only)
 
         status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        if status_dict["homography"] != 2:
             print "Check your homography and upload (again)."
             return
         elif status_dict["object_tracking"] != 2:
@@ -320,7 +318,7 @@ class CloudWizard:
         path = os.path.join(project_path, 'results', 'results.zip')
         if os.path.exists(path):
             os.remove(path)
-        r = requests.get(self.server_addr + 'retrieveResults', data = payload, stream=True)
+        r = requests.get(self.server_addr + 'retrieveResults', params = payload, stream=True)
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
             for chunk in r.iter_content(chunk_size=2048):
