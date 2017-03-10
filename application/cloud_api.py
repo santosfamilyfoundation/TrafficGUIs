@@ -63,6 +63,16 @@ class CloudWizard:
         print "Response JSON: {}".format(r.json())
         return r.json()['identifier']
 
+    def uploadMask(self, identifier, mask_path):
+        print "uploadMask called"
+        with open(mask_path, 'rb') as mask:
+            extn = os.path.basename(mask_path).split('.')[-1]
+            files = {'mask.%s' % extn :  mask}
+            payload = {'identifier': identifier}
+            r = requests.post(self.server_addr + 'mask', data = payload, files = files)
+
+        print "Status Code: {}".format(r.status_code)
+
 ###############################################################################
 # Configuration Functions
 ###############################################################################
