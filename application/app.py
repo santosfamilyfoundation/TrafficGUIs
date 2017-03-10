@@ -450,24 +450,24 @@ class configGui_features(configGuiWidget):
         self.label2, _, self.input2 = self.gridRowHelper("number of frames to process")
 
         self.label3, self.info3, self.input3 = self.gridRowHelper("Max number of features added at each frame",
-            "The maximum number of features added at each frame. Note if that there are many moving objects in each frame, and those objects take up a large portion of the frame, this number may be higher. If you find that not enough features are being tracked, increase this parameter.")
+                "The maximum number of features added at each frame. Recommended range: 1000+. Note if that there are many moving objects in each frame, and those objects take up a large portion of the frame, this number may be higher. If you find that not enough features are being tracked, increase this parameter.")
 
         self.label4 = QtWidgets.QLabel("Number of deplacement to test")
         self.label5, self.info5, self.input5 = self.gridRowHelper("minimum feature motion",
-            "Number of displacement to test minimum feature motion. Determines how long features will be tracked. Increase this parameter if you find that your features are disappearing very quickly (i.e., after a few frames)")
+                "Number of displacement to test minimum feature motion. Recommended range: 2 - 15. Determines how long features will be tracked. Increase this parameter if you find that your features are disappearing very quickly (i.e., after a few frames)")
 
         self.label6, self.info6, self.input6 = self.gridRowHelper("Minimum displacement to keep features (px)",
-            "Minimum displacement to keep features. Describes the minimum required displacement to keep a feature (in pixels). If you have lots of slow-moving (or far-away) objects in your video, and find that not enough features are being tracked, decrease this parameter. On the other hand, if too many non-road- user features are being tracked (i.e., trees swaying in the wind) it may be useful to increase this parameter to capture the faster-moving features, which are more likely to belong to road users.")
+                "Minimum displacement to keep features. Recommended range: 0.0001 -  0.1. Describes the minimum required displacement to keep a feature (in pixels). If you have lots of slow-moving (or far-away) objects in your video, and find that not enough features are being tracked, decrease this parameter. On the other hand, if too many non-road- user features are being tracked (i.e., trees swaying in the wind) it may be useful to increase this parameter to capture the faster-moving features, which are more likely to belong to road users.")
 
         self.label7 = QtWidgets.QLabel("Max number of iterations")
 
         self.label8, self.info8, self.input8 = self.gridRowHelper("to stop feature tracking",
-            "Max number of iterations to stop feature tracking. Changes how long after a feature continues to persist after the feature stops moving. If your video features many slow-moving objects, or objects that start and stop frequently, you may want to increase this parameter.")
+                "Max number of iterations to stop feature tracking. Recommended range: 10 - 1000. Changes how long after a feature continues to persist after the feature stops moving. If your video features many slow-moving objects, or objects that start and stop frequently, you may want to increase this parameter.")
 
         self.label9 = QtWidgets.QLabel("Minimum number of frames to consider")
 
         self.label10, self.info10, self.input10 = self.gridRowHelper("a feature for grouping",
-            "The minimum amount of time (in video frames) for which a feature must persist before it is considered in the next steps of the tracking process. You may want to keep this parameter value fairly high to filter out some of the shorter-lived features (which often belong to non-road-user objects, such as moving plants in the video).")
+                "Minimum number of frames to consider a feature for grouping. Recommended range: 10 - 25. The minimum amount of time (in video frames) for which a feature must persist before it is considered in the next steps of the tracking process. You may want to keep this parameter value fairly high to filter out some of the shorter-lived features (which often belong to non-road-user objects, such as moving plants in the video).")
 
         self.loadConfig_features()
 
