@@ -143,13 +143,17 @@ class MainGUI(QtWidgets.QMainWindow):
     def test_feature(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
         num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
-        api.testConfig(get_identifier(),\
+
+        success, error_message = api.testConfig(get_identifier(),\
                             'feature',\
                             frame_start = frame_start,\
                             num_frames = num_frames)
-        StatusPoller(get_identifier(), 'feature_test', 5, self.test_feature_callback).start()
 
-        self.show_message('Your test of feature tracking has begun. When it has completed, a video will be shown in the window on the left. Please wait, this will only take about a minute.')
+        if success:
+            StatusPoller(get_identifier(), 'feature_test', 5, self.test_feature_callback).start()
+            self.show_message('Your test of feature tracking has begun. When it has completed, a video will be shown in the window on the left. Please wait, this will only take about a minute.')
+        else:
+            self.show_message(error_message)
 
     def test_feature_callback(self):
         # Emitting the signal will call get_feature_video on the main thread
