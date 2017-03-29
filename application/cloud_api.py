@@ -128,7 +128,7 @@ class CloudWizard:
 
         homography = r.json()['homography']
         if file_path:
-            path = os.path.join(file_path, 'homography', 'homography.txt')
+            path = os.path.join(file_path, 'homography.txt')
             np.savetxt(path, np.array(homography))
         return (True, None, homography)
 
@@ -199,7 +199,7 @@ class CloudWizard:
         print "Response Text: {}".format(r.text)
         return (True, None)
 
-    def getTestConfig(self, identifier, test_flag, project_path):
+    def getTestConfig(self, identifier, test_flag, file_path):
         print "getTestConfig called with identifier = {} and test_flag = {}".format(identifier,test_flag)
 
         payload = {
@@ -208,13 +208,9 @@ class CloudWizard:
         }
 
         if test_flag == 'feature':
-            if not os.path.exists(os.path.join(project_path, 'feature_video')):
-                os.mkdir(os.path.join(project_path, 'feature_video'))
-            path = os.path.join(project_path, 'feature_video', 'feature_video.mp4')
+            path = os.path.join(file_path, 'feature_video.mp4')
         elif test_flag == 'object':
-            if not os.path.exists(os.path.join(project_path, 'object_video')):
-                os.mkdir(os.path.join(project_path, 'object_video'))
-            path = os.path.join(project_path, 'object_video', 'object_video.mp4')
+            path = os.path.join(file_path, 'object_video.mp4')
         else:
             print "ERROR: Invalid flag"
             return
@@ -412,7 +408,7 @@ class CloudWizard:
         print "Response Text: {}".format(r.text)
         return (True, None)
 
-    def makeReport(self, identifier):
+    def makeReport(self, identifier, file_path):
         print "makeReport called with identifier = {}".format(identifier)
 
         payload = {
@@ -425,17 +421,27 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
+        path = os.path.join(file_path, 'santosreport.pdf')
+        if os.path.exists(path):
+            os.remove(path)
+
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
+            for chunk in r.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
+
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         return (True, None)
 
-    def retrieveResults(self, identifier, project_path):
+    def retrieveResults(self, identifier, file_path):
         print "retrieveResults called with identifier = {}".format(identifier)
 
         payload = {
             'identifier': identifier,
         }
-        path = os.path.join(project_path, 'results', 'results.zip')
+        path = os.path.join(file_path, 'results.zip')
         if os.path.exists(path):
             os.remove(path)
 
@@ -454,7 +460,7 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         return (True, None)
 
-    def roadUserCounts(self, identifier):
+    def roadUserCounts(self, identifier, file_path):
         print "roadUserCounts called with identifier = {}".format(identifier)
 
         payload = {
@@ -467,11 +473,21 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
+        path = os.path.join(file_path, 'road_user_icon_counts.jpg')
+        if os.path.exists(path):
+            os.remove(path)
+
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
+            for chunk in r.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
+
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         return (True, None)
 
-    def speedDistribution(self, identifier, speed_limit = None, vehicle_only = None):
+    def speedDistribution(self, identifier, file_path, speed_limit = None, vehicle_only = None):
         print "speedDistribution called with identifier = {}, speed_limit = {} and vehicle_only = {}"\
                 .format(identifier, speed_limit, vehicle_only)
 
@@ -487,11 +503,19 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
+        path = os.path.join(file_path, 'velocityPDF.jpg')
+        if os.path.exists(path):
+            os.remove(path)
+
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
+            for chunk in r.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
+
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         return (True, None)
-
-
 
 ###############################################################################
 # Helper Methods
