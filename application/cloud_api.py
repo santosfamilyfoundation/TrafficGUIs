@@ -441,7 +441,7 @@ class CloudWizard:
         payload = {
             'identifier': identifier,
         }
-
+        
         try:
             r = requests.get(self.server_addr + 'retrieveResults', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
