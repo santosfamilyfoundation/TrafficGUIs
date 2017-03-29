@@ -180,7 +180,7 @@ class CloudWizard:
 
         if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
+            return (False, 'Upload homography before testing configuration')
 
         payload = {
             'test_flag': test_flag,
@@ -217,7 +217,7 @@ class CloudWizard:
             path = os.path.join(project_path, 'object_video', 'object_video.mp4')
         else:
             print "ERROR: Invalid flag"
-            return
+            return (False, 'Invalid test flag: '+str(test_flag))
 
         try:
             r = requests.get(self.server_addr + 'testConfig', params = payload, stream=True)
@@ -256,7 +256,7 @@ class CloudWizard:
 
         if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
+            return (False, 'Upload homography before running analysis.')
 
         payload = {
             'identifier': identifier,
@@ -282,7 +282,7 @@ class CloudWizard:
 
         if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
+            return (False, 'Upload homography before running object tracking.')
 
         payload = {
             'identifier': identifier,
@@ -308,10 +308,10 @@ class CloudWizard:
 
         if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
+            return (False, 'Upload homography before running safety analysis.')
         elif status_dict["object_tracking"]['status'] != 2:
             print "Check object tracking and run (again)."
-            return
+            return (False, 'Run object tracking before running safety analysis.')
 
         payload = {
             'identifier': identifier,
@@ -344,8 +344,15 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        status_dict = r.json()
-        status_dict = {k:int(v) for (k,v) in status_dict.iteritems()}
+        d = r.json()
+        status_dict = {}
+        for (k,v) in d.iteritems():
+            status_dict[k] = {}
+            for (key, val) in v.iteritems():
+                if key == 'status':
+                    status_dict[k][key] = int(val)
+                else:
+                    status_dict[k][key] = val
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         return (True, None, status_dict)
@@ -388,13 +395,13 @@ class CloudWizard:
 
         if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
+            return (False, 'Upload homography before creating a highlight video.')
         elif status_dict["object_tracking"]['status'] != 2:
             print "Check object tracking and run (again)."
-            return
+            return (False, 'Run object tracking before creating a highlight video.')
         elif status_dict["safety_analysis"]['status'] != 2:
             print "Check safety analysis and run (again)."
-            return
+            return (False, 'Run safety analysis before creating a highlight video.')
 
         payload = {
             'identifier': identifier,
