@@ -40,6 +40,9 @@ class ProjectWizard(QtWidgets.QWizard):
         # Make 'Back' button non-destructive
         self.setOption(QtWidgets.QWizard.IndependentPages)
 
+        # Don't show 'Cancel' button
+        self.setOption(QtWidgets.QWizard.NoCancelButton)
+
         self.ui.newp_start_creation.clicked.connect(self.start_create_project)
         self.config_parser = SafeConfigParser()
 
