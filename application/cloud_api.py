@@ -399,7 +399,7 @@ class CloudWizard:
         }
 
         try:
-            r = requests.post(self.server_addr + 'highlightVideo', data = payload)
+            r = requests.get(self.server_addr + 'highlightVideo', params = payload, streams = True)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
@@ -416,7 +416,7 @@ class CloudWizard:
         }
 
         try:
-            r = requests.post(self.server_addr + 'makeReport', data = payload)
+            r = requests.get(self.server_addr + 'makeReport', params  = payload, stream = True)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
@@ -441,15 +441,16 @@ class CloudWizard:
         payload = {
             'identifier': identifier,
         }
-        path = os.path.join(file_path, 'results.zip')
-        if os.path.exists(path):
-            os.remove(path)
 
         try:
             r = requests.get(self.server_addr + 'retrieveResults', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
+        path = os.path.join(file_path, 'results.zip')
+        if os.path.exists(path):
+            os.remove(path)
 
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
@@ -468,7 +469,7 @@ class CloudWizard:
         }
 
         try:
-            r = requests.post(self.server_addr + 'roadUserCounts', data = payload)
+            r = requests.get(self.server_addr + 'roadUserCounts', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
