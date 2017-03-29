@@ -376,6 +376,8 @@ class CloudWizard:
         if not s:
             return (s, err)
 
+        return (True, None)
+
     def highlightVideo(self, identifier, ttc_threshold = None, vehicle_only = None):
         print "highlightVideo called with identifier = {}, ttc_threshold = {} and vehicle_only = {}"\
                 .format(identifier, ttc_threshold, vehicle_only)
@@ -541,17 +543,30 @@ class StatusPoller(object):
         self._poll_for_status()
 
     def _poll_for_status(self):
-        status_dict = api.getProjectStatus(self.identifier)
+        success, err, status_dict = api.getProjectStatus(self.identifier)
+
+        if not success:
+            self.callback(err)
+            self.stop()
+            return
 
         if self.status_name not in status_dict.keys():
             print(self.status_name + ' not in status dictionary')
-        elif status_dict[self.status_name] == 2:
+
+        status = status_dict[self.status_name]
+        if status == 2:
+            print(self.status_name + ' finished!')
             self.stop()
-            self.callback()
-        elif status_dict[self.status_name] == 1:
+            self.callback(None)
+        elif status == 1:
             print(self.status_name + ' is still running')
+        elif status == -1:
+            print(self.status_name + ' failed')
+            self.callback(self.status_name + ' failed')
+            self.stop()
         else:
             print(self.status_name + ' is not running, not continuing to poll for status')
+            self.callback(self.status_name + ' is not running, not continuing to poll for status')
             self.stop()
 
     def start(self):

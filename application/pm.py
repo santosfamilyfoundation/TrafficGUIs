@@ -9,7 +9,7 @@ import re
 from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
 import time
 import datetime
-from shutil import copy
+from shutil import copy, rmtree
 import cv2
 try:
     from PIL import Image
@@ -20,6 +20,7 @@ import numpy as np
 from app_config import AppConfig as ac
 from app_config import get_default_project_dir, get_project_path, get_config_path, config_section_exists, get_config_with_sections, update_config_with_sections
 from cloud_api import api
+import message_helper
 
 class ProjectWizard(QtWidgets.QWizard):
 
@@ -36,6 +37,9 @@ class ProjectWizard(QtWidgets.QWizard):
         flags = self.windowFlags() & (~QtCore.Qt.WindowContextHelpButtonHint)
         self.setWindowFlags(flags)
 
+        # Make 'Back' button non-destructive
+        self.setOption(QtWidgets.QWizard.IndependentPages)
+
         self.ui.newp_start_creation.clicked.connect(self.start_create_project)
         self.config_parser = SafeConfigParser()
 
@@ -48,18 +52,39 @@ class ProjectWizard(QtWidgets.QWizard):
         self.ui.newp_p2.registerField("video_server_input*", self.ui.newp_video_server_input)
         self.ui.newp_p2.registerField("video_email", self.ui.newp_video_email_input)
 
-        # Set default server
-        self.ui.newp_video_server_input.setText("http://localhost:8088")
-
         self.ui.newp_p2_5.registerField("aerial_image*", self.ui.newp_aerial_image_input)
         self.ui.newp_p3.registerField("create_project", self.ui.newp_start_creation)
 
+        # Keep track of where they last opened a video or image from, hopefully it will save them
+        # time next time if the next one is in the same spot
+        self.last_known_location = None
+
+    def showEvent(self, event):
+        self.ui.newp_video_server_input.setText("http://localhost:8088")
+
+    def validateCurrentPage(self):
+        # If on last page, treat 'Finish' click as project creation click. Otherwise, return True to advance.
+        page = self.currentPage()
+        if page.isFinalPage():
+            self.start_create_project()
+            return False
+        else:
+            return True
+
+    def show_message(self, message):
+        helper = message_helper.MessageHelper(self)
+        helper.show_message(message)
+
     def open_aerial_image(self):
         filt = "Images (*.png *.jpg *.jpeg *.bmp *.tif *.gif)"  # Select only images
-        documents_folder = os.path.realpath(os.path.join(os.path.expanduser('~'), "Documents"))
-        fname = self.open_fd(dialog_text="Select aerial image", file_filter=filt, default_dir=documents_folder)
+        if self.last_known_location is not None:
+            folder = self.last_known_location
+        else:
+            folder = os.path.realpath(os.path.join(os.path.expanduser('~'), "Documents"))
+        fname = self.open_fd(dialog_text="Select aerial image", file_filter=filt, default_dir=folder)
         if fname:
             filepath = self.get_filepath(fname)
+            self.last_known_location = os.path.dirname(filepath)
             self.ui.newp_aerial_image_input.setText(filepath)
             self.aerialpath = filepath
             self.aerial_image_selected = True
@@ -68,10 +93,14 @@ class ProjectWizard(QtWidgets.QWizard):
 
     def open_video(self):
         filt = "Videos (*.mp4 *.avi *.mpg *.mpeg *.mov *.ogg *.wmv *.m4v *.m4p *.mp2 *.mpe *.mpv *.m2v)"  # Select only videos
-        documents_folder = os.path.realpath(os.path.join(os.path.expanduser('~'), "Documents"))
-        fname = self.open_fd(dialog_text="Select video for analysis", file_filter=filt, default_dir=documents_folder)
+        if self.last_known_location is not None:
+            folder = self.last_known_location
+        else:
+            folder = os.path.realpath(os.path.join(os.path.expanduser('~'), "Documents"))
+        fname = self.open_fd(dialog_text="Select video for analysis", file_filter=filt, default_dir=folder)
         if fname:
             filepath = self.get_filepath(fname)
+            self.last_known_location = os.path.dirname(filepath)
             self.ui.newp_video_input.setText(filepath)
             self.video_selected = True
             self.videopath = filepath
@@ -115,19 +144,21 @@ class ProjectWizard(QtWidgets.QWizard):
     def start_create_project(self):
         if not self.creating_project:
             self.creating_project = True
+            self.config_parser = SafeConfigParser()
             self.create_project_dir()
 
     def create_project_dir(self):
         project_name = str(self.ui.newp_projectname_input.text())
         ac.CURRENT_PROJECT_PATH = os.path.join(get_default_project_dir(), project_name)
-        progress_bar = self.ui.newp_creation_progress
-        progress_bar.setHidden(False)
-        progress_msg = self.ui.newp_creation_status
-        progress_msg.setHidden(False)
-        creation_button = self.ui.newp_start_creation
-        creation_button.setHidden(True)
         directory_names = ["homography", "results"]
         pr_path = get_project_path()
+
+        progress_msg = self.ui.newp_creation_status
+        progress_bar = self.ui.newp_creation_progress
+
+        # Update UI while creating
+        self._update_ui_for_project_creation()
+
         if not os.path.exists(pr_path):
             # Set URL to use before doing anything
             server = str(self.ui.newp_video_server_input.text())
@@ -149,12 +180,11 @@ class ProjectWizard(QtWidgets.QWizard):
             copy(self.videopath, video_dest)
 
             progress_msg.setText("Uploading video file...")
-            try:
-                identifier = api.uploadVideo(self.videopath)
-                update_config_with_sections(get_config_path(), 'info', 'identifier', identifier)
-            except Exception as e:
-                print("Failed to upload the Video")
-                print(str(e))
+            success, err, identifier = api.uploadVideo(self.videopath)
+            if not success:
+                self._project_creation_error(err, project_name_to_delete=project_name)
+                return
+            update_config_with_sections(get_config_path(), 'info', 'identifier', identifier)
             progress_bar.setValue(80)
 
             progress_msg.setText("Extracting camera image...")
@@ -165,7 +195,7 @@ class ProjectWizard(QtWidgets.QWizard):
             if success:
                 cv2.imwrite(os.path.join(pr_path, "homography", "camera.png"), image)
             else:
-                print("ERR: No camera image extracted.")
+                self.show_message("Error getting image. Use the 'Open Camera Image' button and input an image from a frame of the video.")
             progress_bar.setValue(90)
 
             progress_msg.setText("Copying aerial image...")
@@ -180,8 +210,34 @@ class ProjectWizard(QtWidgets.QWizard):
             progress_bar.setValue(100)
             progress_msg.setText("Complete.")
 
+            self.creating_project = False
+            self._update_ui_for_project_creation()
+
+            self.close()
+
         else:
-            print("Project exists. No new project created.")
+            self._project_creation_error("Project exists. No new project created.")
+            return
+
+
+    def _update_ui_for_project_creation(self):
+        progress_bar = self.ui.newp_creation_progress
+        progress_bar.setHidden(not self.creating_project)
+        progress_bar.setValue(0)
+        progress_msg = self.ui.newp_creation_status
+        progress_msg.setHidden(not self.creating_project)
+        creation_button = self.ui.newp_start_creation
+        creation_button.setHidden(self.creating_project)
+
+    def _project_creation_error(self, error, project_name_to_delete=None):
+        ac.CURRENT_PROJECT_PATH = None
+        self.creating_project = False
+        self._update_ui_for_project_creation()
+        self.show_message(error)
+
+        if project_name_to_delete is not None:
+            path = os.path.join(get_default_project_dir(), project_name_to_delete)
+            rmtree(path)
 
     def _write_to_project_config(self):
         ts = time.time()
@@ -203,13 +259,12 @@ class ProjectWizard(QtWidgets.QWizard):
         self.config_parser.set("video", "start", video_timestamp)
 
         self.config_parser.add_section("config")
-        try:
-            config = api.defaultConfig()
+        success, _, config = api.defaultConfig()
+
+        # If we can't get defaults, don't worry. Server fills them in anyway.
+        if success:
             for (key, value) in config.iteritems():
                 self.config_parser.set("config", key, str(value))
-        except Exception as e:
-            print("Failed to get default configuration")
-            print(str(e))
 
         with open(os.path.join(get_config_path()), 'wb') as configfile:
             self.config_parser.write(configfile)

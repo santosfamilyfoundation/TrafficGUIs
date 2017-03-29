@@ -18,8 +18,12 @@ class MessageHelper(QtWidgets.QDialog):
         flags = self.windowFlags() & (~QtCore.Qt.WindowContextHelpButtonHint)
         self.setWindowFlags(flags)
 
-    def show_message(self, message):
+    def show_message(self, message, title=None):
         self.ui.label.setText(message)
+
+        if title is not None:
+            self.setWindowTitle(title)
+
         self.adjustSize()
         self.show()
 

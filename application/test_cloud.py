@@ -35,7 +35,7 @@ if __name__ == '__main__':
     ###########################################################################
     # Upload Video
     ###########################################################################
-    identifier = remote.uploadVideo(VIDEO_PATH)
+    _, _, identifier = remote.uploadVideo(VIDEO_PATH)
     raw_input('Uploading Video, please wait...\n Press Enter to Continue')
 
     ###########################################################################

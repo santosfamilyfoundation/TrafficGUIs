@@ -31,6 +31,7 @@ class MainGUI(QtWidgets.QMainWindow):
     test_object_callback_signal = QtCore.pyqtSignal()
     analysis_callback_signal = QtCore.pyqtSignal()
     results_callback_signal = QtCore.pyqtSignal()
+    error_signal = QtCore.pyqtSignal(str)
 
     def __init__(self):
         super(MainGUI, self).__init__()
@@ -61,6 +62,7 @@ class MainGUI(QtWidgets.QMainWindow):
         self.test_object_callback_signal.connect(self.get_object_video)
         self.analysis_callback_signal.connect(self.runResults)
         self.results_callback_signal.connect(self.retrieveResults)
+        self.error_signal.connect(self.show_error)
 
 ###########################################################################################################################################
 
@@ -153,11 +155,14 @@ class MainGUI(QtWidgets.QMainWindow):
             StatusPoller(get_identifier(), 'feature_test', 5, self.test_feature_callback).start()
             self.show_message('Your test of feature tracking has begun. When it has completed, a video will be shown in the window on the left. Please wait, this will only take about a minute.')
         else:
-            self.show_message(error_message)
+            self.show_error(error_message)
 
-    def test_feature_callback(self):
+    def test_feature_callback(self, error_message):
         # Emitting the signal will call get_feature_video on the main thread
-        self.test_feature_callback_signal.emit()
+        if error_message is None:
+            self.test_feature_callback_signal.emit()
+        else:
+            self.error_signal.emit(error_message)
 
     def open_feature_video(self):
         project_path = get_project_path()
@@ -167,23 +172,33 @@ class MainGUI(QtWidgets.QMainWindow):
                 self.feature_tracking_video_player.openFile(video_path)
 
     def get_feature_video(self):
-        api.getTestConfig(get_identifier(), 'feature', get_project_path())
-        self.open_feature_video()
+        success, err = api.getTestConfig(get_identifier(), 'feature', get_project_path())
+        if success:
+            self.open_feature_video()
+        else:
+            self.show_error(err)
 
     def test_object(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
         num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
-        api.testConfig(get_identifier(),\
+        success, err = api.testConfig(get_identifier(),\
                             'object',\
                             frame_start = frame_start,\
                             num_frames = num_frames)
-        StatusPoller(get_identifier(), 'object_test', 5, self.test_object_callback).start()
 
-        self.show_message('Your test of object tracking has begun. When it has completed, a video will be shown in the window on the left. Please wait, this will only take about a minute.')
+        if success:
+            StatusPoller(get_identifier(), 'object_test', 5, self.test_object_callback).start()
 
-    def test_object_callback(self):
+            self.show_message('Your test of object tracking has begun. When it has completed, a video will be shown in the window on the left. Please wait, this will only take about a minute.')
+        else:
+            self.show_error(err)
+
+    def test_object_callback(self, error_message):
         # Emitting the signal will call get_object_video on the main thread
-        self.test_object_callback_signal.emit()
+        if error_message is None:
+            self.test_object_callback_signal.emit()
+        else:
+            self.error_signal.emit(error_message)
 
     def open_object_video(self):
         project_path = get_project_path()
@@ -193,8 +208,11 @@ class MainGUI(QtWidgets.QMainWindow):
                 self.roadusers_tracking_video_player.openFile(video_path)
 
     def get_object_video(self):
-        api.getTestConfig(get_identifier(), 'object', get_project_path())
-        self.open_object_video()
+        success, err = api.getTestConfig(get_identifier(), 'object', get_project_path())
+        if success:
+            self.open_object_video()
+        else:
+            self.show_error(err)
 
     # for the runAnalysis button
     def runAnalysis(self):
@@ -202,15 +220,20 @@ class MainGUI(QtWidgets.QMainWindow):
         Runs TrafficIntelligence trackers and support scripts.
         """
         email = get_config_with_sections(get_config_path(), 'info', 'email')
-        api.analysis(get_identifier(), email=email)
+        success, err = api.analysis(get_identifier(), email=email)
 
-        StatusPoller(get_identifier(), 'safety_analysis', 15, self.analysisCallback).start()
+        if success:
+            StatusPoller(get_identifier(), 'safety_analysis', 15, self.analysisCallback).start()
+            self.show_message('Object tracking and safety analysis is now running. This will take a few minutes. After it is done, creating a safety report will run, which will take some additional time. \n\nPlease keep the application open during analysis. If it is closed, a safety report will not be generated.\n\nIf you entered an email on the first screen, you will be notified when each step has been completed.')
+        else:
+            self.show_error(err)
 
-        self.show_message('Object tracking and safety analysis is now running. This will take a few minutes. After it is done, creating a safety report will run, which will take some additional time. \n\nPlease keep the application open during analysis. If it is closed, a safety report will not be generated.\n\nIf you entered an email on the first screen, you will be notified when each step has been completed.')
-
-    def analysisCallback(self):
+    def analysisCallback(self, error_message):
         # Emitting this signal will call self.runResults on the main thread
-        self.analysis_callback_signal.emit()
+        if error_message is None:
+            self.analysis_callback_signal.emit()
+        else:
+            self.error_signal.emit(error_message)
 
     def runResults(self):
         """Runs server methods that generate safety metric results and visualizations"""
@@ -218,18 +241,27 @@ class MainGUI(QtWidgets.QMainWindow):
         ttc_threshold = self.ui.timeToCollisionLineEdit.text()
         vehicle_only = self.ui.vehiclesOnlyCheckBox.isChecked()
         speed_limit = self.ui.speedLimitLineEdit.text()
-        api.results(identifier, ttc_threshold, vehicle_only, speed_limit)
+        success, err = api.results(identifier, ttc_threshold, vehicle_only, speed_limit)
 
-        StatusPoller(identifier, 'highlight_video', 15, self.resultsCallback).start()
+        if success:
+            StatusPoller(identifier, 'highlight_video', 15, self.resultsCallback).start()
+            self.show_message('Creating a safety report now. This will take around five minutes.\n\nPlease keep the application open during this. If you close the application, your results will not be automatically downloaded')
+        else:
+            self.show_error(err)
 
-        self.show_message('Creating a safety report now. This will take around five minutes.\n\nPlease keep the application open during this. If you close the application, your results will not be automatically downloaded')
-
-    def resultsCallback(self):
+    def resultsCallback(self, error_message):
         # Emitting this signal will call self.runResults on the main thread
-        self.results_callback_signal.emit()
+        if error_message is None:
+            self.results_callback_signal.emit()
+        else:
+            self.error_signal.emit(error_message)
 
     def retrieveResults(self):
-        api.retrieveResults(get_identifier(), get_project_path())
+        success, err = api.retrieveResults(get_identifier(), get_project_path())
+
+        if not success:
+            self.show_error(err)
+            return
 
         results_dir = os.path.join(get_project_path(), "results")
 
@@ -254,7 +286,6 @@ class MainGUI(QtWidgets.QMainWindow):
         new_i = curr_i + 1
         self.ui.main_tab_widget.setCurrentIndex(new_i)
 
-
     def show_prev_tab(self):
         curr_i = self.ui.main_tab_widget.currentIndex()
         self.ui.main_tab_widget.setCurrentIndex(curr_i - 1)
@@ -263,9 +294,15 @@ class MainGUI(QtWidgets.QMainWindow):
         for method in methods:
             method()
 
-    def show_message(self, message):
+    def show_error(self, error):
+        self.show_message(error, error=True)
+
+    def show_message(self, message, error=False):
+        title = None
+        if error:
+            title = "Error"
         helper = message_helper.MessageHelper(self)
-        helper.show_message(message)
+        helper.show_message(message, title=title)
 
     def open_project(self):
         fname = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Open Existing Project Folder...", get_default_project_dir()))
@@ -333,11 +370,6 @@ class MainGUI(QtWidgets.QMainWindow):
         self.unitPixRatio = float(unicode(px_text))
 
         homography_path = os.path.join(get_project_path(), "homography")
-        api.configHomography(\
-            get_identifier(),\
-            self.unitPixRatio,\
-            self.ui.homography_aerialview.list_points(),\
-            self.ui.homography_cameraview.list_points())
 
         self.unscaled_world_pts = (np.array(self.ui.homography_aerialview.list_points()))
         self.worldPts = self.unitPixRatio * self.unscaled_world_pts
@@ -347,19 +379,11 @@ class MainGUI(QtWidgets.QMainWindow):
             if len(self.worldPts) == len(self.videoPts):
                 self.homography, self.mask = cv2.findHomography(self.videoPts, self.worldPts)
             else:
-                error = QtWidgets.QErrorMessage()
-                error.showMessage('''\
-                To compute the homography, please make sure you choose the same
-                number of points on each image.''')
-                error.exec_()
+                self.show_error('To compute the homography, please make sure you choose the same number of points on each image.')
                 return
 
         else:
-            error = QtWidgets.QErrorMessage()
-            error.showMessage('''\
-            To compute the homography, please choose at least 4 points on
-            each image.''')
-            error.exec_()
+            self.show_error('To compute the homography, please choose at least 4 points on each image.')
             return
 
         if self.homography is None:
@@ -385,6 +409,16 @@ class MainGUI(QtWidgets.QMainWindow):
             np.savetxt(pp, self.videoPts.T)
 
         self.homography_display_results()
+
+        # Finally, upload to server
+        success, err = api.configHomography(\
+            get_identifier(),\
+            self.unitPixRatio,\
+            self.ui.homography_aerialview.list_points(),\
+            self.ui.homography_cameraview.list_points())
+
+        if not success:
+            self.show_error(err)
 
     def homography_display_results(self):
         cvBlue = (0,0,255)
@@ -554,12 +588,15 @@ class configGui_features(configGuiWidget):
         else: min_feature_frames = None
 
 
-        api.configFiles(get_identifier(),\
+        success, err = api.configFiles(get_identifier(),\
                      max_features_per_frame = max_features_per_frame,\
                      num_displacement_frames = num_displacement_frames,\
                      min_feature_displacement = min_feature_displacement,\
                      max_iterations_to_persist = max_iterations_to_persist,\
                      min_feature_frames = min_feature_frames)
+
+        if not success:
+            self.show_error(err)
 
     def loadConfig_features(self):
         config_path = get_config_path()
@@ -653,9 +690,12 @@ class configGui_object(configGuiWidget):
             update_config_with_sections(config_path, "config", "max_segmentation_distance", max_segmentation_distance)
         else: max_segmentation_distance = None
 
-        api.configFiles(get_identifier(),\
+        success, err = api.configFiles(get_identifier(),\
                      max_connection_distance = max_connection_distance,\
                      max_segmentation_distance = max_segmentation_distance)
+
+        if not success:
+            self.show_error(err)
 
     def loadConfig_objects(self):
         config_path = get_config_path()
