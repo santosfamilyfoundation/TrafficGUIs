@@ -405,7 +405,6 @@ class CloudWizard:
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
         print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
         return (True, None)
 
     def makeReport(self, identifier, file_path):
@@ -432,7 +431,6 @@ class CloudWizard:
                     f.write(chunk)
 
         print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
         return (True, None)
 
     def retrieveResults(self, identifier, file_path):
@@ -485,7 +483,6 @@ class CloudWizard:
                     f.write(chunk)
 
         print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
         return (True, None)
 
     def speedDistribution(self, identifier, file_path, speed_limit = None, vehicle_only = None):
@@ -499,7 +496,7 @@ class CloudWizard:
         }
 
         try:
-            r = requests.post(self.server_addr + 'speedDistribution', data = payload)
+            r = requests.get(self.server_addr + 'speedDistribution', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
@@ -515,7 +512,6 @@ class CloudWizard:
                     f.write(chunk)
 
         print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
         return (True, None)
 
 ###############################################################################
