@@ -60,6 +60,7 @@ class ProjectWizard(QtWidgets.QWizard):
         self.last_known_location = None
 
     def showEvent(self, event):
+        # We want to autofill the default server every time the creation page is shown
         self.ui.newp_video_server_input.setText("http://localhost:8088")
 
     def validateCurrentPage(self):
@@ -233,7 +234,7 @@ class ProjectWizard(QtWidgets.QWizard):
         ac.CURRENT_PROJECT_PATH = None
         self.creating_project = False
         self._update_ui_for_project_creation()
-        self.show_message(error)
+        self.show_message(error, title="Error")
 
         if project_name_to_delete is not None:
             path = os.path.join(get_default_project_dir(), project_name_to_delete)
