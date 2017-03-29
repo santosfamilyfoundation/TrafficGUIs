@@ -340,7 +340,7 @@ class CloudWizard:
         payload = {
             'identifier': identifier,
         }
-
+        
         path = os.path.join(file_path, 'results.zip')
         if os.path.exists(path):
             os.remove(path)
