@@ -178,7 +178,7 @@ class CloudWizard:
         if not success:
             return (success, error_message)
 
-        if status_dict["homography"] != 2:
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -254,7 +254,7 @@ class CloudWizard:
         if not success:
             return (success, error_message)
 
-        if status_dict["homography"] != 2:
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -280,7 +280,7 @@ class CloudWizard:
         if not success:
             return (success, error_message)
 
-        if status_dict["homography"] != 2:
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
             return
 
@@ -306,10 +306,10 @@ class CloudWizard:
         if not success:
             return (success, error_message)
 
-        if status_dict["homography"] != 2:
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
             return
-        elif status_dict["object_tracking"] != 2:
+        elif status_dict["object_tracking"]['status'] != 2:
             print "Check object tracking and run (again)."
             return
 
@@ -386,13 +386,13 @@ class CloudWizard:
         if not success:
             return (success, error_message)
 
-        if status_dict["homography"] != 2:
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
             return
-        elif status_dict["object_tracking"] != 2:
+        elif status_dict["object_tracking"]['status'] != 2:
             print "Check object tracking and run (again)."
             return
-        elif status_dict["safety_analysis"] != 2:
+        elif status_dict["safety_analysis"]['status'] != 2:
             print "Check safety analysis and run (again)."
             return
 
@@ -553,7 +553,7 @@ class StatusPoller(object):
         if self.status_name not in status_dict.keys():
             print(self.status_name + ' not in status dictionary')
 
-        status = status_dict[self.status_name]
+        status = status_dict[self.status_name]['status']
         if status == 2:
             print(self.status_name + ' finished!')
             self.stop()
@@ -562,7 +562,10 @@ class StatusPoller(object):
             print(self.status_name + ' is still running')
         elif status == -1:
             print(self.status_name + ' failed')
-            self.callback(self.status_name + ' failed')
+            if 'failure_message' in status_dict[self.status_name]:
+                self.callback(status_dict[self.status_name]['failure_message'])
+            else:
+                self.callback(self.status_name + ' failed.')
             self.stop()
         else:
             print(self.status_name + ' is not running, not continuing to poll for status')
