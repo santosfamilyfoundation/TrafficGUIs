@@ -31,8 +31,12 @@ class CloudWizard:
 
         self.server_addr = protocol + addr + ':{}/'.format(port)
 
-    def parse_error(r):
-        data = r.json()
+    def parse_error(self, r):
+        try:
+            data = r.json()
+        except ValueError:
+            # If no JSON, also no error message
+            return (True, None)
         if 'error_message' in data:
             return (False, data['error_message'])
         else:
@@ -74,13 +78,13 @@ class CloudWizard:
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-        print "Response JSON: {}".format(data)
+        print "Response JSON: {}".format(r.json())
 
         success, err = self.parse_error(r)
         if not success:
             return (success, err, None)
 
-        return (True, None, data['identifier'])
+        return (True, None, r.json()['identifier'])
 
     def uploadMask(self, identifier, mask_path):
         print "uploadMask called"
