@@ -350,25 +350,30 @@ class CloudWizard:
 # Results Functions
 ###############################################################################
 
-    def results(self, identifier, ttc_threshold = None, vehicle_only = None, speed_limit = None):
+    def results(self, identifier, project_path, ttc_threshold = None, vehicle_only = None, speed_limit = None):
         print "results called with identifier = {}, ttc_threshold = {}, vehicle_only = {}, and speed_limit= {}"\
                 .format(identifier, ttc_threshold, vehicle_only, speed_limit)
 
         # sync calls
-        s, err = self.roadUserCounts(identifier)
+        s, err = self.roadUserCounts(identifier,\
+                    os.path.join(project_path, 'results'))
         if not s:
             return (s, err)
 
-        s, err = self.speedDistribution(identifier, speed_limit, vehicle_only)
+        s, err = self.speedDistribution(identifier,\
+                    os.path.join(project_path, 'results'),\
+                    speed_limit, vehicle_only)
         if not s:
             return (s, err)
 
-        s, err = self.makeReport(identifier)
+        s, err = self.makeReport(identifier,\
+                    os.path.join(project_path, 'results'))
         if not s:
             return (s, err)
 
         # async calls
-        s, err = self.highlightVideo(identifier, ttc_threshold, vehicle_only)
+        s, err = self.highlightVideo(identifier,\
+                    ttc_threshold, vehicle_only)
         if not s:
             return (s, err)
 
@@ -399,13 +404,36 @@ class CloudWizard:
         }
 
         try:
-            r = requests.get(self.server_addr + 'highlightVideo', params = payload, streams = True)
+            r = requests.post(self.server_addr + 'highlightVideo', data = payload, streams = True)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
+        print "Response Text: {}".format(r.text)
         print "Status Code: {}".format(r.status_code)
         return (True, None)
+
+    def getHighlightVideo(self, identifier, file_path):
+        print "getHighlightVideo called with identifier = {}".format(identifier)
+
+        payload = {
+            'identifier': identifier
+        }
+
+        try:
+            r = requests.get(self.server_addr + 'highlightVideo', params = payload, streams = True)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+        path = os.path.join(file_path, 'highlight.mp4')
+        if os.path.exists(path):
+            os.remove(path)
+
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
+            for chunk in r.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
 
     def makeReport(self, identifier, file_path):
         print "makeReport called with identifier = {}".format(identifier)
@@ -439,7 +467,7 @@ class CloudWizard:
         payload = {
             'identifier': identifier,
         }
-        
+
         try:
             r = requests.get(self.server_addr + 'retrieveResults', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:

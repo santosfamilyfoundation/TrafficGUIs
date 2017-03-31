@@ -172,7 +172,7 @@ class MainGUI(QtWidgets.QMainWindow):
                 self.feature_tracking_video_player.openFile(video_path)
 
     def get_feature_video(self):
-        success, err = api.getTestConfig(get_identifier(), 'feature', get_project_path())
+        success, err = api.getTestConfig(get_identifier(), 'feature', os.path.join(get_project_path(), 'feature_video'))
         if success:
             self.open_feature_video()
         else:
@@ -208,7 +208,7 @@ class MainGUI(QtWidgets.QMainWindow):
                 self.roadusers_tracking_video_player.openFile(video_path)
 
     def get_object_video(self):
-        success, err = api.getTestConfig(get_identifier(), 'object', get_project_path())
+        success, err = api.getTestConfig(get_identifier(), 'object', os.path.join(get_project_path(), 'object_video'))
         if success:
             self.open_object_video()
         else:
@@ -257,13 +257,12 @@ class MainGUI(QtWidgets.QMainWindow):
             self.error_signal.emit(error_message)
 
     def retrieveResults(self):
-        success, err = api.retrieveResults(get_identifier(), get_project_path())
+        results_dir = os.path.join(get_project_path(), 'results')
+        success, err = api.retrieveResults(get_identifier(), results_dir)
 
         if not success:
             self.show_error(err)
             return
-
-        results_dir = os.path.join(get_project_path(), "results")
 
         with zipfile.ZipFile(os.path.join(results_dir, "results.zip"), "r") as zip_file:
             zip_file.extractall(results_dir)
