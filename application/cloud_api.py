@@ -31,6 +31,17 @@ class CloudWizard:
 
         self.server_addr = protocol + addr + ':{}/'.format(port)
 
+    def parse_error(self, r):
+        try:
+            data = r.json()
+        except ValueError:
+            # If no JSON, also no error message
+            return (True, None)
+        if 'error_message' in data:
+            return (False, data['error_message'])
+        else:
+            return (True, None)
+
 ###############################################################################
 # Upload Functions
 ###############################################################################
@@ -68,6 +79,11 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         print "Response JSON: {}".format(r.json())
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err, None)
+
         return (True, None, r.json()['identifier'])
 
     def uploadMask(self, identifier, mask_path):
@@ -83,8 +99,10 @@ class CloudWizard:
                 print('Connection is offline')
                 return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
-        print "Status Code: {}".format(r.status_code)
-        return (True, None)
+            print "Status Code: {}".format(r.status_code)
+            return self.parse_error(r)
+
+        return (False, "Couldn't open mask file")
 
 ###############################################################################
 # Configuration Functions
@@ -111,7 +129,7 @@ class CloudWizard:
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-        return (True, None)
+        return self.parse_error(r)
 
     def getHomography(self, identifier, file_path = None):
         payload = {'identifier': identifier}
@@ -125,6 +143,10 @@ class CloudWizard:
 
         print "Response JSON: {}".format(r.json())
         print "Status Code: {}".format(r.status_code)
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err, None)
 
         homography = r.json()['homography']
         if file_path:
@@ -165,7 +187,7 @@ class CloudWizard:
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-        return (True, None)
+        return self.parse_error(r)
 
     def testConfig(self, identifier, test_flag,
                    frame_start = None,\
@@ -178,9 +200,9 @@ class CloudWizard:
         if not success:
             return (success, error_message)
 
-        if status_dict["homography"] != 2:
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
+            return (False, 'Upload homography before testing configuration')
 
         payload = {
             'test_flag': test_flag,
@@ -197,7 +219,7 @@ class CloudWizard:
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-        return (True, None)
+        return self.parse_error(r)
 
     def getTestConfig(self, identifier, test_flag, project_path):
         print "getTestConfig called with identifier = {} and test_flag = {}".format(identifier,test_flag)
@@ -217,13 +239,17 @@ class CloudWizard:
             path = os.path.join(project_path, 'object_video', 'object_video.mp4')
         else:
             print "ERROR: Invalid flag"
-            return
+            return (False, 'Invalid test flag: '+str(test_flag))
 
         try:
             r = requests.get(self.server_addr + 'testConfig', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err)
 
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
@@ -241,6 +267,10 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err, None)
+
         return (True, None, r.json())
 
 ###############################################################################
@@ -254,9 +284,9 @@ class CloudWizard:
         if not success:
             return (success, error_message)
 
-        if status_dict["homography"] != 2:
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
+            return (False, 'Upload homography before running analysis.')
 
         payload = {
             'identifier': identifier,
@@ -271,7 +301,7 @@ class CloudWizard:
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-        return (True, None)
+        return self.parse_error(r)
 
     def objectTracking(self, identifier, email=None):
         print "objectTracking called with identifier = {} and email = {}".format(identifier, email)
@@ -280,9 +310,9 @@ class CloudWizard:
         if not success:
             return (success, error_message)
 
-        if status_dict["homography"] != 2:
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
+            return (False, 'Upload homography before running object tracking.')
 
         payload = {
             'identifier': identifier,
@@ -297,7 +327,7 @@ class CloudWizard:
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-        return (True, None)
+        return self.parse_error(r)
 
     def safetyAnalysis(self, identifier, email=None):
         print "safetyAnalysis called with identifier = {} and email = {}".format(identifier, email)
@@ -306,12 +336,12 @@ class CloudWizard:
         if not success:
             return (success, error_message)
 
-        if status_dict["homography"] != 2:
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
-        elif status_dict["object_tracking"] != 2:
+            return (False, 'Upload homography before running safety analysis.')
+        elif status_dict["object_tracking"]['status'] != 2:
             print "Check object tracking and run (again)."
-            return
+            return (False, 'Run object tracking before running safety analysis.')
 
         payload = {
             'identifier': identifier,
@@ -326,7 +356,7 @@ class CloudWizard:
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-        return (True, None)
+        return self.parse_error(r)
 
 ###############################################################################
 # Status Checking Functions
@@ -344,8 +374,19 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        status_dict = r.json()
-        status_dict = {k:int(v) for (k,v) in status_dict.iteritems()}
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err, None)
+
+        d = r.json()
+        status_dict = {}
+        for (k,v) in d.iteritems():
+            status_dict[k] = {}
+            for (key, val) in v.iteritems():
+                if key == 'status':
+                    status_dict[k][key] = int(val)
+                else:
+                    status_dict[k][key] = val
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         return (True, None, status_dict)
@@ -386,15 +427,15 @@ class CloudWizard:
         if not success:
             return (success, error_message)
 
-        if status_dict["homography"] != 2:
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
-        elif status_dict["object_tracking"] != 2:
+            return (False, 'Upload homography before creating a highlight video.')
+        elif status_dict["object_tracking"]['status'] != 2:
             print "Check object tracking and run (again)."
-            return
-        elif status_dict["safety_analysis"] != 2:
+            return (False, 'Run object tracking before creating a highlight video.')
+        elif status_dict["safety_analysis"]['status'] != 2:
             print "Check safety analysis and run (again)."
-            return
+            return (False, 'Run safety analysis before creating a highlight video.')
 
         payload = {
             'identifier': identifier,
@@ -410,7 +451,7 @@ class CloudWizard:
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-        return (True, None)
+        return self.parse_error(r)
 
     def makeReport(self, identifier):
         print "makeReport called with identifier = {}".format(identifier)
@@ -427,7 +468,7 @@ class CloudWizard:
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-        return (True, None)
+        return self.parse_error(r)
 
     def retrieveResults(self, identifier, project_path):
         print "retrieveResults called with identifier = {}".format(identifier)
@@ -444,6 +485,10 @@ class CloudWizard:
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err)
 
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
@@ -469,7 +514,7 @@ class CloudWizard:
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-        return (True, None)
+        return self.parse_error(r)
 
     def speedDistribution(self, identifier, speed_limit = None, vehicle_only = None):
         print "speedDistribution called with identifier = {}, speed_limit = {} and vehicle_only = {}"\
@@ -489,7 +534,7 @@ class CloudWizard:
 
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-        return (True, None)
+        return self.parse_error(r)
 
 
 
@@ -553,7 +598,7 @@ class StatusPoller(object):
         if self.status_name not in status_dict.keys():
             print(self.status_name + ' not in status dictionary')
 
-        status = status_dict[self.status_name]
+        status = status_dict[self.status_name]['status']
         if status == 2:
             print(self.status_name + ' finished!')
             self.stop()
@@ -562,7 +607,10 @@ class StatusPoller(object):
             print(self.status_name + ' is still running')
         elif status == -1:
             print(self.status_name + ' failed')
-            self.callback(self.status_name + ' failed')
+            if 'failure_message' in status_dict[self.status_name]:
+                self.callback(status_dict[self.status_name]['failure_message'])
+            else:
+                self.callback(self.status_name + ' failed.')
             self.stop()
         else:
             print(self.status_name + ' is not running, not continuing to poll for status')
