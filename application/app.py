@@ -24,6 +24,7 @@ import project_selector
 from cloud_api import api
 from cloud_api import StatusPoller
 from video import convert_video_to_frames
+from utils.path_replacer import replace_path_delimiters
 
 
 class MainGUI(QtWidgets.QMainWindow):
@@ -274,7 +275,7 @@ class MainGUI(QtWidgets.QMainWindow):
         if sys.platform == 'darwin':
             subprocess.Popen(['open', '--', results_dir])
         elif sys.platform == 'linux2':
-            subprocess.Popen(['xdg-open', '--', results_dir])
+            subprocess.Popen(['xdg-open', results_dir])
         elif sys.platform == 'win32':
             subprocess.Popen(['explorer', results_dir])
 
@@ -306,6 +307,7 @@ class MainGUI(QtWidgets.QMainWindow):
 
     def open_project(self):
         fname = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Open Existing Project Folder...", get_default_project_dir()))
+        fname = replace_path_delimiters(fname)
         # TODO: Instead of select folder, perhaps select config file?
         if fname:
             pm.load_project(fname, self)
