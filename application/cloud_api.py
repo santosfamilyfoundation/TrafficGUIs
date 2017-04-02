@@ -556,6 +556,10 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err)
+
         path = os.path.join(file_path, 'road_user_icon_counts.jpg')
         if os.path.exists(path):
             os.remove(path)
