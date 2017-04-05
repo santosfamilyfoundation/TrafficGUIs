@@ -1,17 +1,34 @@
 # SantosGUI
+
 GUI application(s) for interfacing with TrafficIntelligence and related code.
 
 SantosGUI is currently supported on Ubuntu 14.04 and Windows 8,10.
 
 ## Installation
 
-### Unix Installation
+### Conda Installation
 
-#### Conda Installation
+First, we have to install conda and dependencies. Follow the directions for Unix, or Windows.
 
-The recommended way to run this project is using Miniconda. You can install Miniconda from [here](https://conda.io/miniconda.html). Be sure to install the Python 2.7 version. Install it to `~/miniconda2` when prompted and let the installer prepend the location to your PATH.
+#### Unix Installation
 
-##### Install from YML
+The recommended way to run this project on Unix is using Miniconda. You can install Miniconda from [here](https://conda.io/miniconda.html). Be sure to install the Python 2.7 version. Install it to `~/miniconda2` when prompted and let the installer prepend the location to your PATH.
+
+#### Windows Installation
+
+The recommended way to run this project on Windows is using Anaconda. You can install Anaconda from [here](https://www.continuum.io/downloads#windows). Be sure to install the Python 2.7 version. Install it to `C:\Anaconda2`.
+
+### Install Dependencies
+
+Next, you have two options: [installing dependencies from YML (recommended)](#install-dependencies-from-yml), or [installing dependencies from script](#install-dependencies-from-script). You can follow these instructions if you have a bash shell (i.e. are on Unix, or are on Windows and have either Git Bash or Windows Subsystem for Linux).
+
+If you are on Windows and don't have a Bash shell, you will have to run the instructions yourself (or install Git Bash). This means that when we say run `bash install_conda_deps.sh santosgui`, that means to:
+
+1. Open the file `install_conda_deps.sh` in a text editor.
+2. Replace `$YOURENVNAME` with `santosgui`.
+3. Copy all of the lines from the file (excluding `YOURENVNAME=$1`) into the command prompt.
+
+#### Install Dependencies from YML
 
 Run the following command to create and activate the conda environment for the project:
 
@@ -19,40 +36,21 @@ Run the following command to create and activate the conda environment for the p
 bash install_conda_deps.sh santosgui
 ```
 
-##### Install from Script
+#### Install Dependencies from Script
 
-Run the following command to create a conda environment that we will use for this project:
-
-```
-conda create -n santosgui
-```
-
-Then use 
-
-```
-source activate santosgui
-```
-
-to enter the environment. Run the following command to begin installing the various dependencies of the project.
+Run the following command to begin installing the various dependencies of the project. The last
 
 ```
 bash build_conda_deps.sh santosgui
 ```
 
+### OpenCV Installation
 
-### Windows Installation
+#### Unix Installation
 
-#### Conda Installation
+Nothing is needed for installing OpenCV on Unix. The necessary components have been installed by the previous steps.
 
-The recommended way to run this project is using Anaconda. You can install Anaconda from [here](https://www.continuum.io/downloads#windows). Be sure to install the Python 2.7 version. Install it to `C:\Anaconda2`.
-
-Run the following command to create a conda environment that we will use for this project:
-
-```
-conda create -n santosgui
-```
-
-#### OpenCV Installation
+#### Windows Installation
 
 Download OpenCV 2.4.13 for Windows from [here](https://sourceforge.net/projects/opencvlibrary/files/opencv-win/2.4.13/opencv-2.4.13.exe/download). Run it and extract to `C:\opencv`.
 
@@ -60,20 +58,9 @@ Next, we have to copy the `cv2.pyd` file. Find the file at either `C:\opencv\bui
 
 Next, open the Control Panel and search 'environment variables'. Then click "Edit the system environment variables". Click "Environment Variables". Create a variable named `OPENCV_DIR` and set its value to `C:\opencv\build\x64\vc12` (use `x86` instead of `x64` on 32-bit systems). Then add `%OPENCV_DIR%\bin` and `C:\opencv\sources\3rdparty\ffmpeg` to your PATH variable.
 
-#### Python Dependency Installation
+### Windows Video Codec Installation
 
-You need to install the following dependencies using conda. If using Git Bash, run `bash install_conda_deps.sh santosgui` to install all packages. Otherwise, run all of the `conda install` lines from the `install_conda_deps.sh` file, with `santosgui` instead of `$YOURENVNAME`. For example:
-
-```
-conda install -n santosgui Pillow=2.7.0
-conda install -n santosgui requests=2.13.0
-conda install -n santosgui -c menpo opencv=2.4.11
-conda install -n santosgui pyqt=5.6.0
-conda install -n santosgui qtawesome=0.4.4
-conda install -n santosgui -c conda-forge requests-toolbelt=0.7.1
-```
-
-#### Video Codec Installation
+Windows only:
 
 In order for Qt to play videos on Windows, you will need to install video codecs. This is a known problem and intended behavior of Qt, as seen [here](https://bugreports.qt.io/browse/QTBUG-51692). Installing the codec [here](http://www.codecguide.com/download_k-lite_codec_pack_basic.htm) will fix this issue. You can leave all of the default settings (but be sure not to install their bloatware!).
 
