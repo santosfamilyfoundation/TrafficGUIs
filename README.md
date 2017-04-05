@@ -73,8 +73,8 @@ In order for Qt to play videos on Windows, you will need to install video codecs
 To run, activate the conda env with:
 
 ```bash
-source activate santosgui # Unix only
-activate santosgui # Windows
+source activate santosgui # Bash shell
+activate santosgui # Windows Command Prompt
 ```
 
 Then `cd` into the `application` folder and run:
