@@ -4,6 +4,16 @@ GUI application(s) for interfacing with TrafficIntelligence and related code.
 
 SantosGUI is currently supported on Ubuntu 14.04 and Windows 8,10.
 
+## Table of Contents
+
+- [Installation](#installation)
+  - [Conda Installation](#conda-installation)
+  - [Install Dependencies](#install-dependencies)
+  - [OpenCV Installation (Windows Only)](#opencv-installation-windows-only)
+  - [Video Codec Installation (Windows Only)](#video-codec-installation-windows-only)
+- [Running](#running)
+- [Packaging Application](#packaging-application)
+
 ## Installation
 
 ### Conda Installation
@@ -44,11 +54,7 @@ Run the following command to begin installing the various dependencies of the pr
 bash build_conda_deps.sh santosgui
 ```
 
-### OpenCV Installation
-
-#### Unix Installation
-
-Nothing is needed for installing OpenCV on Unix. The necessary components have been installed by the previous steps.
+### OpenCV Installation (Windows Only)
 
 #### Windows Installation
 
@@ -58,9 +64,28 @@ Next, we have to copy the `cv2.pyd` file. Find the file at either `C:\opencv\bui
 
 Next, open the Control Panel and search 'environment variables'. Then click "Edit the system environment variables". Click "Environment Variables". Create a variable named `OPENCV_DIR` and set its value to `C:\opencv\build\x64\vc12` (use `x86` instead of `x64` on 32-bit systems). Then add `%OPENCV_DIR%\bin` and `C:\opencv\sources\3rdparty\ffmpeg` to your PATH variable.
 
-### Windows Video Codec Installation
-
-Windows only:
+### Video Codec Installation (Windows Only)
 
 In order for Qt to play videos on Windows, you will need to install video codecs. This is a known problem and intended behavior of Qt, as seen [here](https://bugreports.qt.io/browse/QTBUG-51692). Installing the codec [here](http://www.codecguide.com/download_k-lite_codec_pack_basic.htm) will fix this issue. You can leave all of the default settings (but be sure not to install their bloatware!).
+
+## Running
+
+To run, activate the conda env with:
+
+```bash
+source activate santosgui # Unix only
+activate santosgui # Windows
+```
+
+Then `cd` into the `application` folder and run:
+
+```
+python app.py
+```
+
+(Note: Currently, this must be run from the application/ directory).
+
+## Packaging Application
+
+Simply run the `SantosBuild.sh` file in `application/packaging` directory of SantosGUI with: `bash SantosBuild.sh`. The executable will be output to the `application/dist` folder.
 
