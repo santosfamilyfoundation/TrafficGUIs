@@ -1,5 +1,5 @@
 YOURENVNAME=$1
 
-conda env create -f santos_gui_env.yml -n YOURENVNAME
+conda env create -f santos_gui_env.yml -n $YOURENVNAME
 source deactivate
-source activate YOURENVNAME
+source activate $YOURENVNAME
