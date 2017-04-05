@@ -22,7 +22,9 @@ First, we have to install conda and dependencies. Follow the directions for Unix
 
 #### Unix Installation
 
-The recommended way to run this project on Unix is using Miniconda. You can install Miniconda from [here](https://conda.io/miniconda.html). Be sure to install the Python 2.7 version. Install it to `~/miniconda2` when prompted and let the installer prepend the location to your PATH.
+The recommended way to run this project on Unix is using Miniconda. You can install Miniconda from [here](https://conda.io/miniconda.html). Be sure to install the Python 2.7 version. Install it to `~/miniconda2` when prompted and let the installer prepend the location to your PATH. Install with `bash Miniconda2-latest-Linux-x86_64.sh`, DO NOT USE `sudo`. 
+
+For the next steps, you may need to restart Terminal, or reload `~/.bashrc` by executing `. ~/.bashrc`.
 
 #### Windows Installation
 
