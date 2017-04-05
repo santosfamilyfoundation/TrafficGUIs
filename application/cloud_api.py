@@ -394,24 +394,24 @@ class CloudWizard:
 # Results Functions
 ###############################################################################
 
-    def results(self, identifier, project_path, ttc_threshold = None, vehicle_only = None, speed_limit = None):
+    def results(self, identifier, file_path, ttc_threshold = None, vehicle_only = None, speed_limit = None):
         print "results called with identifier = {}, ttc_threshold = {}, vehicle_only = {}, and speed_limit= {}"\
                 .format(identifier, ttc_threshold, vehicle_only, speed_limit)
 
         # sync calls
         s, err = self.roadUserCounts(identifier,\
-                    os.path.join(project_path, 'results'))
+                    file_path)
         if not s:
             return (s, err)
 
         s, err = self.speedDistribution(identifier,\
-                    os.path.join(project_path, 'results'),\
+                    file_path,\
                     speed_limit, vehicle_only)
         if not s:
             return (s, err)
 
         s, err = self.makeReport(identifier,\
-                    os.path.join(project_path, 'results'))
+                    file_path)
         if not s:
             return (s, err)
 

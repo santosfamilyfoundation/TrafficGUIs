@@ -239,10 +239,11 @@ class MainGUI(QtWidgets.QMainWindow):
     def runResults(self):
         """Runs server methods that generate safety metric results and visualizations"""
         identifier = get_identifier()
+        results_dir = os.path.join(get_project_path(), 'results')
         ttc_threshold = self.ui.timeToCollisionLineEdit.text()
         vehicle_only = self.ui.vehiclesOnlyCheckBox.isChecked()
         speed_limit = self.ui.speedLimitLineEdit.text()
-        success, err = api.results(identifier, ttc_threshold, vehicle_only, speed_limit)
+        success, err = api.results(identifier, results_dir, ttc_threshold, vehicle_only, speed_limit)
 
         if success:
             StatusPoller(identifier, 'highlight_video', 15, self.resultsCallback).start()
