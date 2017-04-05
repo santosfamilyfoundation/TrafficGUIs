@@ -46,7 +46,7 @@ class CloudWizard:
 # Upload Functions
 ###############################################################################
 
-    def uploadVideo(self,  video_path):
+    def uploadVideo(self, video_path):
         '''
 
         '''
@@ -246,6 +246,9 @@ class CloudWizard:
         success, err = self.parse_error(r)
         if not success:
             return (success, err)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
 
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
@@ -475,6 +478,9 @@ class CloudWizard:
         if os.path.exists(path):
             os.remove(path)
 
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
             for chunk in r.iter_content(chunk_size=2048):
@@ -503,6 +509,9 @@ class CloudWizard:
         path = os.path.join(file_path, 'santosreport.pdf')
         if os.path.exists(path):
             os.remove(path)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
 
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
@@ -534,6 +543,9 @@ class CloudWizard:
         if os.path.exists(path):
             os.remove(path)
 
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
             for chunk in r.iter_content(chunk_size=2048):
@@ -563,6 +575,9 @@ class CloudWizard:
         path = os.path.join(file_path, 'road_user_icon_counts.jpg')
         if os.path.exists(path):
             os.remove(path)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
 
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
@@ -596,6 +611,9 @@ class CloudWizard:
         path = os.path.join(file_path, 'velocityPDF.jpg')
         if os.path.exists(path):
             os.remove(path)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
 
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
