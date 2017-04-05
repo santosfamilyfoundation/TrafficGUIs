@@ -448,7 +448,7 @@ class CloudWizard:
         }
 
         try:
-            r = requests.post(self.server_addr + 'highlightVideo', data = payload, streams = True)
+            r = requests.post(self.server_addr + 'highlightVideo', data = payload, stream = True)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
@@ -465,7 +465,7 @@ class CloudWizard:
         }
 
         try:
-            r = requests.get(self.server_addr + 'highlightVideo', params = payload, streams = True)
+            r = requests.get(self.server_addr + 'highlightVideo', params = payload, stream = True)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
