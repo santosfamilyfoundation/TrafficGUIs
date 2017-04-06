@@ -58,17 +58,6 @@ Run the following command to begin installing the various dependencies of the pr
 bash build_conda_deps.sh santosgui
 ```
 
-### OpenCV Installation (Windows Only)
-
-#### Windows Installation
-
-Download OpenCV 2.4.13 for Windows from [here](https://sourceforge.net/projects/opencvlibrary/files/opencv-win/2.4.13/opencv-2.4.13.exe/download). Run it and extract to `C:\opencv`.
-
-Next, we have to copy the `cv2.pyd` file. Find the file at either `C:\opencv\build\python\2.7\x86` on 32-bit systems or `C:\opencv\build\python\2.7\x64` on 64-bit systems. Then copy `cv2.pyd` to `C:\Anaconda2\envs\santosgui\Lib\site-packages`.
-
-Next, open the Control Panel and search 'environment variables'. Then click "Edit the system environment variables". Click "Environment Variables". Create a variable named `OPENCV_DIR` and set its value to `C:\opencv\build\x64\vc12` (use `x86` instead of `x64` on 32-bit systems). Then add `%OPENCV_DIR%\bin` and `C:\opencv\sources\3rdparty\ffmpeg` to your PATH variable.
-
-
 ### Video Codec Installation (Windows Only)
 
 In order for Qt to play videos on Windows, you will need to install video codecs. This is a known problem and intended behavior of Qt, as seen [here](https://bugreports.qt.io/browse/QTBUG-51692). Installing the codec [here](http://www.codecguide.com/download_k-lite_codec_pack_basic.htm) will fix this issue. You can leave all of the default settings (but be sure not to install their bloatware!).

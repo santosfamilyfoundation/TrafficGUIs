@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 import sys
-import cv2
 import qtawesome as qta # must be imported before any other qt imports
 from custom.videographicsitem import VideoPlayer
 from PyQt5 import QtGui, QtWidgets, QtCore
 from views.safety_main import Ui_TransportationSafety
 import subprocess
 import zipfile
+try:
+    from PIL import Image
+except:
+    import Image
 
 ##############################################3
 # testing feature objects
@@ -377,26 +380,46 @@ class MainGUI(QtWidgets.QMainWindow):
         self.worldPts = self.unitPixRatio * self.unscaled_world_pts
         self.videoPts = np.array(self.ui.homography_cameraview.list_points())
 
-        if len(self.worldPts) >= 4:
-            if len(self.worldPts) == len(self.videoPts):
-                self.homography, self.mask = cv2.findHomography(self.videoPts, self.worldPts)
-            else:
-                self.show_error('To compute the homography, please make sure you choose the same number of points on each image.')
-                return
-
-        else:
-            self.show_error('To compute the homography, please choose at least 4 points on each image.')
+        if len(self.worldPts) != len(self.videoPts):
+            self.show_error('To compute the homography, please make sure you choose the same number of points on each image.')
             return
-
-        if self.homography is None:
+        else if len(self.worldPts) < 4:
+            self.show_error('To compute the homography, please choose at least 4 points on each image.')
             return
 
         update_config_with_sections(get_config_path(), "homography", "unitpixelratio", str(self.unitPixRatio))
         homography_path = os.path.join(get_project_path(), "homography")
 
-        if self.homography.size > 0:
-            txt_path = os.path.join(homography_path, "homography.txt")
-            np.savetxt(txt_path, self.homography)  # Save computed homography.
+        # Finally, upload to server
+        success, err = api.configHomography(\
+            get_identifier(),\
+            self.unitPixRatio,\
+            self.ui.homography_aerialview.list_points(),\
+            self.ui.homography_cameraview.list_points())
+
+        if not success:
+            self.show_error(err)
+            return
+
+        # Finally, upload to server
+        success, err = api.configHomography(\
+            get_identifier(),\
+            self.unitPixRatio,\
+            self.ui.homography_aerialview.list_points(),\
+            self.ui.homography_cameraview.list_points())
+
+        if not success:
+            self.show_error(err)
+
+        txt_path = os.path.join(homography_path, "homography.txt")
+        success, err, homography = api.getHomography(\
+            get_identifier(),\
+            txt_path)
+
+        if not success:
+            self.show_error(err)
+
+        self.homography = homography
 
         corr_path = os.path.join(homography_path, "point-correspondences.txt")
         points_path = os.path.join(homography_path, "image-points.txt")
@@ -412,22 +435,12 @@ class MainGUI(QtWidgets.QMainWindow):
 
         self.homography_display_results()
 
-        # Finally, upload to server
-        success, err = api.configHomography(\
-            get_identifier(),\
-            self.unitPixRatio,\
-            self.ui.homography_aerialview.list_points(),\
-            self.ui.homography_cameraview.list_points())
-
-        if not success:
-            self.show_error(err)
-
     def homography_display_results(self):
         cvBlue = (0,0,255)
         cvRed = (255,0,0)
         homography_path = os.path.join(get_project_path(), "homography")
-        worldImg = cv2.imread(os.path.join(homography_path, "aerial.png"))
-        videoImg = cv2.imread(os.path.join(homography_path, "camera.png"))
+        worldImg = Image.open(os.path.join(homography_path, "aerial.png"))
+        videoImg = Image.open(os.path.join(homography_path, "camera.png"))
 
         invHomography = np.linalg.inv(self.homography)
 
@@ -437,18 +450,29 @@ class MainGUI(QtWidgets.QMainWindow):
         # TODO: Nicer formatting for computed goodness images
         for i in range(self.worldPts.shape[0]):
             # world image
-            cv2.circle(worldImg, tuple(np.int32(np.round(self.worldPts[i] / self.unitPixRatio))), 2, cvBlue)
-            cv2.circle(worldImg, tuple(np.int32(np.round(projectedVideoPts[i] / self.unitPixRatio))), 2, cvRed)
-            cv2.putText(worldImg, str(i+1), tuple(np.int32(np.round(self.worldPts[i]/self.unitPixRatio)) + 5), cv2.FONT_HERSHEY_PLAIN, 2., cvBlue, 2)
+            worldDraw = ImageDraw.Draw(worldImg)
+            r = 2
+            x, y = tuple(np.int32(np.round(self.worldPts[i] / self.unitPixRatio)))
+            worldDraw.ellipse((x-r, y-r, x+r, y+r), fill=cvBlue)
+            x, y = tuple(np.int32(np.round(projectedVideoPts[i] / self.unitPixRatio)))
+            worldDraw.ellipse((x-r, y-r, x+r, y+r), fill=cvRed)
+            x, y = tuple(np.int32(np.round(self.worldPts[i]/self.unitPixRatio)) + 5)
+            worldDraw.text((x, y), str(i+1), fill=cvBlue)
+
             # video image
-            cv2.circle(videoImg, tuple(np.int32(np.round(self.videoPts[i]))), 2, cvBlue)
-            cv2.circle(videoImg, tuple(np.int32(np.round(projectedWorldPts[i]))), 2, cvRed)
-            cv2.putText(videoImg, str(i+1), tuple(np.int32(np.round(self.videoPts[i]) + 5)), cv2.FONT_HERSHEY_PLAIN, 2., cvBlue, 2)
+            videoDraw = ImageDraw.Draw(videoImg)
+            x, y = tuple(np.int32(np.round(self.videoPts[i])))
+            worldDraw.ellipse((x-r, y-r, x+r, y+r), fill=cvBlue)
+            x, y = tuple(np.int32(np.round(projectedWorldPts[i])))
+            worldDraw.ellipse((x-r, y-r, x+r, y+r), fill=cvRed)
+            x, y = tuple(np.int32(np.round(self.videoPts[i]) + 5))
+            worldDraw.text((x, y), str(i+1), fill=cvBlue)
+        
         aerial_goodness_path = os.path.join(homography_path, "homography_goodness_aerial.png")
         camera_goodness_path = os.path.join(homography_path, "homography_goodness_camera.png")
 
-        cv2.imwrite(aerial_goodness_path, worldImg)  # Save aerial goodness image
-        cv2.imwrite(camera_goodness_path, videoImg)  # Save camera goodness image
+        Image.save(aerial_goodness_path, worldImg)  # Save aerial goodness image
+        Image.save(camera_goodness_path, videoImg)  # Save camera goodness image
 
         self.ui.homography_results.load_image(QtGui.QImage(aerial_goodness_path))  # Load aerial goodness image into gui
 
@@ -725,7 +749,6 @@ def projectArray(homography, points):
         raise Exception('points of dimension {0} {1}'.format(points.shape[0], points.shape[1]))
 
     if (homography is not None) and homography.size>0:
-        #alternatively, on could use cv2.convertpointstohomogeneous and other conversion to/from homogeneous coordinates
         augmentedPoints = np.append(points,[[1]*points.shape[1]], 0)
         prod = np.dot(homography, augmentedPoints)
         return prod[0:2]/prod[2]
