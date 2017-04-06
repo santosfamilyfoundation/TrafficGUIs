@@ -7,9 +7,9 @@ from views.safety_main import Ui_TransportationSafety
 import subprocess
 import zipfile
 try:
-    from PIL import Image
+    from PIL import Image, ImageDraw
 except:
-    import Image
+    import Image, ImageDraw
 
 ##############################################3
 # testing feature objects
@@ -26,7 +26,7 @@ import message_helper
 import project_selector
 from cloud_api import api
 from cloud_api import StatusPoller
-from video import convert_video_to_frames
+from video import save_video_frame
 from utils.path_replacer import replace_path_delimiters
 
 
@@ -383,7 +383,7 @@ class MainGUI(QtWidgets.QMainWindow):
         if len(self.worldPts) != len(self.videoPts):
             self.show_error('To compute the homography, please make sure you choose the same number of points on each image.')
             return
-        else if len(self.worldPts) < 4:
+        elif len(self.worldPts) < 4:
             self.show_error('To compute the homography, please choose at least 4 points on each image.')
             return
 
@@ -411,15 +411,14 @@ class MainGUI(QtWidgets.QMainWindow):
         if not success:
             self.show_error(err)
 
-        txt_path = os.path.join(homography_path, "homography.txt")
         success, err, homography = api.getHomography(\
             get_identifier(),\
-            txt_path)
+            homography_path)
 
         if not success:
             self.show_error(err)
 
-        self.homography = homography
+        self.homography = np.array(homography)
 
         corr_path = os.path.join(homography_path, "point-correspondences.txt")
         points_path = os.path.join(homography_path, "image-points.txt")
@@ -451,28 +450,28 @@ class MainGUI(QtWidgets.QMainWindow):
         for i in range(self.worldPts.shape[0]):
             # world image
             worldDraw = ImageDraw.Draw(worldImg)
-            r = 2
+            r = 4
             x, y = tuple(np.int32(np.round(self.worldPts[i] / self.unitPixRatio)))
-            worldDraw.ellipse((x-r, y-r, x+r, y+r), fill=cvBlue)
+            worldDraw.ellipse((x-r, y-r, x+r, y+r), outline=cvBlue)
             x, y = tuple(np.int32(np.round(projectedVideoPts[i] / self.unitPixRatio)))
-            worldDraw.ellipse((x-r, y-r, x+r, y+r), fill=cvRed)
+            worldDraw.ellipse((x-r, y-r, x+r, y+r), outline=cvRed)
             x, y = tuple(np.int32(np.round(self.worldPts[i]/self.unitPixRatio)) + 5)
             worldDraw.text((x, y), str(i+1), fill=cvBlue)
 
             # video image
             videoDraw = ImageDraw.Draw(videoImg)
             x, y = tuple(np.int32(np.round(self.videoPts[i])))
-            worldDraw.ellipse((x-r, y-r, x+r, y+r), fill=cvBlue)
+            videoDraw.ellipse((x-r, y-r, x+r, y+r), outline=cvBlue)
             x, y = tuple(np.int32(np.round(projectedWorldPts[i])))
-            worldDraw.ellipse((x-r, y-r, x+r, y+r), fill=cvRed)
+            videoDraw.ellipse((x-r, y-r, x+r, y+r), outline=cvRed)
             x, y = tuple(np.int32(np.round(self.videoPts[i]) + 5))
-            worldDraw.text((x, y), str(i+1), fill=cvBlue)
+            videoDraw.text((x, y), str(i+1), fill=cvBlue)
         
         aerial_goodness_path = os.path.join(homography_path, "homography_goodness_aerial.png")
         camera_goodness_path = os.path.join(homography_path, "homography_goodness_camera.png")
 
-        Image.save(aerial_goodness_path, worldImg)  # Save aerial goodness image
-        Image.save(camera_goodness_path, videoImg)  # Save camera goodness image
+        worldImg.save(aerial_goodness_path)  # Save aerial goodness image
+        videoImg.save(camera_goodness_path)  # Save camera goodness image
 
         self.ui.homography_results.load_image(QtGui.QImage(aerial_goodness_path))  # Load aerial goodness image into gui
 
