@@ -1,6 +1,8 @@
 
 YOURENVNAME=$1
 
+conda remove -y --all -n $YOURENVNAME
+
 if [[ "$OSTYPE" == "linux-gnu" ]] || [[ "$OSTYPE" == "darwin"* ]]; then
 	# Linux or macOS install
 	echo "Detected Unix; Installing dependencies..."
