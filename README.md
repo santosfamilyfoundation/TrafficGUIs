@@ -2,7 +2,7 @@
 
 GUI application(s) for interfacing with TrafficIntelligence and related code.
 
-SantosGUI is currently supported on Ubuntu 14.04 and Windows 8,10.
+SantosGUI is currently supported on Windows 8 or 10, MacOS, and 64-bit Ubuntu (14.04 tested, 16.04 should work).
 
 ## Table of Contents
 
@@ -47,6 +47,8 @@ Run the following command to create and activate the conda environment for the p
 ```
 bash install_conda_deps.sh santosgui
 ```
+
+This *should* work on all operating systems (with the exception of 32-bit Linux, which is not supported).
 
 #### Install Dependencies from Script
 
