@@ -402,16 +402,6 @@ class MainGUI(QtWidgets.QMainWindow):
             self.show_error(err)
             return
 
-        # Finally, upload to server
-        success, err = api.configHomography(\
-            get_identifier(),\
-            self.unitPixRatio,\
-            self.ui.homography_aerialview.list_points(),\
-            self.ui.homography_cameraview.list_points())
-
-        if not success:
-            self.show_error(err)
-
         success, err, homography = api.getHomography(\
             get_identifier(),\
             homography_path)
