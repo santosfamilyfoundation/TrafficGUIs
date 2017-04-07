@@ -1,4 +1,5 @@
 
+import json
 import os
 import subprocess
 try:
@@ -11,13 +12,12 @@ def save_video_frame(video_path, image_path):
         cmd = "ffmpeg -y -i %s -t 1 -vframes 1 -f image2 %s" % (video_path, image_path)
         subprocess.check_call(cmd, shell=True)
 
-def get_video_resolution(video_path):
-    """Gets video resolution in (width, height)"""
-    if os.path.exists(video_path):
-    	temp_image_path = os.path.join(os.path.dirname(video_path), 'temp.png')
-    	save_video_frame(video_path, temp_image_path)
-    	im = Image.open(temp_image_path)
-    	size = im.size
-    	os.remove(temp_image_path)
-    	return size
-
+def get_video_resolution(videopath):
+    """
+    Returns
+    -------
+    (width, height) in number of pixels
+    """
+    out = subprocess.check_output(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_streams', videopath])
+    out = json.loads(out)
+    return (out['streams'][0]['width'], out['streams'][0]['height'])
