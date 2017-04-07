@@ -114,20 +114,20 @@ class HomographyScene(QtWidgets.QGraphicsScene):
         self.main_pixmap_item = None  # Either None or a QGraphicsPixmapItem representing the loaded image
 
         # Point configuration
-        self.point_rad = 4  # Radius, in pixels
+        self.point_rad = 12  # Radius, in pixels
         self.point_pen_color = QtGui.QColor(255, 74, 13, 230)  # R, G, B, A
-        self.point_pen = QtGui.QPen(self.point_pen_color, 2)
+        self.point_pen = QtGui.QPen(self.point_pen_color, 6)
         self.point_brush_color = QtGui.QColor(195, 13, 255, 20)  # R, G, B, A
         self.point_brush = QtGui.QBrush(self.point_brush_color)
         self.point_selected = False
         self.selected_point = None
 
         font = QtGui.QFont()
-        font.setPixelSize(12)
-        font.setBold(False)
+        font.setPixelSize(48)
+        font.setBold(True)
         self.label_font = font
         self.label_pen_color = QtGui.QColor(0, 0, 0)  # R, G, B
-        self.label_pen = QtGui.QPen(self.label_pen_color, .1)
+        self.label_pen = QtGui.QPen(self.label_pen_color, 2)
         self.label_brush_color = QtGui.QColor(255, 255, 255)  # R, G, B
         self.label_brush = QtGui.QBrush(self.label_brush_color)
 
@@ -143,7 +143,7 @@ class HomographyScene(QtWidgets.QGraphicsScene):
         new_point.homography_index = len(self.points)
 
         new_text = QtWidgets.QGraphicsSimpleTextItem()
-        new_text.setPos(-10, -10)
+        new_text.setPos(10, 10)
         new_text.setFont(self.label_font)
         new_text.setBrush(self.label_brush)
         new_text.setPen(self.label_pen)

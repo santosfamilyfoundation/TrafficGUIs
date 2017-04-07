@@ -28,6 +28,7 @@ from cloud_api import api
 from cloud_api import StatusPoller
 from video import save_video_frame
 from utils.path_replacer import replace_path_delimiters
+from utils.image_draw import draw_circle, draw_text
 
 
 class MainGUI(QtWidgets.QMainWindow):
@@ -435,8 +436,13 @@ class MainGUI(QtWidgets.QMainWindow):
         self.homography_display_results()
 
     def homography_display_results(self):
-        cvBlue = (0,0,255)
-        cvRed = (255,0,0)
+        blue = (213,94,0)
+        red = (0,114,178)
+        white = (255,255,255)
+        black = (0,0,0)
+        radius = 12
+        thickness = 6
+
         homography_path = os.path.join(get_project_path(), "homography")
         worldImg = Image.open(os.path.join(homography_path, "aerial.png"))
         videoImg = Image.open(os.path.join(homography_path, "camera.png"))
@@ -450,23 +456,28 @@ class MainGUI(QtWidgets.QMainWindow):
         for i in range(self.worldPts.shape[0]):
             # world image
             worldDraw = ImageDraw.Draw(worldImg)
-            r = 4
+
             x, y = tuple(np.int32(np.round(self.worldPts[i] / self.unitPixRatio)))
-            worldDraw.ellipse((x-r, y-r, x+r, y+r), outline=cvBlue)
+            draw_circle(worldDraw, x, y, blue, radius, thickness=thickness)
+
             x, y = tuple(np.int32(np.round(projectedVideoPts[i] / self.unitPixRatio)))
-            worldDraw.ellipse((x-r, y-r, x+r, y+r), outline=cvRed)
+            draw_circle(worldDraw, x, y, red, radius, thickness=thickness)
+
             x, y = tuple(np.int32(np.round(self.worldPts[i]/self.unitPixRatio)) + 5)
-            worldDraw.text((x, y), str(i+1), fill=cvBlue)
+            draw_text(worldDraw, str(i+1), x, y, white, border_color=black, border_thickness=2, font_size=48)
 
             # video image
             videoDraw = ImageDraw.Draw(videoImg)
+
             x, y = tuple(np.int32(np.round(self.videoPts[i])))
-            videoDraw.ellipse((x-r, y-r, x+r, y+r), outline=cvBlue)
+            draw_circle(videoDraw, x, y, blue, radius, thickness=thickness)
+
             x, y = tuple(np.int32(np.round(projectedWorldPts[i])))
-            videoDraw.ellipse((x-r, y-r, x+r, y+r), outline=cvRed)
+            draw_circle(videoDraw, x, y, red, radius, thickness=thickness)
+
             x, y = tuple(np.int32(np.round(self.videoPts[i]) + 5))
-            videoDraw.text((x, y), str(i+1), fill=cvBlue)
-        
+            draw_text(videoDraw, str(i+1), x, y, white, border_color=white, border_thickness=2, font_size=48)
+
         aerial_goodness_path = os.path.join(homography_path, "homography_goodness_aerial.png")
         camera_goodness_path = os.path.join(homography_path, "homography_goodness_camera.png")
 
