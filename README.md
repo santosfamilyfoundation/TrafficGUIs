@@ -52,14 +52,6 @@ If you are on Windows and don't have a Bash shell, you will have to create the c
 conda env create -f envs/env_windows.yml -n santosgui
 ```
 
-#### Install Dependencies from Script
-
-Run the following command to begin installing the various dependencies of the project. The last
-
-```
-bash build_conda_deps.sh santosgui
-```
-
 ### Video Codec Installation
 
 #### Windows
