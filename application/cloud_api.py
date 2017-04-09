@@ -13,10 +13,10 @@ import numpy as np
 from pprint import pprint
 
 class CloudWizard:
-    def __init__(self, ip_addr, port=8088):
+    def __init__(self, ip_addr, port=8888):
         self.set_url(ip_addr, port=port)
 
-    def set_url(self, ip_addr, port=8088):
+    def set_url(self, ip_addr, port=8888):
         protocol = self.protocol_from_url_string(ip_addr)
         if protocol == None:
             protocol = 'http://'

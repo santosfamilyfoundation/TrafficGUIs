@@ -64,7 +64,7 @@ class ProjectWizard(QtWidgets.QWizard):
 
     def showEvent(self, event):
         # We want to autofill the default server every time the creation page is shown
-        self.ui.newp_video_server_input.setText("http://localhost:8088")
+        self.ui.newp_video_server_input.setText("http://localhost:8888")
 
     def validateCurrentPage(self):
         # If on last page, treat 'Finish' click as project creation click. Otherwise, return True to advance.
