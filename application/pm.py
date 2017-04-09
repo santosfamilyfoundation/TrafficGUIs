@@ -10,7 +10,6 @@ from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
 import time
 import datetime
 from shutil import copy, rmtree
-import cv2
 try:
     from PIL import Image
 except:
@@ -21,6 +20,7 @@ from app_config import AppConfig as ac
 from app_config import get_default_project_dir, get_project_path, get_config_path, config_section_exists, get_config_with_sections, update_config_with_sections
 from cloud_api import api
 import message_helper
+from video import save_video_frame
 
 class ProjectWizard(QtWidgets.QWizard):
 
@@ -192,14 +192,8 @@ class ProjectWizard(QtWidgets.QWizard):
             progress_bar.setValue(80)
 
             progress_msg.setText("Extracting camera image...")
-            vidcap = cv2.VideoCapture(video_dest)
-            vidcap.set(cv2.cv.CV_CAP_PROP_FRAME_COUNT, 1000)
-            success, image = vidcap.read()
-            progress_bar.setValue(85)
-            if success:
-                cv2.imwrite(os.path.join(pr_path, "homography", "camera.png"), image)
-            else:
-                self.show_message("Error getting image. Use the 'Open Camera Image' button and input an image from a frame of the video.")
+            out_path = os.path.join(pr_path, "homography", "camera.png")
+            save_video_frame(video_dest, out_path)
             progress_bar.setValue(90)
 
             progress_msg.setText("Copying aerial image...")

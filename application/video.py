@@ -1,32 +1,23 @@
 
-import cv2
+import json
 import os
+import subprocess
+try:
+	from PIL import Image
+except:
+	import Image
 
-def convert_video_to_frames(video_path, images_dir, prefix='image-', extension='png'):
-	if not os.path.exists(video_path):
-		return False
-
-	if not os.path.exists(images_dir):
-		os.makedirs(images_dir)
-
-	vidcap = cv2.VideoCapture(video_path)
-	count = 0
-	success = True
-	while success:
-		success, image = vidcap.read()
-		if success:
-			if '.' in extension:
-				format_string = "%d"
-			else:
-				format_string = "%d."
-			filename = prefix + format_string + extension
-			cv2.imwrite(os.path.join(images_dir, filename % count), image)     # save frame as JPEG file
-			count += 1
-
-def get_video_resolution(video_path):
-    """Gets video resolution in (width, height)"""
+def save_video_frame(video_path, image_path):
     if os.path.exists(video_path):
-       vidcap = cv2.VideoCapture(video_path)
-       success, image = vidcap.read()
-       if success:
-           return image.shape[1], image.shape[0]
+        cmd = "ffmpeg -y -i %s -t 1 -vframes 1 -f image2 %s" % (video_path, image_path)
+        subprocess.check_call(cmd, shell=True)
+
+def get_video_resolution(videopath):
+    """
+    Returns
+    -------
+    (width, height) in number of pixels
+    """
+    out = subprocess.check_output(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_streams', videopath])
+    out = json.loads(out)
+    return (out['streams'][0]['width'], out['streams'][0]['height'])
