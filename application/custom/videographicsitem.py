@@ -48,7 +48,7 @@ from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QGraphicsScene,
         QGraphicsView, QHBoxLayout, QPushButton, QSlider, QStyle, QVBoxLayout,
-        QWidget, QSizePolicy)
+        QWidget, QSizePolicy, QPlainTextEdit)
 
 import os
 import sys
@@ -60,9 +60,17 @@ WIDTH = 600.0
 WIGGLE = 40.0
 
 class VideoPlayer(QWidget):
+    """
+    Arguments
+    ---------
+    parent: QWidget, the parent widget of VideoPlayer
+    display_status: bool, default False, will show the status of the media player in the gui
+    """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, display_status=False):
         super(VideoPlayer, self).__init__(parent)
+
+        self.display_status = display_status
 
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
 
@@ -81,11 +89,31 @@ class VideoPlayer(QWidget):
         self.positionSlider = QSlider(Qt.Horizontal)
         self.positionSlider.setRange(0, 0)
         self.positionSlider.sliderMoved.connect(self.setPosition)
+        
+        if self.display_status:
+            self.status_mapping = {
+                QMediaPlayer.UnknownMediaStatus: "UnknownMediaStatus",
+                QMediaPlayer.NoMedia: "NoMedia",
+                QMediaPlayer.LoadingMedia: "LoadingMedia",
+                QMediaPlayer.LoadedMedia: "LoadedMedia",
+                QMediaPlayer.StalledMedia: "StalledMedia", 
+                QMediaPlayer.BufferingMedia: "BufferingMedia",
+                QMediaPlayer.BufferedMedia: "BufferedMedia",
+                QMediaPlayer.EndOfMedia: "EndOfMedia",
+                QMediaPlayer.InvalidMedia: "InvalidMedia"
+            }
+            self.statusText = QPlainTextEdit()
+            self.statusText.setReadOnly(True)
+            self.statusText.setFixedHeight(25)
+            self.statusText.setFixedWidth(150)
+            self.mediaPlayer.mediaStatusChanged.connect(self.mediaStatusChanged)
 
         controlLayout = QHBoxLayout()
         controlLayout.setContentsMargins(0, 0, 0, 0)
         controlLayout.addWidget(self.playButton)
         controlLayout.addWidget(self.positionSlider)
+        if self.display_status:
+            controlLayout.addWidget(self.statusText)
 
         layout = QVBoxLayout()
         layout.addWidget(graphicsView)
@@ -131,8 +159,20 @@ class VideoPlayer(QWidget):
             self.playButton.setIcon(
                     self.style().standardIcon(QStyle.SP_MediaPlay))
 
+    def mediaStatusChanged(self, status):
+        self.statusText.setPlaceholderText(self.status_mapping[status])
+
     def positionChanged(self, position):
         self.positionSlider.setValue(position)
+        print self.positionSlider.value()
+
+        # if position slider has reached the end, let's stop the video
+        if self.positionSlider.value() >= self.positionSlider.maximum() - 1:
+            self.mediaPlayer.stop()
+
+            # play/pause hack to show the first frame of video
+            self.mediaPlayer.play()
+            self.mediaPlayer.pause()
 
     def durationChanged(self, duration):
         self.positionSlider.setRange(0, duration)
