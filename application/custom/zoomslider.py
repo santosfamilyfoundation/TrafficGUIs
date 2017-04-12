@@ -1,11 +1,11 @@
 # zoomslider.py
 from PyQt5 import QtWidgets
 
-slider_start = 50.
 
 class ZoomSlider(QtWidgets.QSlider):
     """Slider used for zooming a HomographyView or a HomographyResultView.
     """
+    slider_start = 50.
     def __init__(self, parent):
         super(ZoomSlider, self).__init__(parent)
         self.zoom_target = None  # QGraphicsView
@@ -16,13 +16,18 @@ class ZoomSlider(QtWidgets.QSlider):
 
     def valueChanged_handler(self):
         if self.zoom_target is None:
-            self.setValue(slider_start)  # If no target set, do not manipulate slider.
+            # self.setValue(self.slider_start)  # If no target set, do not manipulate slider.
+            self.resetSliderPosition()
             return
         elif not self.zoom_target.image_loaded:
-            self.setValue(slider_start)
+            # self.setValue(self.slider_start)
+            self.resetSliderPosition()
             return
         slider_val = self.value()
-        desired_percentage = slider_val / slider_start 
+        desired_percentage = slider_val / self.slider_start 
         scale = desired_percentage / self.zoom_percentage
         self.zoom_percentage = desired_percentage
         self.zoom_target.scale(scale, scale)
+
+    def resetSliderPosition(self):
+        self.setValue(self.slider_start)
