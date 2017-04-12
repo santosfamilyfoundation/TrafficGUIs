@@ -474,6 +474,8 @@ class MainGUI(QtWidgets.QMainWindow):
         worldImg.save(aerial_goodness_path)  # Save aerial goodness image
         videoImg.save(camera_goodness_path)  # Save camera goodness image
 
+        # Set Slider Zoom Position to Default when Loading in the Result Image
+        self.ui.homography_hslider_zoom_computed_image.resetSliderPosition()
         self.ui.homography_results.load_image(QtGui.QImage(aerial_goodness_path))  # Load aerial goodness image into gui
 
 ##########################################################################################################################
