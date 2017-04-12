@@ -1,76 +1,96 @@
 # SantosGUI
 
-GUI application(s) for interfacing with TrafficIntelligence and related code.
+SantosGUI is a desktop application that interfaces with [SantosCloud](https://github.com/santosfamilyfoundation/SantosCloud) in order to analyze videos of intersections and produce traffic safety metrics.
 
-SantosGUI is currently supported on Ubuntu 14.04 and Windows 8,10.
+SantosGUI allows users to create projects, upload videos, and configure projects, in order to have intersections of interest analyzed. This GUI makes the appropriate API calls to SantosCloud in order to have videos analyzed, and then displays the results of the analysis to the user.
 
-### Table of Contents
+SantosGUI is currently supported on modern versions of Windows, macOS, and 64-bit Ubuntu.
+
+## Table of Contents
 
 - [Installation](#installation)
+  - [Conda Installation](#conda-installation)
+  - [Install Dependencies](#install-dependencies)
+  - [OpenCV Installation (Windows Only)](#opencv-installation-windows-only)
+  - [Video Codec Installation (Windows Only)](#video-codec-installation-windows-only)
+- [Running](#running)
 - [Packaging Application](#packaging-application)
 
 ## Installation
 
-### Repo Cloning
-
-Clone the repo with:
-```
-git clone https://github.com/santosfamilyfoundation/SantosGUI
-```
-
 ### Conda Installation
 
-The recommended way to run this project is using Anaconda.
+First, we have to install conda and dependencies. Follow the directions for Unix, or Windows. (Unix includes macOS).
 
-#### Download
+#### Unix Installation
 
-##### Windows
+The recommended way to run this project on Unix is using Miniconda. You can install Miniconda from [here](https://conda.io/miniconda.html). Be sure to install the Python 2.7 version. Install it to `~/miniconda2` when prompted and let the installer prepend the location to your PATH. Install with `bash Miniconda2-latest-Linux-x86_64.sh`, DO NOT USE `sudo`.
 
-You can install Anaconda from [here](https://www.continuum.io/downloads#windows). Be sure to install the Python 2.7 version. Install it to `C:\Anaconda2`.
+For the next steps, you may need to restart Terminal, or reload `~/.bashrc` by executing `. ~/.bashrc`.
 
-##### Linux
+#### Windows Installation
 
-You can install Anaconda from [here](https://www.continuum.io/downloads#linux). Be sure to install the Python 2.7 version. Then open Terminal, cd to the `Downloads` folder, and run: `bash Anaconda2-x.x.x-Linux-x86[_64].sh`. You can use the default `/home/USER/anaconda2/` folder.
+The recommended way to run this project on Windows is using Anaconda. You can install Anaconda from [here](https://www.continuum.io/downloads#windows). Be sure to install the Python 2.7 version. Install it to `C:\Anaconda2`.
 
-#### Create Conda Environment
+### Install Dependencies
 
-Run the following command to create a conda environment that we will use for this project:
+Next, you must install dependencies. These instructions install dependencies using `conda` into a conda environment that you must run the project in. If you follow these instructions, it will create an environment named 'santosgui'. You can replace the name 'santosgui' with any other name throughout these instructions.
 
-```
-conda create -n santosgui
-```
+#### Bash Shell
 
-### OpenCV Installation
-
-##### Windows
-
-Download OpenCV 2.4.13 for Windows from [here](https://sourceforge.net/projects/opencvlibrary/files/opencv-win/2.4.13/opencv-2.4.13.exe/download). Run it and extract to `C:\opencv`.
-
-Next, we have to copy the `cv2.pyd` file. Find the file at either `C:\opencv\build\python\2.7\x86` on 32-bit systems or `C:\opencv\build\python\2.7\x64` on 64-bit systems. Then copy `cv2.pyd` to `C:\Anaconda2\envs\santosgui\Lib\site-packages`.
-
-Next, open the Control Panel and search 'environment variables'. Then click "Edit the system environment variables". Click "Environment Variables". Create a variable named `OPENCV_DIR` and set its value to `C:\opencv\build\x64\vc12` (use `x86` instead of `x64` on 32-bit systems). Then add `%OPENCV_DIR%\bin` and `C:\opencv\sources\3rdparty\ffmpeg` to your PATH variable.
-
-##### Linux
-
-Simply run:
-```
-sudo apt-get install python-opencv
-```
-
-#### Python Dependency Installation
-
-You need to install the following dependencies using conda. If using Git Bash, run `bash install_conda_deps.sh santosgui` to install all packages. Otherwise, run all of the lines from the `install_conda_deps.sh` file, with `santosgui` instead of `$YOURENVNAME`. For example:
+You can follow these instructions if you have a bash shell (i.e. are on Unix, or are on Windows and have either Git Bash or Windows Subsystem for Linux). Run the following command to create and activate the conda environment for the project:
 
 ```
-conda env create -f santos_gui_env.yml -n santosgui
-source deactivate
-source activate santosgui
+bash install_conda_deps.sh santosgui
 ```
 
-#### Video Codec Installation
+#### Windows Command Prompt
+
+If you are on Windows and don't have a Bash shell, you will have to create the conda environment yourself (or install Git Bash). To do this, run the following command:
+
+```
+conda env create -f envs/env_windows.yml -n santosgui
+```
+
+### Video Codec Installation
+
+#### Windows
 
 In order for Qt to play videos on Windows, you will need to install video codecs. This is a known problem and intended behavior of Qt, as seen [here](https://bugreports.qt.io/browse/QTBUG-51692). Installing the codec [here](http://www.codecguide.com/download_k-lite_codec_pack_basic.htm) will fix this issue. You can leave all of the default settings (but be sure not to install their bloatware!).
+
+#### Ubuntu/Debian
+
+To install codecs for playing movies, run the following commands from command line:
+
+```
+sudo apt-get install gstreamer1.0-libav gstreamer1.0-plugins-bad-videoparsers
+```
+
+## Running
+
+To run, activate the conda env with:
+
+```bash
+source activate santosgui # Bash shell
+activate santosgui # Windows Command Prompt
+```
+
+Then `cd` into the `application` folder and run:
+
+```
+python app.py
+```
+
+(Note: Currently, this must be run from the application/ directory).
+
+After running, you can deactivate the conda environment with:
+
+```bash
+source deactivate # Bash shell
+deactivate # Windows Command Prompt
+```
 
 ## Packaging Application
 
 Simply run the `SantosBuild.sh` file in `application/packaging` directory of SantosGUI with: `bash SantosBuild.sh`. The executable will be output to the `application/dist` folder.
+

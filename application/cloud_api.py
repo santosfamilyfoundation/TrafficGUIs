@@ -3,24 +3,20 @@ import os
 import pickle
 import uuid
 import requests
+from requests_toolbelt import MultipartEncoder
 from app_config import AppConfig as ac
 from app_config import get_project_path
 import json
 from threading import Timer
+import numpy as np
 
 from pprint import pprint
 
 class CloudWizard:
-    def __init__(self, ip_addr, port=8088):
-        #TODO: Needs to be done in sync with server
-        #   not a uuid creation
-        #self._ids = self.readIds()
-        #self.project_path = project_path
-        #self._ids[self.project_path] = uuid.uuid4()
-        #self._writeIds()
+    def __init__(self, ip_addr, port=8888):
         self.set_url(ip_addr, port=port)
 
-    def set_url(self, ip_addr, port=8088):
+    def set_url(self, ip_addr, port=8888):
         protocol = self.protocol_from_url_string(ip_addr)
         if protocol == None:
             protocol = 'http://'
@@ -35,48 +31,78 @@ class CloudWizard:
 
         self.server_addr = protocol + addr + ':{}/'.format(port)
 
-
-###############################################################################
-# ID Storage Functions
-###############################################################################
-
-    def _initializeIds(self):
-        with open('.IDdict','wb') as blank_dict_file:
-                pickle.dump({},blank_dict_file)
-        return {}
-
-    def readIds(self):
-        if os.path.isfile('.IDdict'):
-            with open('.IDdict','rb') as dict_file:
-                ids = pickle.loads(dict_file.read())
-            return ids
+    def parse_error(self, r):
+        try:
+            data = r.json()
+        except ValueError:
+            # If no JSON, also no error message
+            return (True, None)
+        if 'error_message' in data:
+            return (False, data['error_message'])
         else:
-            return self._initializeIds()
-
-    def _writeIds(self):
-        if os.path.isfile('.IDdict'):
-            with open('.IDdict','wb') as dict_file:
-                pickle.dump(self._ids,dict_file)
-            return
-        else:
-            return self._initializeIds()
+            return (True, None)
 
 ###############################################################################
 # Upload Functions
 ###############################################################################
 
-    def uploadVideo(self,  video_path, identifier = None):
-        print "uploadVideo called with identifier = {}".format(identifier)
+    def uploadVideo(self, video_path):
+        '''
+
+        '''
+        print "uploadVideo called"
         with open(video_path, 'rb') as video:
-            files = {'video' : video}
-            payload = {'identifier': identifier}
-            r = requests.post(\
-                self.server_addr + 'uploadVideo',\
-                data = payload, files = files, stream = True)
+            # We set the content-disposition 'filename' parameter manually
+            # incase we need to do streaming
+            files = {'video' : (os.path.basename(video_path), video)}
+
+            #Use a multipartencoder to stream the file data as just data
+            m = MultipartEncoder(fields = files)
+
+            # m.len returns the size of all of the encoded parts in bytes
+            # and 1024*1024 is MB in bytes. As such we can compare the size
+            # of all the files we want to send to a 100MB size limit for
+            # transitioning to streaming rather than loading into memory
+            try:
+                if m.len/(1024*1024) >= 100:
+                    # We need to set the Content-Type header
+                    r = requests.post(\
+                        self.server_addr + 'uploadVideo', data = m,\
+                        headers = {'Content-Type': m.content_type})
+                else:
+                    r = requests.post(\
+                        self.server_addr + 'uploadVideo', files = files)
+            except requests.exceptions.ConnectionError as e:
+                print('Connection is offline')
+                return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
         print "Response JSON: {}".format(r.json())
-        return r.json()['identifier']
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err, None)
+
+        return (True, None, r.json()['identifier'])
+
+    def uploadMask(self, identifier, mask_path):
+        print "uploadMask called"
+        with open(mask_path, 'rb') as mask:
+            extn = os.path.basename(mask_path).split('.')[-1]
+            files = {'mask.%s' % extn :  mask}
+            payload = {'identifier': identifier}
+
+            try:
+                r = requests.post(self.server_addr + 'mask', data = payload, files = files)
+            except requests.exceptions.ConnectionError as e:
+                print('Connection is offline')
+                return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
+            print "Status Code: {}".format(r.status_code)
+            return self.parse_error(r)
+
+        return (False, "Couldn't open mask file")
 
 ###############################################################################
 # Configuration Functions
@@ -94,10 +120,39 @@ class CloudWizard:
             'camera_pts': json.dumps(camera_pts)
         }
 
-        r = requests.post(\
-            self.server_addr + 'configHomography', data = payload)
+        try:
+            r = requests.post(\
+                self.server_addr + 'homography', data = payload)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
+        return self.parse_error(r)
+
+    def getHomography(self, identifier, file_path = None):
+        payload = {'identifier': identifier}
+
+        try:
+            r = requests.get(\
+                self.server_addr + 'homography', params = payload)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+
+        print "Response JSON: {}".format(r.json())
+        print "Status Code: {}".format(r.status_code)
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err, None)
+
+        homography = r.json()['homography']
+        if file_path:
+            path = os.path.join(file_path, 'homography.txt')
+            np.savetxt(path, np.array(homography))
+        return (True, None, homography)
 
     def configFiles(self, identifier,
                     max_features_per_frame = None,\
@@ -124,21 +179,30 @@ class CloudWizard:
         print "config_data is as follows:"
         pprint(payload)
 
-        r = requests.post(self.server_addr + 'config', data = payload)
+        try:
+            r = requests.post(self.server_addr + 'config', data = payload)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
+        return self.parse_error(r)
 
-    def testConfig(self, test_flag, identifier,
+    def testConfig(self, identifier, test_flag,
                    frame_start = None,\
                    num_frames = None):
         print "testConfig called with identifier = {},\
                 test_flag = {}, frame_start = {}, and num_frames = {}"\
                 .format(identifier,test_flag,frame_start,num_frames)
 
-        status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        success, error_message, status_dict = self.getProjectStatus(identifier)
+        if not success:
+            return (success, error_message)
+
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
+            return (False, 'Upload homography before testing configuration')
 
         payload = {
             'test_flag': test_flag,
@@ -147,11 +211,17 @@ class CloudWizard:
             'num_frames': num_frames
         }
 
-        r = requests.post(self.server_addr + 'testConfig', data = payload)
+        try:
+            r = requests.post(self.server_addr + 'testConfig', data = payload)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
+        return self.parse_error(r)
 
-    def getTestConfig(self, test_flag, identifier, project_path):
+    def getTestConfig(self, identifier, test_flag, file_path):
         print "getTestConfig called with identifier = {} and test_flag = {}".format(identifier,test_flag)
 
         payload = {
@@ -160,29 +230,47 @@ class CloudWizard:
         }
 
         if test_flag == 'feature':
-            if not os.path.exists(os.path.join(project_path, 'feature_video')):
-                os.mkdir(os.path.join(project_path, 'feature_video'))
-            path = os.path.join(project_path, 'feature_video', 'feature_video.mp4')
+            path = os.path.join(file_path, 'feature_video.mp4')
         elif test_flag == 'object':
-            if not os.path.exists(os.path.join(project_path, 'object_video')):
-                os.mkdir(os.path.join(project_path, 'object_video'))
-            path = os.path.join(project_path, 'object_video', 'object_video.mp4')
+            path = os.path.join(file_path, 'object_video.mp4')
         else:
             print "ERROR: Invalid flag"
-            return
+            return (False, 'Invalid test flag: '+str(test_flag))
 
-        r = requests.get(self.server_addr + 'testConfig', data = payload, stream=True)
+        try:
+            r = requests.get(self.server_addr + 'testConfig', params = payload, stream=True)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
 
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
             for chunk in r.iter_content(chunk_size=2048):
                 if chunk:
                     f.write(chunk)
+
         print "Status Code: {}".format(r.status_code)
+        return (True, None)
 
     def defaultConfig(self):
-        r = requests.get(self.server_addr + 'defaultConfig')
-        return r.json()
+        try:
+            r = requests.get(self.server_addr + 'defaultConfig')
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err, None)
+
+        return (True, None, r.json())
 
 ###############################################################################
 # Analysis Functions
@@ -191,55 +279,83 @@ class CloudWizard:
     def analysis(self, identifier, email=None):
         print "analysis called with identifier = {} and email = {}".format(identifier, email)
 
-        status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        success, error_message, status_dict = self.getProjectStatus(identifier)
+        if not success:
+            return (success, error_message)
+
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
+            return (False, 'Upload homography before running analysis.')
 
         payload = {
             'identifier': identifier,
             'email': email
         }
 
-        r = requests.post(self.server_addr + 'analysis', data = payload)
+        try:
+            r = requests.post(self.server_addr + 'analysis', data = payload)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
+        return self.parse_error(r)
 
     def objectTracking(self, identifier, email=None):
         print "objectTracking called with identifier = {} and email = {}".format(identifier, email)
 
-        status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        success, error_message, status_dict = self.getProjectStatus(identifier)
+        if not success:
+            return (success, error_message)
+
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
+            return (False, 'Upload homography before running object tracking.')
 
         payload = {
             'identifier': identifier,
             'email': email
         }
-        r = requests.post(self.server_addr + 'objectTracking', data = payload)
+
+        try:
+            r = requests.post(self.server_addr + 'objectTracking', data = payload)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
+        return self.parse_error(r)
 
     def safetyAnalysis(self, identifier, email=None):
         print "safetyAnalysis called with identifier = {} and email = {}".format(identifier, email)
 
-        status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        success, error_message, status_dict = self.getProjectStatus(identifier)
+        if not success:
+            return (success, error_message)
+
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
-        elif status_dict["object_tracking"] != 2:
+            return (False, 'Upload homography before running safety analysis.')
+        elif status_dict["object_tracking"]['status'] != 2:
             print "Check object tracking and run (again)."
-            return
+            return (False, 'Run object tracking before running safety analysis.')
 
         payload = {
             'identifier': identifier,
             'email': email
         }
 
-        r = requests.post(self.server_addr + 'safetyAnalysis', data = payload)
+        try:
+            r = requests.post(self.server_addr + 'safetyAnalysis', data = payload)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
+        return self.parse_error(r)
 
 ###############################################################################
 # Status Checking Functions
@@ -251,44 +367,79 @@ class CloudWizard:
             'identifier': identifier,
         }
 
-        r = requests.post(self.server_addr + 'status', data = payload)
-        status_dict = r.json()
-        status_dict = {k:int(v) for (k,v) in status_dict.iteritems()}
+        try:
+            r = requests.get(self.server_addr + 'status', params = payload)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err, None)
+
+        d = r.json()
+        status_dict = {}
+        for (k,v) in d.iteritems():
+            status_dict[k] = {}
+            for (key, val) in v.iteritems():
+                if key == 'status':
+                    status_dict[k][key] = int(val)
+                else:
+                    status_dict[k][key] = val
         print "Status Code: {}".format(r.status_code)
         print "Response Text: {}".format(r.text)
-        return status_dict
+        return (True, None, status_dict)
 
 ###############################################################################
 # Results Functions
 ###############################################################################
 
-    def results(self, identifier, ttc_threshold = None, vehicle_only = None, speed_limit = None):
+    def results(self, identifier, file_path, ttc_threshold = None, vehicle_only = None, speed_limit = None):
         print "results called with identifier = {}, ttc_threshold = {}, vehicle_only = {}, and speed_limit= {}"\
                 .format(identifier, ttc_threshold, vehicle_only, speed_limit)
 
         # sync calls
-        self.roadUserCounts(identifier)
-        self.speedDistribution(identifier, speed_limit, vehicle_only)
+        s, err = self.roadUserCounts(identifier,\
+                    file_path)
+        if not s:
+            return (s, err)
 
-        self.makeReport(identifier)
+        s, err = self.speedDistribution(identifier,\
+                    file_path,\
+                    speed_limit, vehicle_only)
+        if not s:
+            return (s, err)
+
+        s, err = self.makeReport(identifier,\
+                    file_path)
+        if not s:
+            return (s, err)
 
         # async calls
-        self.highlightVideo(identifier, ttc_threshold, vehicle_only)
+        s, err = self.highlightVideo(identifier,\
+                    ttc_threshold, vehicle_only)
+        if not s:
+            return (s, err)
+
+        return (True, None)
 
     def highlightVideo(self, identifier, ttc_threshold = None, vehicle_only = None):
         print "highlightVideo called with identifier = {}, ttc_threshold = {} and vehicle_only = {}"\
                 .format(identifier, ttc_threshold, vehicle_only)
 
-        status_dict = self.getProjectStatus(identifier)
-        if status_dict["config_homography"] != 2:
+        success, error_message, status_dict = self.getProjectStatus(identifier)
+        if not success:
+            return (success, error_message)
+
+        if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return
-        elif status_dict["object_tracking"] != 2:
+            return (False, 'Upload homography before creating a highlight video.')
+        elif status_dict["object_tracking"]['status'] != 2:
             print "Check object tracking and run (again)."
-            return
-        elif status_dict["safety_analysis"] != 2:
+            return (False, 'Run object tracking before creating a highlight video.')
+        elif status_dict["safety_analysis"]['status'] != 2:
             print "Check safety analysis and run (again)."
-            return
+            return (False, 'Run safety analysis before creating a highlight video.')
 
         payload = {
             'identifier': identifier,
@@ -296,50 +447,148 @@ class CloudWizard:
             'vehicle_only': vehicle_only
         }
 
-        r = requests.post(self.server_addr + 'highlightVideo', data = payload)
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
+        try:
+            r = requests.post(self.server_addr + 'highlightVideo', data = payload, stream = True)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
-    def makeReport(self, identifier):
+        print "Response Text: {}".format(r.text)
+        print "Status Code: {}".format(r.status_code)
+        return self.parse_error(r)
+
+    def getHighlightVideo(self, identifier, file_path):
+        print "getHighlightVideo called with identifier = {}".format(identifier)
+
+        payload = {
+            'identifier': identifier
+        }
+
+        try:
+            r = requests.get(self.server_addr + 'highlightVideo', params = payload, stream = True)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err)
+
+        path = os.path.join(file_path, 'highlight.mp4')
+        if os.path.exists(path):
+            os.remove(path)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
+            for chunk in r.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
+
+        return (True, None)
+
+    def makeReport(self, identifier, file_path):
         print "makeReport called with identifier = {}".format(identifier)
 
         payload = {
             'identifier': identifier,
         }
 
-        r = requests.post(self.server_addr + 'makeReport', data = payload)
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
+        try:
+            r = requests.get(self.server_addr + 'makeReport', params  = payload, stream = True)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
-    def retrieveResults(self, identifier, project_path):
-        print "retrieveResults called with identifier = {}".format(identifier)
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err)
 
-        payload = {
-            'identifier': identifier,
-        }
-        path = os.path.join(project_path, 'results', 'results.zip')
+        path = os.path.join(file_path, 'santosreport.pdf')
         if os.path.exists(path):
             os.remove(path)
-        r = requests.get(self.server_addr + 'retrieveResults', data = payload, stream=True)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
         with open(path, 'wb') as f:
             print('Dumping "{0}"...'.format(path))
             for chunk in r.iter_content(chunk_size=2048):
                 if chunk:
                     f.write(chunk)
-        print "Status Code: {}".format(r.status_code)
 
-    def roadUserCounts(self, identifier):
+        print "Status Code: {}".format(r.status_code)
+        return (True, None)
+
+    def retrieveResults(self, identifier, file_path):
+        print "retrieveResults called with identifier = {}".format(identifier)
+
+        payload = {
+            'identifier': identifier,
+        }
+
+        try:
+            r = requests.get(self.server_addr + 'retrieveResults', params = payload, stream=True)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err)
+
+        path = os.path.join(file_path, 'results.zip')
+        if os.path.exists(path):
+            os.remove(path)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
+            for chunk in r.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
+
+        print "Status Code: {}".format(r.status_code)
+        return (True, None)
+
+    def roadUserCounts(self, identifier, file_path):
         print "roadUserCounts called with identifier = {}".format(identifier)
 
         payload = {
             'identifier': identifier,
         }
 
-        r = requests.post(self.server_addr + 'roadUserCounts', data = payload)
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
+        try:
+            r = requests.get(self.server_addr + 'roadUserCounts', params = payload, stream=True)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
-    def speedDistribution(self, identifier, speed_limit = None, vehicle_only = None):
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err)
+
+        path = os.path.join(file_path, 'road_user_icon_counts.jpg')
+        if os.path.exists(path):
+            os.remove(path)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
+            for chunk in r.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
+
+        print "Status Code: {}".format(r.status_code)
+        return (True, None)
+
+    def speedDistribution(self, identifier, file_path, speed_limit = None, vehicle_only = None):
         print "speedDistribution called with identifier = {}, speed_limit = {} and vehicle_only = {}"\
                 .format(identifier, speed_limit, vehicle_only)
 
@@ -349,11 +598,31 @@ class CloudWizard:
             'vehicle_only': vehicle_only
         }
 
-        r = requests.post(self.server_addr + 'speedDistribution', data = payload)
+        try:
+            r = requests.get(self.server_addr + 'speedDistribution', params = payload, stream=True)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err)
+
+        path = os.path.join(file_path, 'velocityPDF.jpg')
+        if os.path.exists(path):
+            os.remove(path)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
+            for chunk in r.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
+
         print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
-
-
+        return (True, None)
 
 ###############################################################################
 # Helper Methods
@@ -405,17 +674,33 @@ class StatusPoller(object):
         self._poll_for_status()
 
     def _poll_for_status(self):
-        status_dict = api.getProjectStatus(self.identifier)
+        success, err, status_dict = api.getProjectStatus(self.identifier)
+
+        if not success:
+            self.callback(err)
+            self.stop()
+            return
 
         if self.status_name not in status_dict.keys():
             print(self.status_name + ' not in status dictionary')
-        elif status_dict[self.status_name] == 2:
+
+        status = status_dict[self.status_name]['status']
+        if status == 2:
+            print(self.status_name + ' finished!')
             self.stop()
-            self.callback()
-        elif status_dict[self.status_name] == 1:
+            self.callback(None)
+        elif status == 1:
             print(self.status_name + ' is still running')
+        elif status == -1:
+            print(self.status_name + ' failed')
+            if 'failure_message' in status_dict[self.status_name]:
+                self.callback(status_dict[self.status_name]['failure_message'])
+            else:
+                self.callback(self.status_name + ' failed.')
+            self.stop()
         else:
             print(self.status_name + ' is not running, not continuing to poll for status')
+            self.callback(self.status_name + ' is not running, not continuing to poll for status')
             self.stop()
 
     def start(self):

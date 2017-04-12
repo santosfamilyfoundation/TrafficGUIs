@@ -2,10 +2,10 @@
 Project management classes and functions
 """
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 from views.message_dialog import Ui_message_dialog
 
-class MessageHelper(QtGui.QDialog):
+class MessageHelper(QtWidgets.QDialog):
 
     def __init__(self, parent):
         super(MessageHelper, self).__init__(parent)
@@ -18,7 +18,12 @@ class MessageHelper(QtGui.QDialog):
         flags = self.windowFlags() & (~QtCore.Qt.WindowContextHelpButtonHint)
         self.setWindowFlags(flags)
 
-    def show_message(self, message):
+    def show_message(self, message, title=None):
         self.ui.label.setText(message)
+
+        if title is not None:
+            self.setWindowTitle(title)
+
+        self.adjustSize()
         self.show()
 
