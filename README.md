@@ -12,7 +12,7 @@ SantosGUI is currently supported on modern versions of Windows, macOS, and 64-bi
 
 ## Questions?
 
-You can reach out to contributors and maintainers of the project through [our Google Group](https://groups.google.com/d/forum/santos-traffic).
+You can reach out to contributors and maintainers of the project through our [Google Group](https://groups.google.com/d/forum/santos-traffic).
 
 ## Bugs and Issues
 
