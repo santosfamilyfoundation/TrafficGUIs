@@ -16,11 +16,9 @@ class ZoomSlider(QtWidgets.QSlider):
 
     def valueChanged_handler(self):
         if self.zoom_target is None:
-            # self.setValue(self.slider_start)  # If no target set, do not manipulate slider.
-            self.resetSliderPosition()
+            self.resetSliderPosition()  # If no target set, do not manipulate slider.
             return
         elif not self.zoom_target.image_loaded:
-            # self.setValue(self.slider_start)
             self.resetSliderPosition()
             return
         slider_val = self.value()
