@@ -17,3 +17,7 @@ You can reach out to contributors and maintainers of the project through our [Go
 ## Bugs and Issues
 
 Please report bugs and issues with the software using the [issues page](https://github.com/santosfamilyfoundation/SantosGUI/issues).
+
+## Examples
+
+
