@@ -30,4 +30,5 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
-          console=True )
+          console=True, 
+          icon = path+'/packaging/santos_app_logo.icns')
