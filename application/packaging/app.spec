@@ -6,12 +6,12 @@ path = os.getcwd()
 
 block_cipher = None
 
-            
+
 
 a = Analysis([path+'/app.py'],
              pathex=[path],
              binaries=[],
-             datas=[(path+ '/datas/fonts/*', '/qtawesome/fonts')],
+             datas=[(path+ '/datas/fonts/*', '/qtawesome/fonts'),(path+ '/datas/fonts/*', './datas/fonts')],
              hiddenimports = ['qtawesome','sklearn.neighbors.typedefs'],
              hookspath=[],
              runtime_hooks=[],
@@ -30,5 +30,5 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
-          console=True, 
-          icon = path+'/packaging/santos_app_logo.icns')
+          console=True,
+          icon = path+'/packaging/santos_app_logo.ico')
