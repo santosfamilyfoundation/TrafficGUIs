@@ -271,7 +271,11 @@ class MainGUI(QtWidgets.QMainWindow):
             return
 
         with zipfile.ZipFile(os.path.join(results_dir, "results.zip"), "r") as zip_file:
-            zip_file.extractall(results_dir)
+            try:
+                zip_file.extractall(results_dir)
+            except zipfile.BadZipfile as e:
+                self.show_error("Couldn't open results zip file. The file may not exist.")
+                return
 
         self.show_message('Results have been retrieved! This program will now open the folder containing the results.')
 
