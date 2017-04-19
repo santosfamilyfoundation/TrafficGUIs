@@ -39,6 +39,9 @@ def get_project_video_path():
             print("ERR: project_video(): Couldn't get video")
     return None
 
+def get_font_path(font_filename):
+    return os.path.join(os.path.dirname(__file__), 'datas', 'fonts', font_filename)
+
 def update_config_with_sections(config_path, section, option, value):
     """
     Updates a single value in the current open project's configuration file.

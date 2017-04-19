@@ -5,6 +5,8 @@ try:
 except:
     import Image, ImageDraw, ImageFont
 
+from app_config import get_font_path
+
 def draw_circle(image_draw, x, y, color, radius, thickness=1):
     # Draw inside and outside radius given
     start = radius - thickness//2
@@ -13,7 +15,11 @@ def draw_circle(image_draw, x, y, color, radius, thickness=1):
 
 def draw_text(image_draw, text, x, y, fill_color, border_color=(0,0,0), border_thickness=0, font_size=12):
     # Load font, required for larger font size. Found here: https://www.fontsquirrel.com/fonts/open-sans
-    font = ImageFont.truetype(os.path.join(os.path.dirname(__file__), "OpenSans.ttf"), size=48)
+    try:
+        font = ImageFont.truetype(get_font_path("OpenSans.ttf"), size=48)
+    except:
+        print("Couldn't load font")
+        return
 
     if border_thickness != 0:
         image_draw.text((x-border_thickness, y-border_thickness), text, font=font, fill=border_color)
