@@ -245,9 +245,7 @@ class MainGUI(QtWidgets.QMainWindow):
         identifier = get_identifier()
         results_dir = os.path.join(get_project_path(), 'results')
         ttc_threshold = self.ui.timeToCollisionLineEdit.text()
-        vehicle_only = self.ui.vehiclesOnlyCheckBox.isChecked()
-        speed_limit = self.ui.speedLimitLineEdit.text()
-        success, err = api.results(identifier, results_dir, ttc_threshold, vehicle_only, speed_limit)
+        success, err = api.results(identifier, results_dir, ttc_threshold)
 
         if success:
             StatusPoller(identifier, 'highlight_video', 15, self.resultsCallback).start()
