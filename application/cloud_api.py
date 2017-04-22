@@ -674,6 +674,7 @@ class CallbackProcess(object):
                 Timer(delay, self._check_queue).start()
             else:
                 self._end_process()
+                self._q.close()
                 self.finish()
 
     def _end_process(self):
