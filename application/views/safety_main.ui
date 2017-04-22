@@ -33,7 +33,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>3</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -470,8 +470,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>597</width>
-               <height>541</height>
+               <width>605</width>
+               <height>549</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -611,8 +611,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>597</width>
-               <height>541</height>
+               <width>605</width>
+               <height>549</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -708,8 +708,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>1206</width>
-               <height>661</height>
+               <width>1222</width>
+               <height>669</height>
               </rect>
              </property>
              <widget class="QWidget" name="formLayoutWidget">
@@ -718,50 +718,40 @@
                 <x>10</x>
                 <y>10</y>
                 <width>261</width>
-                <height>111</height>
+                <height>51</height>
                </rect>
               </property>
               <layout class="QFormLayout" name="results_parameter_form">
                <item row="0" column="0">
-                <widget class="QLabel" name="speedLimitLabel">
-                 <property name="text">
-                  <string>speed limit</string>
-                 </property>
-                </widget>
+                <layout class="QHBoxLayout" name="results_parameter_layout"/>
                </item>
-               <item row="0" column="1">
-                <widget class="QLineEdit" name="speedLimitLineEdit"/>
-               </item>
-               <item row="2" column="0">
+               <item row="1" column="0">
                 <widget class="QLabel" name="timeToCollisionLabel">
                  <property name="text">
                   <string>time to collision</string>
                  </property>
                 </widget>
                </item>
-               <item row="2" column="1">
-                <widget class="QLineEdit" name="timeToCollisionLineEdit"/>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="vehiclesOnlyLabel">
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="timeToCollisionLineEdit">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="text">
-                  <string>vehicles only</string>
+                  <string>1.5</string>
                  </property>
                 </widget>
-               </item>
-               <item row="3" column="1">
-                <widget class="QCheckBox" name="vehiclesOnlyCheckBox"/>
-               </item>
-               <item row="1" column="0">
-                <layout class="QHBoxLayout" name="results_parameter_layout"/>
                </item>
               </layout>
              </widget>
              <widget class="QPushButton" name="runAnalysisButton">
               <property name="geometry">
                <rect>
-                <x>12</x>
-                <y>130</y>
+                <x>10</x>
+                <y>60</y>
                 <width>261</width>
                 <height>32</height>
                </rect>

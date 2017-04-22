@@ -2,7 +2,7 @@ import cloud_api as api
 
 TEST_IP = 'localhost'
 VIDEO_PATH = 'path/to/video'
-LOCAL_PROJECT_PATH = 'path/to/project' 
+project_path = 'path/to/local/project/'
 UNIT_PIXEL_RATIO = 0.05
 
 #TODO: Remove raw_input hotfix in favor of checking function call
@@ -32,22 +32,33 @@ if __name__ == '__main__':
     # Setup CloudWizard
     ###########################################################################
     remote = api.CloudWizard(TEST_IP)
+    
 
     ###########################################################################
     # Upload Video
     ###########################################################################
-    _, _, identifier = remote.uploadVideo(VIDEO_PATH)
-    raw_input('Uploading Video, please wait...\n Press Enter to Continue')
+    identifier = None # set if you have already uploaded video
+    if identifier is None:
+        identifier = remote.uploadVideo(VIDEO_PATH)
+        raw_input('Uploading Video, please wait...\n Press Enter to Continue')
 
     ###########################################################################
-    # Configure Homography
+    # Upload Mask 
     ###########################################################################
+    mask_path = None
+    if mask_path:
+        remote.uploadMask(identifier, mask_path)
+        raw_input('Uploading Mask, please wait...\n Press Enter to Continue')
+
+    # ###########################################################################
+    # # Configure Homography
+    # ###########################################################################
     remote.configHomography(identifier, UNIT_PIXEL_RATIO, AERIAL_PTS, CAMERA_PTS)
     raw_input('Configuring Homography, please wait...\n Press Enter to Continue')
 
-    ###########################################################################
-    # Test Configs
-    ###########################################################################
+    # ###########################################################################
+    # # Test Configs
+    # ###########################################################################
 
     remote.configFiles(identifier,\
                 max_features_per_frame = 1001,\
@@ -65,34 +76,36 @@ if __name__ == '__main__':
     remote.testConfig('object', identifier)
     raw_input('Testing object Config, please wait...\n Press Enter to Continue')
 
-    ###########################################################################
-    # Run Analysis Routes
-    ###########################################################################
+    # ###########################################################################
+    # # Run Analysis Routes
+    # ###########################################################################
 
-    #remote.objectTracking(identifier,EMAIL)
-    #raw_input('Running Object Tracking, please wait...\n Press Enter to Continue')
+    run_separately = False 
+    if run_separately:
+        remote.objectTracking(identifier,EMAIL)
+        raw_input('Running Object Tracking, please wait...\n Press Enter to Continue')
 
-    #remote.safetyAnalysis(identifier,EMAIL)
-    #raw_input('Running Safety Analysis, please wait...\n Press Enter to Continue')
+        remote.safetyAnalysis(identifier,EMAIL)
+        raw_input('Running Safety Analysis, please wait...\n Press Enter to Continue')
+    else:
+        remote.analysis(identifier,EMAIL)
+        raw_input('Running Analysis, please wait...\n Press Enter to Continue')
 
-    remote.analysis(identifier,EMAIL)
-    raw_input('Running Analysis, please wait...\n Press Enter to Continue')
-
-    ###########################################################################
-    # Run Result Routes
-    ###########################################################################
+    # ###########################################################################
+    # # Run Result Routes
+    # ###########################################################################
 
     remote.highlightVideo(identifier)
     raw_input('Generating Highlight Video, please wait...\n Press Enter to Continue')
 
-    remote.roadUserCounts(identifier, LOCAL_PROJECT_PATH)
+    remote.roadUserCounts(identifier, project_path)
     raw_input('Generating User Counts, please wait...\n Press Enter to Continue')
 
-    remote.speedDistribution(identifier, LOCAL_PROJECT_PATH)
+    remote.speedDistribution(identifier, project_path)
     raw_input('Generating Speed Distribution, please wait...\n Press Enter to Continue')
 
-    remote.makeReport(identifier, LOCAL_PROJECT_PATH)
+    remote.makeReport(identifier)
     raw_input('Generating Report, please wait...\n Press Enter to Continue')
 
-    remote.retrieveResults(identifier, LOCAL_PROJECT_PATH)
+    remote.retrieveResults(identifier, project_path)
     raw_input('Retrieving Results, please wait...\n Press Enter to Continue')

@@ -394,9 +394,9 @@ class CloudWizard:
 # Results Functions
 ###############################################################################
 
-    def results(self, identifier, file_path, ttc_threshold = None, vehicle_only = None, speed_limit = None):
-        print "results called with identifier = {}, ttc_threshold = {}, vehicle_only = {}, and speed_limit= {}"\
-                .format(identifier, ttc_threshold, vehicle_only, speed_limit)
+    def results(self, identifier, file_path, ttc_threshold = None):
+        print "results called with identifier = {}, ttc_threshold = {}" \
+                .format(identifier, ttc_threshold)
 
         # sync calls
         s, err = self.roadUserCounts(identifier,\
@@ -405,8 +405,7 @@ class CloudWizard:
             return (s, err)
 
         s, err = self.speedDistribution(identifier,\
-                    file_path,\
-                    speed_limit, vehicle_only)
+                    file_path)
         if not s:
             return (s, err)
 
@@ -417,15 +416,15 @@ class CloudWizard:
 
         # async calls
         s, err = self.highlightVideo(identifier,\
-                    ttc_threshold, vehicle_only)
+                    ttc_threshold)
         if not s:
             return (s, err)
 
         return (True, None)
 
-    def highlightVideo(self, identifier, ttc_threshold = None, vehicle_only = None):
-        print "highlightVideo called with identifier = {}, ttc_threshold = {} and vehicle_only = {}"\
-                .format(identifier, ttc_threshold, vehicle_only)
+    def highlightVideo(self, identifier, ttc_threshold = None):
+        print "highlightVideo called with identifier = {}, ttc_threshold = {}"\
+                .format(identifier, ttc_threshold)
 
         success, error_message, status_dict = self.getProjectStatus(identifier)
         if not success:
@@ -443,8 +442,7 @@ class CloudWizard:
 
         payload = {
             'identifier': identifier,
-            'ttc_threshold': ttc_threshold,
-            'vehicle_only': vehicle_only
+            'ttc_threshold': ttc_threshold
         }
 
         try:
@@ -588,14 +586,12 @@ class CloudWizard:
         print "Status Code: {}".format(r.status_code)
         return (True, None)
 
-    def speedDistribution(self, identifier, file_path, speed_limit = None, vehicle_only = None):
-        print "speedDistribution called with identifier = {}, speed_limit = {} and vehicle_only = {}"\
-                .format(identifier, speed_limit, vehicle_only)
+    def speedDistribution(self, identifier, file_path):
+        print "speedDistribution called with identifier = {} "\
+                .format(identifier)
 
         payload = {
-            'identifier': identifier,
-            'speed_limit': speed_limit,
-            'vehicle_only': vehicle_only
+            'identifier': identifier
         }
 
         try:
