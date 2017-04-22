@@ -35,7 +35,10 @@ from utils.image_draw import draw_circle, draw_text
 class MainGUI(QtWidgets.QMainWindow):
     test_feature_callback_signal = QtCore.pyqtSignal()
     get_feature_video_callback_signal = QtCore.pyqtSignal()
+
     test_object_callback_signal = QtCore.pyqtSignal()
+    get_object_video_callback_signal = QtCore.pyqtSignal()
+
     analysis_callback_signal = QtCore.pyqtSignal()
     results_callback_signal = QtCore.pyqtSignal()
     error_signal = QtCore.pyqtSignal(str)
@@ -69,6 +72,7 @@ class MainGUI(QtWidgets.QMainWindow):
         self.get_feature_video_callback_signal.connect(self.open_feature_video)
 
         self.test_object_callback_signal.connect(self.get_object_video)
+        self.get_object_video_callback_signal.connect(self.open_object_video)
 
         self.analysis_callback_signal.connect(self.runResults)
         self.results_callback_signal.connect(self.retrieveResults)
@@ -174,12 +178,13 @@ class MainGUI(QtWidgets.QMainWindow):
         else:
             self.error_signal.emit(error_message)
 
-    def open_feature_video(self):
-        project_path = get_project_path()
-        if project_path != '':
-            video_path = os.path.join(project_path, 'feature_video', 'feature_video.mp4')
-            if os.path.exists(video_path):
-                self.feature_tracking_video_player.openFile(video_path)
+    def get_feature_video(self):
+        SingleAPICallbackProcess(
+            target = api.getTestConfig,
+            args = (get_identifier(), 'feature', os.path.join(get_project_path(), 'feature_video')),
+            callback = self.get_feature_video_callback,
+            return_error=True,
+        ).start()
 
     def get_feature_video_callback(self,error_message):
         # Emitting the signal will call open_feature_video on the main thread
@@ -188,13 +193,12 @@ class MainGUI(QtWidgets.QMainWindow):
         else:
             self.error_signal.emit(error_message)
 
-    def get_feature_video(self):
-        SingleAPICallbackProcess(
-            target = api.getTestConfig,
-            args = (get_identifier(), 'feature', os.path.join(get_project_path(), 'feature_video')),
-            callback = self.get_feature_video_callback,
-            return_error=True,
-        ).start()
+    def open_feature_video(self):
+        project_path = get_project_path()
+        if project_path != '':
+            video_path = os.path.join(project_path, 'feature_video', 'feature_video.mp4')
+            if os.path.exists(video_path):
+                self.feature_tracking_video_player.openFile(video_path)
 
     def test_object(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
@@ -218,6 +222,21 @@ class MainGUI(QtWidgets.QMainWindow):
         else:
             self.error_signal.emit(error_message)
 
+    def get_object_video(self):
+        SingleAPICallbackProcess(
+            target = api.getTestConfig,
+            args = (get_identifier(), 'object', os.path.join(get_project_path(), 'object_video')),
+            callback = self.get_object_video_callback,
+            return_error=True,
+        ).start()
+
+    def get_object_video_callback(self,error_message):
+        # Emitting the signal will call open_feature_video on the main thread
+        if error_message is None:
+            self.get_object_video_callback_signal.emit()
+        else:
+            self.error_signal.emit(error_message)
+
     def open_object_video(self):
         project_path = get_project_path()
         if project_path != '':
@@ -225,12 +244,7 @@ class MainGUI(QtWidgets.QMainWindow):
             if os.path.exists(video_path):
                 self.roadusers_tracking_video_player.openFile(video_path)
 
-    def get_object_video(self):
-        success, err, _ = api.getTestConfig(get_identifier(), 'object', os.path.join(get_project_path(), 'object_video'))
-        if success:
-            self.open_object_video()
-        else:
-            self.show_error(err)
+######################################################################################################
 
     # for the runAnalysis button
     def runAnalysis(self):
