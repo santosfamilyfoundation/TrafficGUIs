@@ -76,9 +76,9 @@ if __name__ == '__main__':
     remote.testConfig('object', identifier)
     raw_input('Testing object Config, please wait...\n Press Enter to Continue')
 
-    # ###########################################################################
-    # # Run Analysis Routes
-    # ###########################################################################
+    ###########################################################################
+    # Run Analysis Routes
+     ###########################################################################
 
     run_separately = False
     if run_separately:
@@ -91,9 +91,9 @@ if __name__ == '__main__':
         remote.analysis(identifier,EMAIL)
         raw_input('Running Analysis, please wait...\n Press Enter to Continue')
 
-    # ###########################################################################
-    # # Run Result Routes
-    # ###########################################################################
+    ###########################################################################
+    # Run Result Routes
+    ###########################################################################
 
     remote.highlightVideo(identifier)
     raw_input('Generating Highlight Video, please wait...\n Press Enter to Continue')
@@ -107,6 +107,17 @@ if __name__ == '__main__':
     remote.turningCounts(identifier, project_path)
     raw_input('Generating Turning Counts, please wait...\n Press Enter to Continue')
 
+    ###########################################################################
+    # Run Compare Routes
+    ###########################################################################
+    identifier2 = None # input an identifier to compare current project to 
+    remote.compareSpeeds(identifier, [identifier, identifier2], ['label1', 'label2'], project_path, False)
+    remote.compareSpeeds(identifier, [identifier, identifier2], ['label1', 'label2'], project_path, True)
+    raw_input('Generating Speed Comparison, please wait...\n Press Enter to Continue')
+
+    ###########################################################################
+    # Run Report/Aggregate Results Routes
+    ###########################################################################
     remote.makeReport(identifier)
     raw_input('Generating Report, please wait...\n Press Enter to Continue')
 

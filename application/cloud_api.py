@@ -551,6 +551,50 @@ class CloudWizard:
 
         return (success, err, data)
 
+###############################################################################
+# Compare Methods
+###############################################################################
+
+    def compareSpeeds(self, identifier, identifiers_to_cmp, labels_to_cmp, file_path, only_show_85th=False):
+        print "compareSpeeds called with identifer = {},\n identifiers_to_cmp = {},\n, labels_to_cmp = {},\n only_show_85th = {}"\
+                .format(identifier, identifiers_to_cmp, labels_to_cmp, only_show_85th)
+
+        payload = {
+            'identifier': identifier,
+            'identifiers_to_cmp': identifiers_to_cmp,
+            'labels_to_cmp': labels_to_cmp,
+            'only_show_85th': only_show_85th
+        }
+
+        try:
+            r = requests.get(self.server_addr + 'compareSpeeds', params = payload, stream=True)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err)
+
+        if only_show_85th: 
+            path = os.path.join(file_path, 'compare85th_{}.jpg'.format('_'.join(labels_to_cmp)))
+        else:
+            path = os.path.join(file_path, 'comparePercentiles_{}.jpg'.format('_'.join(labels_to_cmp)))
+        if os.path.exists(path):
+            os.remove(path)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
+            for chunk in r.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
+
+        print "Status Code: {}".format(r.status_code)
+        return (True, None)
+
 
 # Define singleton to be used everywhere
 api = CloudWizard('localhost')
