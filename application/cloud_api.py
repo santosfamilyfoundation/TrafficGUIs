@@ -32,6 +32,9 @@ class CloudWizard:
         self.server_addr = protocol + addr + ':{}/'.format(port)
 
     def parse_error(self, r):
+        content_type = r.headers['content-type']
+        if 'application/json' not in content_type:
+            return (True, None)
         try:
             data = r.json()
         except ValueError:
@@ -409,6 +412,11 @@ class CloudWizard:
         if not s:
             return (s, err)
 
+        s, err = self.turningCounts(identifier,\
+                    file_path)
+        if not s:
+            return (s, err)
+
         s, err = self.makeReport(identifier,\
                     file_path)
         if not s:
@@ -605,6 +613,40 @@ class CloudWizard:
             return (success, err)
 
         path = os.path.join(file_path, 'velocityPDF.jpg')
+        if os.path.exists(path):
+            os.remove(path)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
+            for chunk in r.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
+
+        print "Status Code: {}".format(r.status_code)
+        return (True, None)
+
+    def turningCounts(self, identifier, file_path):
+        print "turningCounts called with identifier = {}"\
+                .format(identifier)
+
+        payload = {
+            'identifier': identifier
+        }
+
+        try:
+            r = requests.get(self.server_addr + 'turningCounts', params = payload, stream=True)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection is offline')
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+
+        success, err = self.parse_error(r)
+        if not success:
+            return (success, err)
+
+        path = os.path.join(file_path, 'turningCounts.jpg')
         if os.path.exists(path):
             os.remove(path)
 
