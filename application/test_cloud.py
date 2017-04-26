@@ -32,7 +32,7 @@ if __name__ == '__main__':
     # Setup CloudWizard
     ###########################################################################
     remote = api.CloudWizard(TEST_IP)
-    
+
 
     ###########################################################################
     # Upload Video
@@ -43,7 +43,7 @@ if __name__ == '__main__':
         raw_input('Uploading Video, please wait...\n Press Enter to Continue')
 
     ###########################################################################
-    # Upload Mask 
+    # Upload Mask
     ###########################################################################
     mask_path = None
     if mask_path:
@@ -80,7 +80,7 @@ if __name__ == '__main__':
     # # Run Analysis Routes
     # ###########################################################################
 
-    run_separately = False 
+    run_separately = False
     if run_separately:
         remote.objectTracking(identifier,EMAIL)
         raw_input('Running Object Tracking, please wait...\n Press Enter to Continue')
@@ -103,6 +103,9 @@ if __name__ == '__main__':
 
     remote.speedDistribution(identifier, PROJECT_PATH)
     raw_input('Generating Speed Distribution, please wait...\n Press Enter to Continue')
+
+    remote.turningCounts(identifier, project_path)
+    raw_input('Generating Turning Counts, please wait...\n Press Enter to Continue')
 
     remote.makeReport(identifier)
     raw_input('Generating Report, please wait...\n Press Enter to Continue')
