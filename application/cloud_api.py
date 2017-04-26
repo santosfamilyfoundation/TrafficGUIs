@@ -45,6 +45,51 @@ class CloudWizard:
             return (True, None, data)
 
 ###############################################################################
+# Helper Methods
+###############################################################################
+
+    def writeToPath(self,request, file_path,file_name):
+        path = os.path.join(file_path, file_name)
+        if os.path.exists(path):
+            os.remove(path)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
+            for chunk in request.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
+
+    def connectionError(self):
+        message = 'Connection to server "{}" is offline'.format(self.server_addr)
+        print(message)
+        return (False, message, None)
+
+    @classmethod
+    def ip_and_port_from_url_string(cls, url):
+        # Strip protocol if exists
+        protocol = cls.protocol_from_url_string(url)
+        if protocol:
+            url = url[len(protocol):]
+
+        # Now we should only have IP:PORT
+        if ':' in url:
+            l = url.split(':')
+            return (l[0], l[1])
+        else:
+            return (url, None)
+
+    @classmethod
+    def protocol_from_url_string(cls, url):
+        protocols = ['http://', 'https://']
+        for protocol in protocols:
+            if url.startswith(protocol):
+                return protocol
+        return None
+
+###############################################################################
 # Upload Functions
 ###############################################################################
 
@@ -74,8 +119,7 @@ class CloudWizard:
                     r = requests.post(\
                         self.server_addr + 'uploadVideo', files = files)
             except requests.exceptions.ConnectionError as e:
-                print('Connection is offline')
-                return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+                return self.connectionError()
 
         success, err, data = self.parse_error(r)
         if success:
@@ -93,8 +137,7 @@ class CloudWizard:
             try:
                 r = requests.post(self.server_addr + 'mask', json = payload, files = files)
             except requests.exceptions.ConnectionError as e:
-                print('Connection is offline')
-                return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+                return self.connectionError()
 
             return self.parse_error(r)
 
@@ -120,8 +163,7 @@ class CloudWizard:
             r = requests.post(\
                 self.server_addr + 'homography', json = payload)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+            return self.connectionError()
 
         return self.parse_error(r)
 
@@ -132,8 +174,7 @@ class CloudWizard:
             r = requests.get(\
                 self.server_addr + 'homography', params = payload)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+            return self.connectionError()
 
         success, err, data = self.parse_error(r)
         if not success:
@@ -169,8 +210,7 @@ class CloudWizard:
         try:
             r = requests.post(self.server_addr + 'config', json = payload)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+            return self.connectionError()
 
         return self.parse_error(r)
 
@@ -200,8 +240,7 @@ class CloudWizard:
         try:
             r = requests.post(self.server_addr + 'testConfig', json = payload)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+            return self.connectionError()
 
         return self.parse_error(r)
 
@@ -223,8 +262,7 @@ class CloudWizard:
         try:
             r = requests.get(self.server_addr + 'testConfig', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+            return self.connectionError()
 
         success, err, data = self.parse_error(r)
         if success:
@@ -236,8 +274,7 @@ class CloudWizard:
         try:
             r = requests.get(self.server_addr + 'defaultConfig')
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+            return self.connectionError()
 
         return self.parse_error(r)
 
@@ -263,8 +300,7 @@ class CloudWizard:
         try:
             r = requests.post(self.server_addr + 'analysis', json = payload)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+            return self.connectionError()
 
         return self.parse_error(r)
 
@@ -286,8 +322,7 @@ class CloudWizard:
         try:
             r = requests.post(self.server_addr + 'objectTracking', json = payload)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+            return self.connectionError()
 
         return self.parse_error(r)
 
@@ -312,8 +347,7 @@ class CloudWizard:
         try:
             r = requests.post(self.server_addr + 'safetyAnalysis', json = payload)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+            return self.connectionError()
 
         return self.parse_error(r)
 
@@ -330,8 +364,7 @@ class CloudWizard:
         try:
             r = requests.get(self.server_addr + 'status', params = payload)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+            return self.connectionError()
 
         success, err, data = self.parse_error(r)
         if not success:
@@ -408,24 +441,9 @@ class CloudWizard:
         try:
             r = requests.post(self.server_addr + 'highlightVideo', json = payload, stream = True)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
+            return self.connectionError()
 
         return self.parse_error(r)
-
-    def writeToPath(self,request, file_path,file_name):
-        path = os.path.join(file_path, file_name)
-        if os.path.exists(path):
-            os.remove(path)
-
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
-
-        with open(path, 'wb') as f:
-            print('Dumping "{0}"...'.format(path))
-            for chunk in request.iter_content(chunk_size=2048):
-                if chunk:
-                    f.write(chunk)
 
 
     def getHighlightVideo(self, identifier, file_path):
@@ -437,8 +455,7 @@ class CloudWizard:
         try:
             r = requests.get(self.server_addr + 'highlightVideo', params = payload, stream = True)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return self.connectionError()
 
         success, err, data = self.parse_error(r)
         if success:
@@ -455,8 +472,7 @@ class CloudWizard:
         try:
             r = requests.get(self.server_addr + 'makeReport', params  = payload, stream = True)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return self.connectionError()
 
         success, err, data = self.parse_error(r)
         if success:
@@ -473,8 +489,7 @@ class CloudWizard:
         try:
             r = requests.get(self.server_addr + 'retrieveResults', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return self.connectionError()
 
         success, err, data = self.parse_error(r)
         if success:
@@ -491,8 +506,7 @@ class CloudWizard:
         try:
             r = requests.get(self.server_addr + 'roadUserCounts', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return self.connectionError()
 
         success, err, data = self.parse_error(r)
         if success:
@@ -510,7 +524,7 @@ class CloudWizard:
             r = requests.get(self.server_addr + 'speedDistribution', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return
 
         success, err, data = self.parse_error(r)
         if success:
@@ -529,8 +543,7 @@ class CloudWizard:
         try:
             r = requests.get(self.server_addr + 'turningCounts', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return self.connectionError()
 
         success, err, data = self.parse_error(r)
         if success:
@@ -538,31 +551,6 @@ class CloudWizard:
 
         return (success, err, data)
 
-###############################################################################
-# Helper Methods
-###############################################################################
-
-    @classmethod
-    def ip_and_port_from_url_string(cls, url):
-        # Strip protocol if exists
-        protocol = cls.protocol_from_url_string(url)
-        if protocol:
-            url = url[len(protocol):]
-
-        # Now we should only have IP:PORT
-        if ':' in url:
-            l = url.split(':')
-            return (l[0], l[1])
-        else:
-            return (url, None)
-
-    @classmethod
-    def protocol_from_url_string(cls, url):
-        protocols = ['http://', 'https://']
-        for protocol in protocols:
-            if url.startswith(protocol):
-                return protocol
-        return None
 
 # Define singleton to be used everywhere
 api = CloudWizard('localhost')
