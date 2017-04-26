@@ -523,8 +523,7 @@ class CloudWizard:
         try:
             r = requests.get(self.server_addr + 'speedDistribution', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return
+            return self.connectionError()
 
         success, err, data = self.parse_error(r)
         if success:
@@ -548,6 +547,33 @@ class CloudWizard:
         success, err, data = self.parse_error(r)
         if success:
             self.writeToPath(r, file_path, 'turningCounts.jpg')
+
+        return (success, err, data)
+
+###############################################################################
+# Compare Methods
+###############################################################################
+
+    def compareSpeeds(self, identifier, identifiers_to_cmp, labels_to_cmp, file_path, only_show_85th=False):
+        print "compareSpeeds called with identifer = {},\n identifiers_to_cmp = {},\n, labels_to_cmp = {},\n only_show_85th = {}"\
+                .format(identifier, identifiers_to_cmp, labels_to_cmp, only_show_85th)
+
+        payload = {
+            'identifier': identifier,
+            'identifiers_to_cmp': identifiers_to_cmp,
+            'labels_to_cmp': labels_to_cmp,
+            'only_show_85th': only_show_85th
+        }
+
+        try:
+            r = requests.get(self.server_addr + 'compareSpeeds', params = payload, stream=True)
+        except requests.exceptions.ConnectionError as e:
+            return self.connectionError()
+
+        success, err, data = self.parse_error(r)
+        imgname = 'compare85th.jpg' if only_show_85th else 'comparePercentiles.jpg'
+        if success:
+            self.writeToPath(r, file_path, imgname)
 
         return (success, err, data)
 
