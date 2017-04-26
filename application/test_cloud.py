@@ -118,7 +118,7 @@ if __name__ == '__main__':
     ###########################################################################
     # Run Report/Aggregate Results Routes
     ###########################################################################
-    remote.makeReport(identifier)
+    remote.makeReport(identifier, project_path)
     raw_input('Generating Report, please wait...\n Press Enter to Continue')
 
     remote.retrieveResults(identifier, PROJECT_PATH)
