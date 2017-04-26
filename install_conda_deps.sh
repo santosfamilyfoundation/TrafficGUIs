@@ -1,4 +1,10 @@
 
+if [ -z "$1" ]
+  then
+    echo "Please specify the name of the environment to create"
+    exit 1
+fi
+
 YOURENVNAME=$1
 
 conda remove -y --all -n $YOURENVNAME
