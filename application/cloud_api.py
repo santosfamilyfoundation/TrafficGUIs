@@ -523,8 +523,7 @@ class CloudWizard:
         try:
             r = requests.get(self.server_addr + 'speedDistribution', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return
+            return self.connectionError()
 
         success, err, data = self.parse_error(r)
         if success:
@@ -569,31 +568,16 @@ class CloudWizard:
         try:
             r = requests.get(self.server_addr + 'compareSpeeds', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
-            print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return self.connectionError()
 
-        success, err = self.parse_error(r)
-        if not success:
-            return (success, err)
+        success, err, data = self.parse_error(r)
+        if success:
+            if only_show_85th:
+                self.writeToPath(r, file_path, 'compare85th.jpg')
+            else:
+                self.writeToPath(r, file_path, 'comparePercentiles.jpg')
 
-        if only_show_85th: 
-            path = os.path.join(file_path, 'compare85th_{}.jpg'.format('_'.join(labels_to_cmp)))
-        else:
-            path = os.path.join(file_path, 'comparePercentiles_{}.jpg'.format('_'.join(labels_to_cmp)))
-        if os.path.exists(path):
-            os.remove(path)
-
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
-
-        with open(path, 'wb') as f:
-            print('Dumping "{0}"...'.format(path))
-            for chunk in r.iter_content(chunk_size=2048):
-                if chunk:
-                    f.write(chunk)
-
-        print "Status Code: {}".format(r.status_code)
-        return (True, None)
+        return (success, err, data)
 
 
 # Define singleton to be used everywhere
