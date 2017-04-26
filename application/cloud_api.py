@@ -7,7 +7,7 @@ from app_config import get_project_path
 from threading import Timer
 import numpy as np
 
-from multiprocessing import Process, Queue
+from multiprocess import Process, Queue
 from Queue import Empty as EmptyQueue
 import time, signal
 
