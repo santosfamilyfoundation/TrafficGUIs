@@ -1,16 +1,15 @@
 ###This will hold all api calls for TrafficCloud
 import os
-import pickle
-import uuid
 import requests
 from requests_toolbelt import MultipartEncoder
 from app_config import AppConfig as ac
 from app_config import get_project_path
-import json
 from threading import Timer
 import numpy as np
 
-from pprint import pprint
+from multiprocessing import Process, Queue
+from Queue import Empty as EmptyQueue
+import time, signal
 
 class CloudWizard:
     def __init__(self, ip_addr, port=8888):
@@ -34,16 +33,16 @@ class CloudWizard:
     def parse_error(self, r):
         content_type = r.headers['content-type']
         if 'application/json' not in content_type:
-            return (True, None)
+            return (True, None, None)
         try:
             data = r.json()
         except ValueError:
             # If no JSON, also no error message
-            return (True, None)
-        if 'error_message' in data:
-            return (False, data['error_message'])
+            return (True, None, None)
+        if 'error' in data:
+            return (False, data['error']['error_message'], data)
         else:
-            return (True, None)
+            return (True, None, data)
 
 ###############################################################################
 # Upload Functions
@@ -51,9 +50,8 @@ class CloudWizard:
 
     def uploadVideo(self, video_path):
         '''
-
+            If success returns as false, the data field will contain the raw dictionary response from the server or None
         '''
-        print "uploadVideo called"
         with open(video_path, 'rb') as video:
             # We set the content-disposition 'filename' parameter manually
             # incase we need to do streaming
@@ -79,15 +77,11 @@ class CloudWizard:
                 print('Connection is offline')
                 return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
-        print "Response JSON: {}".format(r.json())
+        success, err, data = self.parse_error(r)
+        if success:
+            data = data['identifier']
 
-        success, err = self.parse_error(r)
-        if not success:
-            return (success, err, None)
-
-        return (True, None, r.json()['identifier'])
+        return (success, err, data)
 
     def uploadMask(self, identifier, mask_path):
         print "uploadMask called"
@@ -97,15 +91,14 @@ class CloudWizard:
             payload = {'identifier': identifier}
 
             try:
-                r = requests.post(self.server_addr + 'mask', data = payload, files = files)
+                r = requests.post(self.server_addr + 'mask', json = payload, files = files)
             except requests.exceptions.ConnectionError as e:
                 print('Connection is offline')
-                return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+                return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-            print "Status Code: {}".format(r.status_code)
             return self.parse_error(r)
 
-        return (False, "Couldn't open mask file")
+        return (False, "Couldn't open mask file", None)
 
 ###############################################################################
 # Configuration Functions
@@ -119,19 +112,17 @@ class CloudWizard:
         payload = {
             'identifier': identifier,
             'unit_pixel_ratio': up_ratio,
-            'aerial_pts': json.dumps(aerial_pts),
-            'camera_pts': json.dumps(camera_pts)
+            'aerial_pts': aerial_pts,
+            'camera_pts': camera_pts
         }
 
         try:
             r = requests.post(\
-                self.server_addr + 'homography', data = payload)
+                self.server_addr + 'homography', json = payload)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
         return self.parse_error(r)
 
     def getHomography(self, identifier, file_path = None):
@@ -144,18 +135,16 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        print "Response JSON: {}".format(r.json())
-        print "Status Code: {}".format(r.status_code)
-
-        success, err = self.parse_error(r)
+        success, err, data = self.parse_error(r)
         if not success:
-            return (success, err, None)
+            return (success, err, data)
 
-        homography = r.json()['homography']
+        homography = data['homography']
         if file_path:
             path = os.path.join(file_path, 'homography.txt')
             np.savetxt(path, np.array(homography))
-        return (True, None, homography)
+
+        return (success, err, homography)
 
     def configFiles(self, identifier,
                     max_features_per_frame = None,\
@@ -165,9 +154,6 @@ class CloudWizard:
                     min_feature_frames = None,\
                     max_connection_distance = None,\
                     max_segmentation_distance = None):
-
-        print "configFiles called with identifier = {}"\
-                .format(identifier)
 
         payload = {
             'identifier': identifier,
@@ -179,33 +165,30 @@ class CloudWizard:
             'max_connection_distance': max_connection_distance,
             'max_segmentation_distance': max_segmentation_distance
         }
-        print "config_data is as follows:"
-        pprint(payload)
 
         try:
-            r = requests.post(self.server_addr + 'config', data = payload)
+            r = requests.post(self.server_addr + 'config', json = payload)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
         return self.parse_error(r)
 
     def testConfig(self, identifier, test_flag,
                    frame_start = None,\
                    num_frames = None):
-        print "testConfig called with identifier = {},\
-                test_flag = {}, frame_start = {}, and num_frames = {}"\
-                .format(identifier,test_flag,frame_start,num_frames)
+
+        if not (test_flag == 'feature' or test_flag == 'object'):
+            print "ERROR: Invalid flag"
+            return (False, 'Invalid test flag: '+str(test_flag))
 
         success, error_message, status_dict = self.getProjectStatus(identifier)
         if not success:
-            return (success, error_message)
+            return (success, error_message, status_dict)
 
         if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return (False, 'Upload homography before testing configuration')
+            return (False, 'Upload homography before testing configuration', None)
 
         payload = {
             'test_flag': test_flag,
@@ -215,17 +198,14 @@ class CloudWizard:
         }
 
         try:
-            r = requests.post(self.server_addr + 'testConfig', data = payload)
+            r = requests.post(self.server_addr + 'testConfig', json = payload)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
         return self.parse_error(r)
 
     def getTestConfig(self, identifier, test_flag, file_path):
-        print "getTestConfig called with identifier = {} and test_flag = {}".format(identifier,test_flag)
 
         payload = {
             'test_flag': test_flag,
@@ -233,34 +213,24 @@ class CloudWizard:
         }
 
         if test_flag == 'feature':
-            path = os.path.join(file_path, 'feature_video.mp4')
+            file_name = 'feature_video.mp4'
         elif test_flag == 'object':
-            path = os.path.join(file_path, 'object_video.mp4')
+            file_name = 'object_video.mp4'
         else:
             print "ERROR: Invalid flag"
-            return (False, 'Invalid test flag: '+str(test_flag))
+            return (False, 'Invalid test flag: '+str(test_flag), None)
 
         try:
             r = requests.get(self.server_addr + 'testConfig', params = payload, stream=True)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        success, err = self.parse_error(r)
-        if not success:
-            return (success, err)
+        success, err, data = self.parse_error(r)
+        if success:
+            self.writeToPath(r, file_path,file_name)
 
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
-
-        with open(path, 'wb') as f:
-            print('Dumping "{0}"...'.format(path))
-            for chunk in r.iter_content(chunk_size=2048):
-                if chunk:
-                    f.write(chunk)
-
-        print "Status Code: {}".format(r.status_code)
-        return (True, None)
+        return (success, err, data)
 
     def defaultConfig(self):
         try:
@@ -269,26 +239,21 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        success, err = self.parse_error(r)
-        if not success:
-            return (success, err, None)
-
-        return (True, None, r.json())
+        return self.parse_error(r)
 
 ###############################################################################
 # Analysis Functions
 ###############################################################################
 
     def analysis(self, identifier, email=None):
-        print "analysis called with identifier = {} and email = {}".format(identifier, email)
 
         success, error_message, status_dict = self.getProjectStatus(identifier)
         if not success:
-            return (success, error_message)
+            return (success, error_message, status_dict)
 
         if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return (False, 'Upload homography before running analysis.')
+            return (False, 'Upload homography before running analysis.', None)
 
         payload = {
             'identifier': identifier,
@@ -296,25 +261,22 @@ class CloudWizard:
         }
 
         try:
-            r = requests.post(self.server_addr + 'analysis', data = payload)
+            r = requests.post(self.server_addr + 'analysis', json = payload)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
         return self.parse_error(r)
 
     def objectTracking(self, identifier, email=None):
-        print "objectTracking called with identifier = {} and email = {}".format(identifier, email)
 
         success, error_message, status_dict = self.getProjectStatus(identifier)
         if not success:
-            return (success, error_message)
+            return (success, error_message, status_dict)
 
         if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
-            return (False, 'Upload homography before running object tracking.')
+            return (False, 'Upload homography before running object tracking.', None)
 
         payload = {
             'identifier': identifier,
@@ -322,21 +284,18 @@ class CloudWizard:
         }
 
         try:
-            r = requests.post(self.server_addr + 'objectTracking', data = payload)
+            r = requests.post(self.server_addr + 'objectTracking', json = payload)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
         return self.parse_error(r)
 
     def safetyAnalysis(self, identifier, email=None):
-        print "safetyAnalysis called with identifier = {} and email = {}".format(identifier, email)
 
         success, error_message, status_dict = self.getProjectStatus(identifier)
         if not success:
-            return (success, error_message)
+            return (success, error_message, status_dict)
 
         if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
@@ -351,13 +310,11 @@ class CloudWizard:
         }
 
         try:
-            r = requests.post(self.server_addr + 'safetyAnalysis', data = payload)
+            r = requests.post(self.server_addr + 'safetyAnalysis', json = payload)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
         return self.parse_error(r)
 
 ###############################################################################
@@ -376,21 +333,19 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        success, err = self.parse_error(r)
+        success, err, data = self.parse_error(r)
         if not success:
-            return (success, err, None)
+            return (success, err, data)
 
-        d = r.json()
         status_dict = {}
-        for (k,v) in d.iteritems():
+        for (k,v) in data.iteritems():
             status_dict[k] = {}
             for (key, val) in v.iteritems():
                 if key == 'status':
                     status_dict[k][key] = int(val)
                 else:
                     status_dict[k][key] = val
-        print "Status Code: {}".format(r.status_code)
-        print "Response Text: {}".format(r.text)
+
         return (True, None, status_dict)
 
 ###############################################################################
@@ -402,41 +357,38 @@ class CloudWizard:
                 .format(identifier, ttc_threshold)
 
         # sync calls
-        s, err = self.roadUserCounts(identifier,\
+        s, err, data = self.roadUserCounts(identifier,\
                     file_path)
         if not s:
-            return (s, err)
+            return (s, err, data)
 
-        s, err = self.speedDistribution(identifier,\
+        s, err, data= self.speedDistribution(identifier,\
                     file_path)
         if not s:
-            return (s, err)
+            return (s, err, data)
 
-        s, err = self.turningCounts(identifier,\
+        s, err, data = self.turningCounts(identifier,\
                     file_path)
         if not s:
-            return (s, err)
+            return (s, err, data)
 
-        s, err = self.makeReport(identifier,\
+        s, err, data = self.makeReport(identifier,\
                     file_path)
         if not s:
-            return (s, err)
+            return (s, err, data)
 
         # async calls
-        s, err = self.highlightVideo(identifier,\
+        s, err, data = self.highlightVideo(identifier,\
                     ttc_threshold)
         if not s:
-            return (s, err)
+            return (s, err, data)
 
-        return (True, None)
+        return (True, None, None)
 
     def highlightVideo(self, identifier, ttc_threshold = None):
-        print "highlightVideo called with identifier = {}, ttc_threshold = {}"\
-                .format(identifier, ttc_threshold)
-
         success, error_message, status_dict = self.getProjectStatus(identifier)
         if not success:
-            return (success, error_message)
+            return (success, error_message, status_dict)
 
         if status_dict["homography"]['status'] != 2:
             print "Check your homography and upload (again)."
@@ -454,17 +406,29 @@ class CloudWizard:
         }
 
         try:
-            r = requests.post(self.server_addr + 'highlightVideo', data = payload, stream = True)
+            r = requests.post(self.server_addr + 'highlightVideo', json = payload, stream = True)
         except requests.exceptions.ConnectionError as e:
             print('Connection is offline')
-            return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
+            return (False, 'Connection to server "{}" is offline'.format(self.server_addr), None)
 
-        print "Response Text: {}".format(r.text)
-        print "Status Code: {}".format(r.status_code)
         return self.parse_error(r)
 
+    def writeToPath(self,request, file_path,file_name):
+        path = os.path.join(file_path, file_name)
+        if os.path.exists(path):
+            os.remove(path)
+
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
+        with open(path, 'wb') as f:
+            print('Dumping "{0}"...'.format(path))
+            for chunk in request.iter_content(chunk_size=2048):
+                if chunk:
+                    f.write(chunk)
+
+
     def getHighlightVideo(self, identifier, file_path):
-        print "getHighlightVideo called with identifier = {}".format(identifier)
 
         payload = {
             'identifier': identifier
@@ -476,27 +440,13 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
-        success, err = self.parse_error(r)
-        if not success:
-            return (success, err)
+        success, err, data = self.parse_error(r)
+        if success:
+            self.writeToPath(r, file_path, 'highlight.mp4')
 
-        path = os.path.join(file_path, 'highlight.mp4')
-        if os.path.exists(path):
-            os.remove(path)
-
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
-
-        with open(path, 'wb') as f:
-            print('Dumping "{0}"...'.format(path))
-            for chunk in r.iter_content(chunk_size=2048):
-                if chunk:
-                    f.write(chunk)
-
-        return (True, None)
+        return (success, err, data)
 
     def makeReport(self, identifier, file_path):
-        print "makeReport called with identifier = {}".format(identifier)
 
         payload = {
             'identifier': identifier,
@@ -508,28 +458,13 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
-        success, err = self.parse_error(r)
-        if not success:
-            return (success, err)
+        success, err, data = self.parse_error(r)
+        if success:
+            self.writeToPath(r, file_path, 'santosreport.pdf')
 
-        path = os.path.join(file_path, 'santosreport.pdf')
-        if os.path.exists(path):
-            os.remove(path)
-
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
-
-        with open(path, 'wb') as f:
-            print('Dumping "{0}"...'.format(path))
-            for chunk in r.iter_content(chunk_size=2048):
-                if chunk:
-                    f.write(chunk)
-
-        print "Status Code: {}".format(r.status_code)
-        return (True, None)
+        return (success, err, data)
 
     def retrieveResults(self, identifier, file_path):
-        print "retrieveResults called with identifier = {}".format(identifier)
 
         payload = {
             'identifier': identifier,
@@ -541,28 +476,13 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
-        success, err = self.parse_error(r)
-        if not success:
-            return (success, err)
+        success, err, data = self.parse_error(r)
+        if success:
+            self.writeToPath(r, file_path, 'results.zip')
 
-        path = os.path.join(file_path, 'results.zip')
-        if os.path.exists(path):
-            os.remove(path)
-
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
-
-        with open(path, 'wb') as f:
-            print('Dumping "{0}"...'.format(path))
-            for chunk in r.iter_content(chunk_size=2048):
-                if chunk:
-                    f.write(chunk)
-
-        print "Status Code: {}".format(r.status_code)
-        return (True, None)
+        return (success, err, data)
 
     def roadUserCounts(self, identifier, file_path):
-        print "roadUserCounts called with identifier = {}".format(identifier)
 
         payload = {
             'identifier': identifier,
@@ -574,29 +494,13 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
-        success, err = self.parse_error(r)
-        if not success:
-            return (success, err)
+        success, err, data = self.parse_error(r)
+        if success:
+            self.writeToPath(r, file_path, 'road_user_icon_counts.jpg')
 
-        path = os.path.join(file_path, 'road_user_icon_counts.jpg')
-        if os.path.exists(path):
-            os.remove(path)
-
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
-
-        with open(path, 'wb') as f:
-            print('Dumping "{0}"...'.format(path))
-            for chunk in r.iter_content(chunk_size=2048):
-                if chunk:
-                    f.write(chunk)
-
-        print "Status Code: {}".format(r.status_code)
-        return (True, None)
+        return (success, err, data)
 
     def speedDistribution(self, identifier, file_path):
-        print "speedDistribution called with identifier = {} "\
-                .format(identifier)
 
         payload = {
             'identifier': identifier
@@ -608,25 +512,11 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
-        success, err = self.parse_error(r)
-        if not success:
-            return (success, err)
+        success, err, data = self.parse_error(r)
+        if success:
+            self.writeToPath(r, file_path, 'velocityPDF.jpg')
 
-        path = os.path.join(file_path, 'velocityPDF.jpg')
-        if os.path.exists(path):
-            os.remove(path)
-
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
-
-        with open(path, 'wb') as f:
-            print('Dumping "{0}"...'.format(path))
-            for chunk in r.iter_content(chunk_size=2048):
-                if chunk:
-                    f.write(chunk)
-
-        print "Status Code: {}".format(r.status_code)
-        return (True, None)
+        return (success, err, data)
 
     def turningCounts(self, identifier, file_path):
         print "turningCounts called with identifier = {}"\
@@ -642,25 +532,11 @@ class CloudWizard:
             print('Connection is offline')
             return (False, 'Connection to server "{}" is offline'.format(self.server_addr))
 
-        success, err = self.parse_error(r)
-        if not success:
-            return (success, err)
+        success, err, data = self.parse_error(r)
+        if success:
+            self.writeToPath(r, file_path, 'turningCounts.jpg')
 
-        path = os.path.join(file_path, 'turningCounts.jpg')
-        if os.path.exists(path):
-            os.remove(path)
-
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
-
-        with open(path, 'wb') as f:
-            print('Dumping "{0}"...'.format(path))
-            for chunk in r.iter_content(chunk_size=2048):
-                if chunk:
-                    f.write(chunk)
-
-        print "Status Code: {}".format(r.status_code)
-        return (True, None)
+        return (success, err, data)
 
 ###############################################################################
 # Helper Methods
@@ -756,3 +632,127 @@ class StatusPoller(object):
         self._timer.cancel()
         self.is_running = False
 
+###############################################################################
+# Run Function on Process with Callback
+###############################################################################
+
+class CallbackProcess(object):
+    def __init__(self, group=None, target=None, name=None, args=(), kwargs={},\
+                        callback=None, callback_args=(), callback_kwargs={},\
+                        interval=1, timeout=0):
+
+        self._q = Queue()
+
+        self._args = tuple(args)
+        self._kwargs = dict(kwargs)
+        self._method = self._wrap(target, self._q)
+        self._p = Process(target=self._method, group=group, name=name, args=self._args, kwargs=self._kwargs)
+
+        self._callback = callback
+        self._callback_args = callback_args
+        self._callback_kwargs = callback_kwargs
+
+        self._interval = interval
+        self._timeout = timeout
+        self._start_time = 0
+        self._count = 0
+
+        self._done = False
+        self.results = []
+
+    def start(self):
+        self._p.start()
+        self._start_time=time.time()
+        Timer(self._interval,self._check_queue).start()
+
+    # Override to determine what to do when something is grabbed from the queue
+    # By default this adds the first value returned from the target function to the results list
+    # and sets the internal boolean to be done.
+    def on_success(self, data):
+        self._done = True
+        self.results.append(data)
+
+    # Override to determine when the state in which the callback should be called and the process ended
+    # By default this uses a simple internal boolean that is set in the default on_success function.
+    def is_done(self):
+        return self._done
+
+    # Override to determine what you want the function to do when it finishes
+    # By default this calls the provided callback function
+    def finish(self):
+        if self._callback:
+            self._callback(*self._callback_args,**self._callback_kwargs)
+
+    def _wrap(self, func, queue):
+        def _function(*args, **kwargs):
+            ret = func(*args, **kwargs)
+            queue.put(ret)
+        return _function
+
+    def _check_queue(self):
+        delay = max(self._start_time + (self._count+2)*self._interval - time.time(),0)
+        try:
+            return_val = self._q.get_nowait()
+            self.on_success(data=return_val)
+        except EmptyQueue:
+            pass
+        finally:
+            if not self.is_done() and (self._timeout==0 or self._count<self._timeout):
+                self._count+=1
+                Timer(delay, self._check_queue).start()
+            else:
+                self._end_process()
+                self._q.close()
+                self.finish()
+
+    def _end_process(self):
+        if self._p.is_alive():
+            if self._count>=self._timeout:
+                print "Timeout Warning: Process terminating, returned data could be corrupted."
+            else:
+                print "Warning: Process terminating but was still alive and timeout was not reached, returned data could be corrupted."
+            self._p.terminate()
+        elif self._p.exitcode == signal.SIGTERM:
+            print "Warning: Process was terminated (SIGTERM)"
+        elif self._p.exitcode == signal.SIGSEGV:
+            print "Warning: Process was terminated (SIGSEGV)"
+        elif self._p.exitcode == 0:
+            print "Process Exited Cleanly"
+
+class SingleAPICallbackProcess(CallbackProcess):
+    def __init__(self, group=None, target=None, name=None, args=(), kwargs={},
+                        callback=None, callback_args=(), callback_kwargs={},
+                        return_data=False, return_error=False, interval=1, timeout=0):
+
+        super(SingleAPICallbackProcess, self).__init__(
+                        group=group, target=target, name=name, args=args, kwargs=kwargs,
+                        callback=callback, callback_args=callback_args, callback_kwargs=callback_kwargs,
+                        interval=interval, timeout=timeout)
+
+        self._return_data = return_data
+        self._return_error = return_error
+
+    def finish(self):
+        if self._callback:
+            if self._return_data:
+                try:
+                    self._callback(queue=self.results, *self._callback_args, **self._callback_kwargs)
+                except TypeError:
+                    print "Callback function does not have queue argument. This is required to return data"
+            elif self._return_error:
+                try:
+                    self._callback(error_message=self._get_single_error(), *self._callback_args, **self._callback_kwargs)
+                except TypeError:
+                    print "Callback function does not have error_message argument. This is required to return the first error message"
+            else:
+                try:
+                    self._callback(*self._callback_args,**self._callback_kwargs)
+                except Exception as e:
+                    print str(e)
+
+    def _get_single_error(self, index=0):
+        if index>=0 and index<len(self.results):
+            ret = self.results[index]
+            if not ret==None:
+                return ret[1]
+        return None

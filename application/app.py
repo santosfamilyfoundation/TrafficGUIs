@@ -25,6 +25,7 @@ import pm
 import message_helper
 import project_selector
 from cloud_api import api
+from cloud_api import SingleAPICallbackProcess
 from cloud_api import StatusPoller
 from video import save_video_frame
 from utils.path_replacer import replace_path_delimiters
@@ -33,7 +34,11 @@ from utils.image_draw import draw_circle, draw_text
 
 class MainGUI(QtWidgets.QMainWindow):
     test_feature_callback_signal = QtCore.pyqtSignal()
+    get_feature_video_callback_signal = QtCore.pyqtSignal()
+
     test_object_callback_signal = QtCore.pyqtSignal()
+    get_object_video_callback_signal = QtCore.pyqtSignal()
+
     analysis_callback_signal = QtCore.pyqtSignal()
     results_callback_signal = QtCore.pyqtSignal()
     error_signal = QtCore.pyqtSignal(str)
@@ -64,7 +69,11 @@ class MainGUI(QtWidgets.QMainWindow):
 
         # Connect callback signals
         self.test_feature_callback_signal.connect(self.get_feature_video)
+        self.get_feature_video_callback_signal.connect(self.open_feature_video)
+
         self.test_object_callback_signal.connect(self.get_object_video)
+        self.get_object_video_callback_signal.connect(self.open_object_video)
+
         self.analysis_callback_signal.connect(self.runResults)
         self.results_callback_signal.connect(self.retrieveResults)
         self.error_signal.connect(self.show_error)
@@ -151,7 +160,7 @@ class MainGUI(QtWidgets.QMainWindow):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
         num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
 
-        success, error_message = api.testConfig(get_identifier(),\
+        success, error_message, _ = api.testConfig(get_identifier(),\
                             'feature',\
                             frame_start = frame_start,\
                             num_frames = num_frames)
@@ -169,6 +178,21 @@ class MainGUI(QtWidgets.QMainWindow):
         else:
             self.error_signal.emit(error_message)
 
+    def get_feature_video(self):
+        SingleAPICallbackProcess(
+            target = api.getTestConfig,
+            args = (get_identifier(), 'feature', os.path.join(get_project_path(), 'feature_video')),
+            callback = self.get_feature_video_callback,
+            return_error=True,
+        ).start()
+
+    def get_feature_video_callback(self,error_message):
+        # Emitting the signal will call open_feature_video on the main thread
+        if error_message is None:
+            self.get_feature_video_callback_signal.emit()
+        else:
+            self.error_signal.emit(error_message)
+
     def open_feature_video(self):
         project_path = get_project_path()
         if project_path != '':
@@ -176,17 +200,10 @@ class MainGUI(QtWidgets.QMainWindow):
             if os.path.exists(video_path):
                 self.feature_tracking_video_player.openFile(video_path)
 
-    def get_feature_video(self):
-        success, err = api.getTestConfig(get_identifier(), 'feature', os.path.join(get_project_path(), 'feature_video'))
-        if success:
-            self.open_feature_video()
-        else:
-            self.show_error(err)
-
     def test_object(self):
         frame_start = get_config_with_sections(get_config_path(), "config", "frame_start")
         num_frames = get_config_with_sections(get_config_path(), "config", "num_frames")
-        success, err = api.testConfig(get_identifier(),\
+        success, err, _ = api.testConfig(get_identifier(),\
                             'object',\
                             frame_start = frame_start,\
                             num_frames = num_frames)
@@ -205,6 +222,21 @@ class MainGUI(QtWidgets.QMainWindow):
         else:
             self.error_signal.emit(error_message)
 
+    def get_object_video(self):
+        SingleAPICallbackProcess(
+            target = api.getTestConfig,
+            args = (get_identifier(), 'object', os.path.join(get_project_path(), 'object_video')),
+            callback = self.get_object_video_callback,
+            return_error=True,
+        ).start()
+
+    def get_object_video_callback(self,error_message):
+        # Emitting the signal will call open_feature_video on the main thread
+        if error_message is None:
+            self.get_object_video_callback_signal.emit()
+        else:
+            self.error_signal.emit(error_message)
+
     def open_object_video(self):
         project_path = get_project_path()
         if project_path != '':
@@ -212,12 +244,7 @@ class MainGUI(QtWidgets.QMainWindow):
             if os.path.exists(video_path):
                 self.roadusers_tracking_video_player.openFile(video_path)
 
-    def get_object_video(self):
-        success, err = api.getTestConfig(get_identifier(), 'object', os.path.join(get_project_path(), 'object_video'))
-        if success:
-            self.open_object_video()
-        else:
-            self.show_error(err)
+######################################################################################################
 
     # for the runAnalysis button
     def runAnalysis(self):
@@ -225,7 +252,7 @@ class MainGUI(QtWidgets.QMainWindow):
         Runs TrafficIntelligence trackers and support scripts.
         """
         email = get_config_with_sections(get_config_path(), 'info', 'email')
-        success, err = api.analysis(get_identifier(), email=email)
+        success, err, _ = api.analysis(get_identifier(), email=email)
 
         if success:
             StatusPoller(get_identifier(), 'safety_analysis', 15, self.analysisCallback).start()
@@ -245,7 +272,7 @@ class MainGUI(QtWidgets.QMainWindow):
         identifier = get_identifier()
         results_dir = os.path.join(get_project_path(), 'results')
         ttc_threshold = self.ui.timeToCollisionLineEdit.text()
-        success, err = api.results(identifier, results_dir, ttc_threshold)
+        success, err, _ = api.results(identifier, results_dir, ttc_threshold)
 
         if success:
             StatusPoller(identifier, 'highlight_video', 15, self.resultsCallback).start()
@@ -262,7 +289,7 @@ class MainGUI(QtWidgets.QMainWindow):
 
     def retrieveResults(self):
         results_dir = os.path.join(get_project_path(), 'results')
-        success, err = api.retrieveResults(get_identifier(), results_dir)
+        success, err, _ = api.retrieveResults(get_identifier(), results_dir)
 
         if not success:
             self.show_error(err)
@@ -394,7 +421,7 @@ class MainGUI(QtWidgets.QMainWindow):
         homography_path = os.path.join(get_project_path(), "homography")
 
         # Finally, upload to server
-        success, err = api.configHomography(\
+        success, err, _ = api.configHomography(\
             get_identifier(),\
             self.unitPixRatio,\
             self.ui.homography_aerialview.list_points(),\
@@ -510,6 +537,7 @@ class configGui_features(configGuiWidget):
         """ parent is an instance of MainGUI """
         super(configGui_features, self).__init__(parent)
         self.initUI()
+        self.parent = parent
 
     def initUI(self):
 
@@ -618,7 +646,7 @@ class configGui_features(configGuiWidget):
         else: min_feature_frames = None
 
 
-        success, err = api.configFiles(get_identifier(),\
+        success, err, _ = api.configFiles(get_identifier(),\
                      max_features_per_frame = max_features_per_frame,\
                      num_displacement_frames = num_displacement_frames,\
                      min_feature_displacement = min_feature_displacement,\
@@ -626,7 +654,7 @@ class configGui_features(configGuiWidget):
                      min_feature_frames = min_feature_frames)
 
         if not success:
-            self.show_error(err)
+            self.parent.show_error(err)
 
     def loadConfig_features(self):
         config_path = get_config_path()
@@ -720,12 +748,12 @@ class configGui_object(configGuiWidget):
             update_config_with_sections(config_path, "config", "max_segmentation_distance", max_segmentation_distance)
         else: max_segmentation_distance = None
 
-        success, err = api.configFiles(get_identifier(),\
+        success, err, _ = api.configFiles(get_identifier(),\
                      max_connection_distance = max_connection_distance,\
                      max_segmentation_distance = max_segmentation_distance)
 
         if not success:
-            self.show_error(err)
+            self.parent.show_error(err)
 
     def loadConfig_objects(self):
         config_path = get_config_path()

@@ -2,7 +2,7 @@ import cloud_api as api
 
 TEST_IP = 'localhost'
 VIDEO_PATH = 'path/to/video'
-project_path = 'path/to/local/project/'
+PROJECT_PATH = 'path/to/local/project/'
 UNIT_PIXEL_RATIO = 0.05
 
 #TODO: Remove raw_input hotfix in favor of checking function call
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     ###########################################################################
     identifier = None # set if you have already uploaded video
     if identifier is None:
-        identifier = remote.uploadVideo(VIDEO_PATH)
+        _, _, identifier = remote.uploadVideo(VIDEO_PATH)
         raw_input('Uploading Video, please wait...\n Press Enter to Continue')
 
     ###########################################################################
@@ -98,10 +98,10 @@ if __name__ == '__main__':
     remote.highlightVideo(identifier)
     raw_input('Generating Highlight Video, please wait...\n Press Enter to Continue')
 
-    remote.roadUserCounts(identifier, project_path)
+    remote.roadUserCounts(identifier, PROJECT_PATH)
     raw_input('Generating User Counts, please wait...\n Press Enter to Continue')
 
-    remote.speedDistribution(identifier, project_path)
+    remote.speedDistribution(identifier, PROJECT_PATH)
     raw_input('Generating Speed Distribution, please wait...\n Press Enter to Continue')
 
     remote.turningCounts(identifier, project_path)
@@ -110,5 +110,5 @@ if __name__ == '__main__':
     remote.makeReport(identifier)
     raw_input('Generating Report, please wait...\n Press Enter to Continue')
 
-    remote.retrieveResults(identifier, project_path)
+    remote.retrieveResults(identifier, PROJECT_PATH)
     raw_input('Retrieving Results, please wait...\n Press Enter to Continue')

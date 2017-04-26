@@ -164,7 +164,7 @@ class VideoPlayer(QWidget):
 
     def positionChanged(self, position):
         self.positionSlider.setValue(position)
-        print self.positionSlider.value()
+        #print self.positionSlider.value()
 
         # if position slider has reached the end, let's stop the video
         if self.positionSlider.value() >= self.positionSlider.maximum() - 1:
