@@ -571,11 +571,9 @@ class CloudWizard:
             return self.connectionError()
 
         success, err, data = self.parse_error(r)
+        imgname = 'compare85th.jpg' if only_show_85th else 'comparePercentiles.jpg'
         if success:
-            if only_show_85th:
-                self.writeToPath(r, file_path, 'compare85th.jpg')
-            else:
-                self.writeToPath(r, file_path, 'comparePercentiles.jpg')
+            self.writeToPath(r, file_path, imgname)
 
         return (success, err, data)
 

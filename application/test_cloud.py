@@ -111,9 +111,10 @@ if __name__ == '__main__':
     # Run Compare Routes
     ###########################################################################
     identifier2 = None # input an identifier to compare current project to 
-    remote.compareSpeeds(identifier, [identifier, identifier2], ['label1', 'label2'], project_path, False)
-    remote.compareSpeeds(identifier, [identifier, identifier2], ['label1', 'label2'], project_path, True)
-    raw_input('Generating Speed Comparison, please wait...\n Press Enter to Continue')
+    if identifier2:
+        remote.compareSpeeds(identifier, [identifier, identifier2], ['label1', 'label2'], project_path, False)
+        remote.compareSpeeds(identifier, [identifier, identifier2], ['label1', 'label2'], project_path, True)
+        raw_input('Generating Speed Comparison, please wait...\n Press Enter to Continue')
 
     ###########################################################################
     # Run Report/Aggregate Results Routes
