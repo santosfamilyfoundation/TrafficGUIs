@@ -21,14 +21,26 @@ class CloudWizard:
             protocol = 'http://'
 
         (addr, p) = self.ip_and_port_from_url_string(ip_addr)
-        if addr == 'localhost':
+        if addr.lower() == 'localhost':
             addr = '127.0.0.1'
-
-        # Use port specified by string, otherwise fall back to default port
-        if p == None:
+        # Use port specified by string, otherwise fall back to default port and ignore port on server target
+        if p == None: 
             p = port
 
-        self.server_addr = protocol + addr + ':{}/'.format(port)
+        if addr.lower() == "server.santostraffic.com":
+            port = None
+            targ = protocol + addr
+        else:
+            targ = protocol + addr + ':{}/'.format(port)
+         
+        try:    
+            r = requests.get(targ)
+            if targ != r.url:
+                targ = str(r.url)
+        except Exception as e:
+            print e
+            print "Could not resolve address!"
+        self.server_addr = targ
 
     def parse_error(self, r):
         content_type = r.headers['content-type']
