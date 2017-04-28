@@ -89,14 +89,14 @@ class VideoPlayer(QWidget):
         self.positionSlider = QSlider(Qt.Horizontal)
         self.positionSlider.setRange(0, 0)
         self.positionSlider.sliderMoved.connect(self.setPosition)
-        
+
         if self.display_status:
             self.status_mapping = {
                 QMediaPlayer.UnknownMediaStatus: "UnknownMediaStatus",
                 QMediaPlayer.NoMedia: "NoMedia",
                 QMediaPlayer.LoadingMedia: "LoadingMedia",
                 QMediaPlayer.LoadedMedia: "LoadedMedia",
-                QMediaPlayer.StalledMedia: "StalledMedia", 
+                QMediaPlayer.StalledMedia: "StalledMedia",
                 QMediaPlayer.BufferingMedia: "BufferingMedia",
                 QMediaPlayer.BufferedMedia: "BufferedMedia",
                 QMediaPlayer.EndOfMedia: "EndOfMedia",
@@ -144,6 +144,9 @@ class VideoPlayer(QWidget):
             # trick to show screenshot of the first frame of video
             self.mediaPlayer.play()
             self.mediaPlayer.pause()
+
+    def closeFile(self):
+        self.mediaPlayer.setMedia(QMediaContent())
 
     def play(self):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:

@@ -52,7 +52,10 @@ class CloudWizard:
             # If no JSON, also no error message
             return (True, None, None)
         if 'error' in data:
-            return (False, data['error']['error_message'], data)
+            if 'error_message' in data['error']:
+                return (False, data['error']['error_message'], data)
+            else:
+                return (False, 'An error occurred', data)
         else:
             return (True, None, data)
 
@@ -713,6 +716,16 @@ class CallbackProcess(object):
         def _function(*args, **kwargs):
             ret = func(*args, **kwargs)
             queue.put(ret)
+            #
+            # This prevents the race condition detailed here:
+            #    1. After putting an object on an empty queue there may be an infinitesimal
+            #        delay before the queue’s empty() method returns False and get_nowait()
+            #        can return without raising Queue.Empty. 
+            # See: https://docs.python.org/2/library/multiprocessing.html#pipes-and-queues
+            #
+            # Instead we sleep for 100ms and then terminate the process. This allows us to
+            # get all data returned from the queue before we terminate.
+            time.sleep(0.1)
         return _function
 
     def _check_queue(self):
@@ -723,7 +736,7 @@ class CallbackProcess(object):
         except EmptyQueue:
             pass
         finally:
-            if not self.is_done() and (self._timeout==0 or self._count<self._timeout):
+            if not self.is_done() and (self._timeout==0 or self._count<self._timeout) and self._p.is_alive():
                 self._count+=1
                 Timer(delay, self._check_queue).start()
             else:
@@ -733,7 +746,7 @@ class CallbackProcess(object):
 
     def _end_process(self):
         if self._p.is_alive():
-            if self._count>=self._timeout:
+            if self._count>=self._timeout and self._timeout!=0:
                 print "Timeout Warning: Process terminating, returned data could be corrupted."
             else:
                 print "Warning: Process terminating but was still alive and timeout was not reached, returned data could be corrupted."

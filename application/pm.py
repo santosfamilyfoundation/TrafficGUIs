@@ -75,9 +75,9 @@ class ProjectWizard(QtWidgets.QWizard):
         else:
             return True
 
-    def show_message(self, message):
+    def show_message(self, message, title=None):
         helper = message_helper.MessageHelper(self)
-        helper.show_message(message)
+        helper.show_message(message, title=title)
 
     def open_aerial_image(self):
         filt = "Images (*.png *.jpg *.jpeg *.bmp *.tif *.gif)"  # Select only images

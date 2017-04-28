@@ -4,6 +4,8 @@ import qtawesome as qta # must be imported before any other qt imports
 from custom.videographicsitem import VideoPlayer
 from PyQt5 import QtGui, QtWidgets, QtCore
 from views.safety_main import Ui_TransportationSafety
+
+import multiprocess
 import subprocess
 import zipfile
 try:
@@ -179,6 +181,9 @@ class MainGUI(QtWidgets.QMainWindow):
             self.error_signal.emit(error_message)
 
     def get_feature_video(self):
+        # We have to close the file so that the process can write to it. See #108.
+        self.feature_tracking_video_player.closeFile()
+
         SingleAPICallbackProcess(
             target = api.getTestConfig,
             args = (get_identifier(), 'feature', os.path.join(get_project_path(), 'feature_video')),
@@ -223,6 +228,9 @@ class MainGUI(QtWidgets.QMainWindow):
             self.error_signal.emit(error_message)
 
     def get_object_video(self):
+        # We have to close the file so that the process can write to it. See #108.
+        self.roadusers_tracking_video_player.closeFile()
+
         SingleAPICallbackProcess(
             target = api.getTestConfig,
             args = (get_identifier(), 'object', os.path.join(get_project_path(), 'object_video')),
@@ -792,6 +800,9 @@ def main():
     app.exec_()
 
 if __name__ == '__main__':
+    from utils.patch_multiprocess import patch_multiprocess
+    multiprocess.freeze_support()
+    patch_multiprocess()
     app = QtWidgets.QApplication(sys.argv)
     ex = MainGUI()
     sys.exit(main())

@@ -54,6 +54,8 @@ def update_config_with_sections(config_path, section, option, value):
         option (str): Name of the option to write/update.
         value (str): Value to write/update assocaited with the specified option.
     """
+    if config_path == None:
+        return -1
     if not os.path.exists(config_path):
         print("ERR [update_config_with_sections()]: File {} does not exist.".format(config_path))
         return -1
@@ -78,7 +80,6 @@ def get_config_with_sections(config_path, section, option):
         option (str): Name of the option check/return.
     """
     if config_path == None:
-        print("ERR [get_config_with_sections()]: config_path was None.")
         return None
     if not os.path.exists(config_path):
         print("ERR [get_config_with_sections()]: File {} does not exist.".format(config_path))
@@ -104,6 +105,8 @@ def get_config_section(config_path, section):
         config_path (str): Path to the config file to check
         section (str): Name of the section whose data should be returned.
     """
+    if config_path == None:
+        return None
     if not os.path.exists(config_path):
         print("ERR [get_config_section()]: File {} does not exist.".format(config_path))
         return None
@@ -130,6 +133,11 @@ def config_section_exists(config_path, section):
         config_path (str): Path to the config file.
         section (str): Name of the section to check existance of.
     """
+    if config_path == None:
+        return None
+    if not os.path.exists(config_path):
+        print("ERR [config_section_exists()]: File {} does not exist.".format(config_path))
+        return None
     cfp = SafeConfigParser()
     cfp.read(config_path)
     if section in cfp.sections():  # If the given section exists,
@@ -142,6 +150,11 @@ def update_config_without_sections(config_path, update_dict):
 
     update_dict: i.e. {'nframes': 10, 'video-filename': 'video.avi'}
     """
+    if config_path == None:
+        return None
+    if not os.path.exists(config_path):
+        print("ERR [update_config_without_sections()]: File {} does not exist.".format(config_path))
+        return None
     unused_keys = update_dict.keys()
     with open(config_path, 'r') as rf:
         lines = rf.readlines()
@@ -162,6 +175,11 @@ def get_config_without_sections(config_path):
 
     get_dict: params to their values, as a dictionary
     """
+    if config_path == None:
+        return None
+    if not os.path.exists(config_path):
+        print("ERR [get_config_without_sections()]: File {} does not exist.".format(config_path))
+        return None
     get_dict = {}
     with open(config_path, 'r') as rf:
         lines = rf.readlines()
