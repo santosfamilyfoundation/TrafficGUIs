@@ -15,11 +15,5 @@ dependencies:
 - requests-toolbelt=0.7.1
 - nomkl=1.0
 - !!python/unicode
-  'numexpr=2.6.2=np112py27_nomkl_0'
-- !!python/unicode
   'numpy=1.12.0=py27_nomkl_0'
-- !!python/unicode
-  'scikit-learn=0.18.1=np112py27_nomkl_1'
-- !!python/unicode
-  'scipy=0.18.1=np112py27_nomkl_1'
 

@@ -4,6 +4,8 @@ import qtawesome as qta # must be imported before any other qt imports
 from custom.videographicsitem import VideoPlayer
 from PyQt5 import QtGui, QtWidgets, QtCore
 from views.safety_main import Ui_TransportationSafety
+
+import multiprocess
 import subprocess
 import zipfile
 try:
@@ -798,6 +800,9 @@ def main():
     app.exec_()
 
 if __name__ == '__main__':
+    from utils.patch_multiprocess import patch_multiprocess
+    multiprocess.freeze_support()
+    patch_multiprocess()
     app = QtWidgets.QApplication(sys.argv)
     ex = MainGUI()
     sys.exit(main())
