@@ -40,7 +40,10 @@ class CloudWizard:
             # If no JSON, also no error message
             return (True, None, None)
         if 'error' in data:
-            return (False, data['error']['error_message'], data)
+            if 'error_message' in data['error']:
+                return (False, data['error']['error_message'], data)
+            else:
+                return (False, 'An error occurred', data)
         else:
             return (True, None, data)
 

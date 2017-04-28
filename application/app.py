@@ -179,6 +179,9 @@ class MainGUI(QtWidgets.QMainWindow):
             self.error_signal.emit(error_message)
 
     def get_feature_video(self):
+        # We have to close the file so that the process can write to it. See #108.
+        self.feature_tracking_video_player.closeFile()
+
         SingleAPICallbackProcess(
             target = api.getTestConfig,
             args = (get_identifier(), 'feature', os.path.join(get_project_path(), 'feature_video')),
@@ -223,6 +226,9 @@ class MainGUI(QtWidgets.QMainWindow):
             self.error_signal.emit(error_message)
 
     def get_object_video(self):
+        # We have to close the file so that the process can write to it. See #108.
+        self.roadusers_tracking_video_player.closeFile()
+
         SingleAPICallbackProcess(
             target = api.getTestConfig,
             args = (get_identifier(), 'object', os.path.join(get_project_path(), 'object_video')),
