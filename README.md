@@ -6,6 +6,10 @@ SantosGUI allows users to create projects, upload videos, and configure projects
 
 SantosGUI is currently supported on modern versions of Windows, macOS, and 64-bit Ubuntu.
 
+## Project Information
+
+For more information on this project, its uses, and more, see our website at http://santostraffic.com.
+
 ## Documentation
 
 [The project's wiki](https://github.com/santosfamilyfoundation/SantosGUI/wiki) contains project documentation, including installation instructions, usage guides, and other information.
