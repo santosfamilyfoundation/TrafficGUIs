@@ -18,6 +18,26 @@ You can reach out to contributors and maintainers of the project through our [Go
 
 Please report bugs and issues with the software using the [issues page](https://github.com/santosfamilyfoundation/SantosGUI/issues).
 
-## Examples
+## Results
 
+SantosGUI allows you to take your video and have cars, bicycles, and pedestrians tracked by our SantosCloud platform, and display safety metrics for your intersection.
 
+Using SantosGUI allows objects in your video to be tracked.
+
+<img src="docs/tracking.gif" alt="GIF of Tracking">
+
+SantosGUI will give you counts of cars, bikes, and pedestrians.
+
+<img src="docs/road_user_icon_counts.jpg" width="320" alt="Road User Counts">
+
+You can also view a distribution of the speeds of the cars at the intersection.
+
+<img src="docs/velocityPDF.jpg" width="320" alt="Car Speed Counts">
+
+Our software tracks the turning motions of cars to show you the amount of turns cars are taking at the intersection.
+
+<img src="docs/turningCounts.jpg" width="320" alt="Car Turn Counts">
+
+You can use our software to compare an intersection's speeds at different times of the day.
+
+<img src="docs/harveys_speed.jpg" width="320" alt="Speed Comparison">
