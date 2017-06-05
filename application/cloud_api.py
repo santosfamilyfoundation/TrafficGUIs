@@ -719,7 +719,7 @@ class CallbackProcess(object):
             #
             # This prevents the race condition detailed here:
             #    1. After putting an object on an empty queue there may be an infinitesimal
-            #        delay before the queue’s empty() method returns False and get_nowait()
+            #        delay before the queue's empty() method returns False and get_nowait()
             #        can return without raising Queue.Empty. 
             # See: https://docs.python.org/2/library/multiprocessing.html#pipes-and-queues
             #
