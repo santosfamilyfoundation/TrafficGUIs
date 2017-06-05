@@ -408,8 +408,12 @@ class MainGUI(QtWidgets.QMainWindow):
         return image
 
     def homography_compute(self):
-        #TODO: display error message if points are < 4
         px_text = self.ui.unit_px_input.text()
+
+        if not px_text:
+            self.show_error('To compute the homography, please provide a unit pixel ratio.')
+            return
+
         self.unitPixRatio = float(unicode(px_text))
 
         homography_path = os.path.join(get_project_path(), "homography")
