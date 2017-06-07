@@ -146,11 +146,16 @@ class CloudWizard:
         print "uploadMask called"
         with open(mask_path, 'rb') as mask:
             extn = os.path.basename(mask_path).split('.')[-1]
-            files = {'mask.%s' % extn :  mask}
-            payload = {'identifier': identifier}
 
+            # Need multipart encoding for file upload. Following instructions for non-streaming.
+            # http://toolbelt.readthedocs.io/en/latest/uploading-data.html#requests_toolbelt.multipart.encoder.MultipartEncoder
+            encoder = MultipartEncoder({
+                'image': ('mask.%s' % extn, mask, 'image/%s' % extn),
+                'identifier': identifier})
             try:
-                r = requests.post(self.server_addr + 'mask', json = payload, files = files)
+                r = requests.post(self.server_addr + 'mask',
+                                  data=encoder.to_string(),
+                                  headers={'Content-Type': encoder.content_type})
             except requests.exceptions.ConnectionError as e:
                 return self.connectionError()
 
